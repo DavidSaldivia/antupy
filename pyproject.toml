@@ -10,6 +10,9 @@ python = "^3.11"
 pandas = "^2.2.2"
 numpy = "^1.26.4"
 matplotlib = "^3.8.4"
+xarray = "^2024.3.0"
+cantera = "^3.0.0"
+nemosis = "^3.4.0"
 
 
 [build-system]
