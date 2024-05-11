@@ -1,4 +1,4 @@
-from antupy.general import Analyser
+from antupy.base import Analyser
 
 class FinAnalyser(Analyser):
     def __init__(self):
