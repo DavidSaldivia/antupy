@@ -25,11 +25,9 @@ class Tank(Protocol):
     U: Variable
     
     @property
-    def diam(self) -> Variable:
-        ...
+    def diam(self) -> Variable: ...
     @property
-    def area_loss(self) -> Variable:
-        ...
+    def area_loss(self) -> Variable: ...
 
 class TempControl(Protocol):
     temp_max: Optional[Variable]
@@ -53,12 +51,10 @@ class HotWaterHeater(Protocol):
 
     #properties
     @property
-    def thermal_cap(self) -> Variable:
-        ...
+    def thermal_cap(self) -> Variable: ...
     
     @classmethod
-    def from_model_file(cls) -> HotWaterHeater:
-        ...
+    def from_model_file(cls) -> HotWaterHeater: ...
 
 #----------------
 # System protocols
