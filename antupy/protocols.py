@@ -2,6 +2,9 @@ from __future__ import annotations
 from typing import Protocol, Optional
 from antupy.units import Variable
 
+class Models(Protocol):
+    def run_simulation(self) -> dict: ...
+
 #-----------------
 # utils protocols
 class Fluid(Protocol):

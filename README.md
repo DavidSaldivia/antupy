@@ -1,6 +1,6 @@
 # antupy
 antupy (pronounced *antu-py*[^1], from the mapudungún word "antu" (sun)[^2]). It is an open-source python library to analyse (thermal) energy systems using stochastics methods. It includes a series of objects and methods to simulate energy conversion and energy storage systems, under uncertain timeseries constraints (weather, market, human behaviour, etc.).
-It is an object-oriented software, with four main classes: Models, Timeseries Generators, Solvers, and Analysers. The different analysers allow a wide range of outputs such as: techno-economics, financial, (life-cycle) environmental impacts, etc.
+It is an object-oriented software, with four main classes: Models, Timeseries Generators, Solvers, and Analysers. The different analysers allow a wide range of outputs such as: technical, economics (broader than just maximasing revenue), financial, (life-cycle) environmental impacts, etc.
 Due to the wide range of possibilities, the current development is focused on applying this methodology on real research projects. Therefore, at the moment, the only Models implemented are domestic hot water heaters (DEWH) and concentrated solar thermal systems (CST). The available analysers are techno-economics and financial.
 
 ## methodology
