@@ -10,19 +10,30 @@ Due to the wide range of possibilities, the current development is focused on ap
 has two main outputs: simulation settings and timeseries generation. The first one deals with setting the numerical models for the simulations (things that don't change during the simulations), while the timeseries generation includes the uncertainties associated with monte-carlo simulation (things that change over time).
 
 ### simulations
+key concepts:
+    - MC simulations.
+    - thermal simulation.
+    - forecasts.
+
 
 ### analysis
 The analysis is performed once the simulation is over.
 
 ## main classes
-### The `Models` class
-represents real-world object that converts energy and/or mass flows following certain physical principle. Its functionality is defined by a protocol that includes: input/output flows, a numerical model (equations?) describing the input-to-output process, and a solver caller to simulate said model under certain inputs. A Model can contain other interconnected model.
-
-### `Timeseries Generators`
-
-### `Solvers`
+All these are Protocols.
 
 ### `Analysers`
+They are the most fundamental objects. They define the type of analysis to be performed, and by consequence, the required models (and the interconnection between models), TSGs and Solvers to perform such analysis. 
+
+### `Models`
+represents real-world object that converts energy and/or mass flows following certain physical principle. Its functionality is defined by a protocol that includes: input/output flows, a numerical model (equations?) describing the input-to-output process, and a solver caller to simulate said model under certain inputs. A Model can contain other interconnected model.
+
+### `Timeseries Generators (TSGs)`
+These are objects that generate the timeseries for the simulations. Each one has a set of attributes and methods that fully define the timeseries generation algorithm. The most common ones are: Weather, Market, HWD, and ControlledLoad. 
+
+### `Solvers`
+Here is where the simulations are executed. Solvers can be own-made modules or wrappers of other (ideally open source) library/software. For example, for PV systems, we use pvlib, while for CSP both own methods or solarshift/SAM software are available.
+
 
 
 ## Examples
@@ -32,4 +43,4 @@ See the `examples` folder.
 
 
 [^1]: IPA pronunciation.
-[^2]: mapudungún is the language of the Mapuche people, the main indigineous group in Chile. antü means sun, which also represents one of the main pilláns (spirits) in Mapuche mythology. Here the word is used with its first literal meaning. The name was chosen because the first version of this library was written in Temuco, a Chilean city located at Mapuche heartland (*Wallmapu*). More importantly, this library does not claim to include any of the Mapuche worldview in its development. I am Chilean (*huinca* from a mapuche point of view), although I do support Mapuche people's claims regarding their autonomy, lands, and self-determination, I do not consider myself mapuche.
+[^2]: mapudungún is the language of the Mapuche people, the main indigineous group in Chile. antü means sun, which also represents one of the main pilláns (spirits) in Mapuche mythology. Here the word is used with its first literal meaning. The name was chosen because the first version of this library was written in Temuco, a Chilean city located at Mapuche heartland (*Wallmapu*). More importantly, this library does not claim to include any of the Mapuche worldview in its development. I am Chilean (*huinca* from a mapuche point of view), although I do support Mapuche people's claims regarding their autonomy, lands, and self-determination, this software, sadly, has almost no influence from Mapuche culture.

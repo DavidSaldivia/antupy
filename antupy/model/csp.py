@@ -1,4 +1,4 @@
-from antupy.models import (
+from antupy.model import (
     cst,
     tpp
 )
