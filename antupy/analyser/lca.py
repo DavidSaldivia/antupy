@@ -1,4 +1,4 @@
-from antupy.base import Analyser
+from antupy.core import Analyser
 
 class LCAnalyser(Analyser):
     def __init__(self):
