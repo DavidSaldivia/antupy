@@ -191,8 +191,8 @@ def conversion_factor(unit1: str, unit2: str) -> float:
 def main():
 
     #Examples of conversion factors and Variable usage.
-    print(conversion_factor("L/min","m3/s"))
-    print(conversion_factor("W","kJ/hr"))
+    print(conversion_factor("L/min", "m3/s"))
+    print(conversion_factor("W", "kJ/hr"))
     print(conversion_factor("W", "kJ/hr"))
 
     time_sim = Variable(365, "d")

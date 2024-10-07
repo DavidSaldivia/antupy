@@ -1,6 +1,6 @@
 from __future__ import annotations
 import pandas as pd
-from typing import Protocol
+from typing import Protocol, Self
 
 # main classes
 class Analyser(Protocol):
@@ -8,6 +8,7 @@ class Analyser(Protocol):
         ...
     def output(self) -> dict[str,float|dict]:
         ...
+
 
 class Model(Protocol):
     solver: Solver
@@ -17,13 +18,19 @@ class Model(Protocol):
     def run_simulation(self, ts:pd.DataFrame) -> pd.DataFrame:
         ...
 
+
 class TimeSeriesGenerator(Protocol):
-    def create_ts(self, cols:list[str]) -> pd.DataFrame:
+    @classmethod
+    def parameters(cls, dict) -> Self:
         ...
+    def load_data(self, cols:list[str]) -> pd.DataFrame:
+        ...
+
 
 class Solver(Protocol):
     def run_simulation(self, model: Model, ts: pd.DataFrame) -> pd.DataFrame:
         ...
+
 
 # # utils protocols
 # class Fluid():

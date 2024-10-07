@@ -5,7 +5,7 @@
 """
 import pandas as pd
 
-from antupy.constants import DIRECTORY
+from antupy.globals import DIRECTORY
 from antupy.units import Variable
 
 class Weather():

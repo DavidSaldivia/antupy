@@ -1,5 +1,5 @@
 from antupy.core import Analyser
 
-class PAnalyser(Analyser):
+class ParAnalyser(Analyser):
     def __init__(self):
         self.name = "Parametric Analyser"
