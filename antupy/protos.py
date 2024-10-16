@@ -1,29 +1,41 @@
 from __future__ import annotations
-import pandas as pd
-from typing import Protocol, Self
 
-# main classes
+from collections.abc import Iterable
+import pandas as pd
+from typing import Protocol, Self, TypedDict, TypeAlias
+
+
+# base classes
 class Analyser(Protocol):
-    def input(self):
+    def input(self) -> Input:
+        ...
+    def get_simulation_instance() -> Simulator:
         ...
     def output(self) -> dict[str,float|dict]:
+        ...
+
+
+class Simulator(Protocol):
+    def layout() -> Layout:
+        ...
+    def run_simulation() -> Output:
         ...
 
 
 class Model(Protocol):
     solver: Solver
     @classmethod
-    def new_instance(cls, *args) -> Model:
+    def set_model(cls, by:tuple[str|None,str|None] = (None,None)) -> Self:
         ...
-    def run_simulation(self, ts:pd.DataFrame) -> pd.DataFrame:
+    def simulate(self, ts:pd.DataFrame) -> pd.DataFrame:
         ...
 
 
 class TimeSeriesGenerator(Protocol):
     @classmethod
-    def parameters(cls, dict) -> Self:
+    def settings(cls, dict) -> Self:
         ...
-    def load_data(self, cols:list[str]) -> pd.DataFrame:
+    def get_data(self, cols:list[str]) -> pd.DataFrame:
         ...
 
 
@@ -32,57 +44,6 @@ class Solver(Protocol):
         ...
 
 
-# # utils protocols
-# class Fluid():
-#     rho: Variable
-#     cp: Variable
-#     k: Variable
-
-# #----------------
-# # Subcomponent protocols
-# class Heater():
-#     nom_power: Variable
-#     eta: Variable
-
-# class Tank():
-#     vol: Variable
-#     height: Variable
-#     height_inlet: Variable
-#     height_outlet: Variable
-#     height_heater: Variable
-#     height_thermostat: Variable
-#     U: Variable
-    
-#     @property
-#     def diam(self) -> Variable: ...
-#     @property
-#     def area_loss(self) -> Variable: ...
-
-# class TempControl(Protocol):
-#     temp_max: Optional[Variable]
-#     temp_min: Optional[Variable]
-#     temp_deadband: Optional[Variable]
-#     temp_consump: Optional[Variable]
-
-# #----------------
-# # Component protocols
-# class HotWaterHeater(Protocol):
-#     #metadata
-#     name: str
-#     model: str
-#     cost: Variable
-
-#     #subcomponents
-#     heater: Heater
-#     tank: Optional[Tank]
-#     control: TempControl
-#     fluid: Fluid
-
-#     #properties
-#     @property
-#     def thermal_cap(self) -> Variable:
-#         ...
-    
-#     @classmethod
-#     def from_model_file(cls) -> HotWaterHeater:
-#         ...
+Input: TypeAlias = list[Model|TimeSeriesGenerator]
+Layout: TypeAlias = dict[tuple[str,str], tuple[str,str]]
+Output: TypeAlias = dict[str,float|Iterable]
