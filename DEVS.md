@@ -17,3 +17,17 @@ There are two types of protocols in antupy. The software level protocols are def
 Specific software can also have their own protocols, although they are valid only inside their scope.
 
 For a parametric analysis, All the atributes should be either strings or Variable
+
+### 100% typed
+it is recommended to install mypy and run it frequently. even it is possible to run it everytime you save your files (with an extension).
+
+## Wishlist
+
+### 003: parametric analyser
+so far, only with one level of attributes
+capabilities of interest:
+ - .params_in: so far only Variable and Categorical. future with Callable and instances.
+ - .settings() with all combinations (with itertools).
+ - .settings() with linked variables (functions? freeze? dict?). option: ([], by=[], with=[])
+ - .settings() with list of instances?
+

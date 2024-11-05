@@ -151,9 +151,9 @@ class Variable():
         return f"{self.value:} [{self.unit}]"
 
 #-------------------------
-class VariableList():
+class Array():
     """
-    Similar to Variable() but for lists.
+    Similar to Variable() but for lists (iterators, actually).
     """
     def __init__(self, values: list, unit: Optional[str] = None, type="scalar"):
         self.values = values

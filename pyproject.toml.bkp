@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "antupy"
+version = "0.0.1"
+description = "Analyser of thermal energy storage systems."
+authors = ["David Saldivia <david.saldivia.s@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+numpy = "^1.26.4"
+scipy = "^1.13.0"
+pandas = "^2.2.2"
+xarray = "^2024.3.0"
+matplotlib = "^3.8.4"
+cantera = "^3.0.0"
+nemosis = "^3.4.0"
+pvlib = "^0.10.5"
+mypy = "^1.10.0"
+pandas-stubs = "^2.2.2.240514"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
