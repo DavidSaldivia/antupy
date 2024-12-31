@@ -1,3 +1,0 @@
-class PVSystem:
-    def __init__(self):
-        self.name = "Photovoltaic System (domestic)."

@@ -3,7 +3,7 @@ module for CST plants. CSP can be seen as a CST+ power plant
 
 """
 from __future__ import annotations
-from antupy.protos import Simulator
+from antupy.protocols import Simulation
 from antupy.cst.optics import (
     SolarField,
     HyperboloidMirror,
@@ -28,7 +28,7 @@ R2_COLS = ['hel','xi','yi','zi',
            'hel_in','hit_hb','hit_tod','hit_rcv','Nr_tod']
 
 
-class CSTSimulator(Simulator):
+class CSTSimulation(Simulation):
     def __init__(self):
         self.name = "Concentrated Solar Thermal"
     
@@ -39,7 +39,9 @@ class CSTSimulator(Simulator):
     power_block : None
     storage : None
 
-    def layout() -> None:
-
+    def layout(self) -> None:
         return None
+    
+    def run_simulation(self) -> None:
+        pass
     

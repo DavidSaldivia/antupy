@@ -8,7 +8,11 @@ import sys
 
 from dataclasses import dataclass
 from typing import Any
-from antupy.units import (Variable, VariableList, conversion_factor as CF)
+from antupy.units import (
+    Variable, 
+    Array, 
+    conversion_factor as CF
+)
 
 from antupy.cst.simulator import CSTSimulator
 
@@ -17,7 +21,7 @@ DIR_MAIN = os.path.dirname(DIR_FILE)
 
 @dataclass
 class ParametricAnalyser():
-    params_in: dict[str, list[str|Variable|VariableList]]
+    params_in: dict[str, list[str|Variable|Array]]
     sim_base: Any
     dir_data: str | None = None
     dir_results: str | None = None
@@ -26,10 +30,10 @@ class ParametricAnalyser():
     params_out: list[str] | None = None
     show_plots: bool = False
 
-    def get_simulation_instance():
+    def get_simulation_instance(self):
         pass
 
-    def analysis():
+    def analysis(self):
         pass
 
 
@@ -43,11 +47,11 @@ def parametric__runs_paper() -> pd.DataFrame:
     parametric = ParametricAnalyser(
         params_in = {
             'bdr.geometry' : ["PB",],
-            'bdr.height' : VariableList([50.,],"m"),
-            'bdr.fzv': VariableList(np.arange(0.750,0.910,0.02), "-"),
-            'bdr.Cg': VariableList([1.5,2.0,3.0,4.0], "-"),
+            'bdr.height' : Array([50.,],"m"),
+            'bdr.fzv': Array(np.arange(0.750,0.910,0.02), "-"),
+            'bdr.Cg': Array([1.5,2.0,3.0,4.0], "-"),
             'bdr.array' : ['A','B','C','D','E','F'] ,
-            'power_block.power_el': VariableList([10.,],"MW"),
+            'power_block.power_el': Array([10.,],"MW"),
             },
         params_out = ["eta_bdr","eta_SF", "N_hels"],
         sim_base = sim_base,
@@ -70,11 +74,11 @@ def parametric_runs_thesis() -> pd.DataFrame:
     parametric = ParametricAnalyser(
         params_in = {
             'bdr.geometry' : ["CPC","PB"],
-            'bdr.height' : VariableList([50.,],"m"),
-            'bdr.fzv': VariableList(np.arange(0.770,0.910,0.02), "-"),
-            'bdr.Cg': VariableList([1.5,2.0,3.0,4.0], "-"),
+            'bdr.height' : Array([50.,],"m"),
+            'bdr.fzv': Array(np.arange(0.770,0.910,0.02), "-"),
+            'bdr.Cg': Array([1.5,2.0,3.0,4.0], "-"),
             'bdr.array' : ['A','B','C','D','E','F'] ,
-            'power_block.power_el': VariableList([10.,],"MW"),
+            'power_block.power_el': Array([10.,],"MW"),
             },
         params_out = ["eta_bdr","eta_SF", "N_hels"],
         sim_base = sim_base,
@@ -96,11 +100,11 @@ def parametric_runs_point() -> pd.DataFrame:
     parametric = ParametricAnalyser(
         params_in = {
             'bdr.geometry' : ["PB",],
-            'bdr.height' : VariableList([50.,],"m"),
-            'bdr.fzv': VariableList([0.83,], "-"),
-            'bdr.Cg': VariableList([2.0,], "-"),
+            'bdr.height' : Array([50.,],"m"),
+            'bdr.fzv': Array([0.83,], "-"),
+            'bdr.Cg': Array([2.0,], "-"),
             'bdr.array' : ['A',] ,
-            'power_block.power_el': VariableList([10.,],"MW"),
+            'power_block.power_el': Array([10.,],"MW"),
             },
         params_out = ["eta_bdr","eta_SF", "N_hels"],
         sim_base = sim_base,
@@ -123,10 +127,10 @@ def parametric_runs_power_variable() -> pd.DataFrame:
         params_in = {
             'bdr.geometry' : ["PB",],
             'bdr.array' : ['A',] ,
-            'bdr.height' : VariableList(np.arange(50,101,5),"m"),
-            'bdr.fzv': VariableList(np.arange(0.75,0.90,0.02), "-"),
-            'bdr.Cg': VariableList([2.0,], "-"),
-            'power_block.power_el': VariableList(np.arange(3,15,2),"MW"),
+            'bdr.height' : Array(np.arange(50,101,5),"m"),
+            'bdr.fzv': Array(np.arange(0.75,0.90,0.02), "-"),
+            'bdr.Cg': Array([2.0,], "-"),
+            'power_block.power_el': Array(np.arange(3,15,2),"MW"),
             },
         params_out = ["eta_bdr","eta_SF", "N_hels"],
         sim_base = sim_base,

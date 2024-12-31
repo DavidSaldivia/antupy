@@ -16,7 +16,7 @@ protocols are an esential part of the antupy development, as they ensure consist
 There are two types of protocols in antupy. The software level protocols are defined in protos.py. They define the base interfaces, and they serve as a blueprint for specific module's objects. They define the methods that the modules' objects are expected to have to interact with the rest of the software.
 Specific software can also have their own protocols, although they are valid only inside their scope.
 
-For a parametric analysis, All the atributes should be either strings or Variable
+For a parametric analysis, all the atributes should be either strings or Variable
 
 ### 100% typed
 it is recommended to install mypy and run it frequently. even it is possible to run it everytime you save your files (with an extension).

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from antupy.protos import Model
+from antupy.protocols import Model
 
 @dataclass
 class SolarField(Model):
@@ -11,6 +11,8 @@ class SolarField(Model):
     err_x   = 0.001                    # [rad] Reflected error mirror in X direction
     err_y   = 0.001                    # [rad] Reflected error mirror in X direction
     pass
+
+    def 
 
 
 

@@ -10,7 +10,7 @@ from os.path import isfile
 import pickle
 from pvlib.location import Location
 
-from antupy.protos import Model
+from antupy.protocols import Model
 from antupy.units import Variable
 
 #%% ############## HYPERBOLOID SUBROUTINES #########################
@@ -106,54 +106,15 @@ class HyperboloidMirror(Model):
         yrc = self.yrc
         
         #hyperboloid geometry calculations
-        zv      = fzv*zf
-        zfh,zvh = zf-zrc, zv-zrc
-        fvh     = zvh/zfh
+        zv = fzv*zf
+        zfh = zf-zrc
+        zvh = zv-zrc
+        fvh = zvh/zfh
         (xo,yo,zo) = (0, yrc/2, zrc + zfh/2)
         c = np.sqrt(zfh**2+yrc**2)/2
         t = (yo - yrc) / (zo - 0.)
         a = c*( 2*fvh - 1 )
         b = 2*c*np.sqrt(fvh - fvh**2)
-        
-        # Calculating interceptions with surface (explicit quadratic expression)
-        import polars as pl
-        R = pl.DataFrame()
-        R1 = (
-            R.with_columns(
-                (pl.col("uyi") * t + pl.col("uzi")).alias("m1"),
-                (pl.col("uxi")).alias("m2"),
-                (pl.col("uyi") - pl.col("uzi") * t ).alias("m3"),
-                ( (pl.col("uyi")-yo) * t + (pl.col("uzi")-zo) ).alias("n1"),
-                ( pl.col("uxi")-xo ).alias("n2"),
-                ( (pl.col("uyi")-yo) - (pl.col("uzi")-zo)*t ).alias("n3"),
-            ).with_columns(
-                (pl.col("m1")**2/a**2 - pl.col("m2")**2*(1+t**2)/b**2 - pl.col("m3")**2/b**2)
-                .alias("p2"),
-                (
-                    2*(pl.col("m1")*pl.col("n1")/a**2 
-                    - pl.col("m2")*pl.col("n2")*(1+t**2)/b**2
-                    - pl.col("m3")*pl.col("n3")/b**2)
-                ).alias("p1"),
-                (
-                    pl.col("n1")**2/a**2 
-                    - pl.col("n2")**2*(1+t**2)/b**2 
-                    - pl.col("n3")**2/b**2 - t**2 - 1
-                ).alias("p0"),
-            ).with_columns(
-                (
-                    (- pl.col("p1") + (pl.col("p1")**2- 4*pl.col("p2")*pl.col("p0"))**0.5) 
-                    / (2*pl.col("p2"))
-                ).alias("kb")
-            ).with_columns(
-                (pl.col('xi') + pl.col("kb")*pl.col("uxi")).alias("xb"),
-                (pl.col('yi') + pl.col("kb")*pl.col("uyi")).alias("yb"),
-                (pl.col('zi') + pl.col("kb")*pl.col("uzi")).alias("zb"),
-            ).with_columns(
-                ((pl.col("xb")**2 + pl.col("yb")**2)**0.5).alias("rb")
-            ).with_columns(
-                #partial differentiation
-            )
-        )
         
         # pandas
         R1 = R0.copy()
@@ -205,7 +166,7 @@ class HyperboloidMirror(Model):
             self,
             R0: pl.DataFrame,
             refl_error: bool = True
-        ) -> pd.DataFrame:
+        ) -> pl.DataFrame:
         
         zf = self.zf
         fzv = self.fzv
@@ -224,7 +185,9 @@ class HyperboloidMirror(Model):
         
         # Calculating interceptions with surface (explicit quadratic expression)
         import polars as pl
-        R1 = (
+# Calculating interceptions with surface (explicit quadratic expression)
+        import polars as pl
+        R1_pl = (
             R0.with_columns(
                 (pl.col("uyi") * t + pl.col("uzi")).alias("m1"),
                 (pl.col("uxi")).alias("m2"),
@@ -232,7 +195,8 @@ class HyperboloidMirror(Model):
                 ( (pl.col("uyi")-yo) * t + (pl.col("uzi")-zo) ).alias("n1"),
                 ( pl.col("uxi")-xo ).alias("n2"),
                 ( (pl.col("uyi")-yo) - (pl.col("uzi")-zo)*t ).alias("n3"),
-            ).with_columns(
+            )
+            .with_columns(
                 (pl.col("m1")**2/a**2 - pl.col("m2")**2*(1+t**2)/b**2 - pl.col("m3")**2/b**2)
                 .alias("p2"),
                 (
@@ -245,26 +209,46 @@ class HyperboloidMirror(Model):
                     - pl.col("n2")**2*(1+t**2)/b**2 
                     - pl.col("n3")**2/b**2 - t**2 - 1
                 ).alias("p0"),
-            ).with_columns(
+            )
+            .with_columns(     # calculating kb
                 (
-                    (- pl.col("p1") + (pl.col("p1")**2- 4*pl.col("p2")*pl.col("p0"))**0.5) 
-                    / (2*pl.col("p2"))
+                    (- pl.col("p1") + (pl.col("p1")**2- 4*pl.col("p2")*pl.col("p0"))**0.5) / (2*pl.col("p2"))
                 ).alias("kb")
-            ).with_columns(
-                (pl.col('xi') + pl.col("kb")*pl.col("uxi")).alias("xb"),
-                (pl.col('yi') + pl.col("kb")*pl.col("uyi")).alias("yb"),
-                (pl.col('zi') + pl.col("kb")*pl.col("uzi")).alias("zb"),
-            ).with_columns(
-                ((pl.col("xb")**2 + pl.col("yb")**2)**0.5).alias("rb")
-            ).with_columns(
-                #partial differentiation
-                ...
+            )
+            .with_columns(     # intersection with mirror
+                [(pl.col(f'{j}i') + pl.col("kb")*pl.col(f"u{j}i")).alias("{j}b") for j in ["x", "y", "z"]]
+            )
+            .with_columns( #partial differentiation
+                (-2*(pl.col('xb') - xo)/b**2).alias("ddx"),
+                (
+                    2*t*( (pl.col('yb')-yo)*t+(pl.col('zb')-zo) )/ a**2 
+                    - 2*( (pl.col('yb')-yo) - t*(pl.col('zb')-zo) ) / b**2
+                ).alias("ddy"),
+                (
+                    2*((pl.col('yb')-yo)*t+(pl.col('zb')-zo))/a**2 
+                    + 2*t*((pl.col('yb')-yo) - t*(pl.col('zb')-zo))/b**2
+                ).alias("ddz"),
+            )
+            .with_columns(
+                ((pl.col("xb")**2 + pl.col("yb")**2)**0.5).alias("rb"),
+                ((pl.col("ddx")**2+pl.col("ddy")**2+pl.col("ddz")**2)**0.5).alias("nn")
+            )
+            .with_columns(
+                [(pl.col(f"dd{j}")/pl.col("nn")).alias(f"n{j}") for j in ["x", "y", "z"]]
+            )
+            .with_columns(
+                (
+                    pl.col("nx")*pl.col("uxi") + pl.col("ny")*pl.col("uyi") + pl.col("nz")*pl.col("uzi")
+                ).alias("sc")
+            )
+            .with_columns(      # (perfect) reflected rays
+                [(pl.col(f"u{j}i") - 2*pl.col("sc")*pl.col(f"n{j}")).alias(f"u{j}r") for j in ["x", "y", "z"]]
             )
         )
-        return R1
+        return R1_pl
 
 
-#%% ############# TOD SUBROUTINES #####################################
+#%% TOD SUBROUTINES 
 @dataclass
 class TertiaryOpticalDevice(Model):
 
@@ -272,19 +256,19 @@ class TertiaryOpticalDevice(Model):
     array = "N"
     radious_ap = Variable(1.0,"m")
     radious_out = Variable(0.5,"m")
-    height = Variable(None,"m")
+    height = Variable(1.0,"m")
     Cg = Variable(2.0,"m2")
-    xo = Variable(0.0, "m")
-    yo = Variable(0.0, "m")
-    zo = Variable(0.0, "m")
+    xrc = Variable(0.0, "m")
+    yrc = Variable(0.0, "m")
+    zrc = Variable(0.0, "m")
     
     @property
     def number_tods(self) -> int:       #N_TOD
-        return self._get_array_values(self.array)[0]
+        return self._get_array_values()[0]
     
     @property
     def number_sides(self) -> int:      #V_TOD
-        return self._get_array_values(self.array)[1]
+        return self._get_array_values()[1]
 
     def _get_array_values(self) -> tuple[int,int]:
         array_values = {
@@ -293,18 +277,13 @@ class TertiaryOpticalDevice(Model):
             "C": (4, 4),           # 4 squares, with centered vertix
             "D": (4, 4),           # 4 squares, with two sharing center and two in shorter side
             "E": (1, 8),           # 1 octagon centered
-            "F": (1,1e6),          # Full circle
+            "F": (1,int(1e6)),     # Full circle
             "N": (1,0),            # Non-TOD
         }
         return array_values[self.array]
 
     @property
-    def array_centers(
-            self,
-            rA: float,
-            xrc: float = 0.0,
-            yrc=0
-        ) -> tuple[list[float], list[float]]:
+    def array_centers(self) -> tuple[list[float], list[float]]:
         """
         From a design, an aperture radius and a TOD position, it returns the centers of all polygon TODs
 
@@ -327,7 +306,11 @@ class TertiaryOpticalDevice(Model):
         """
         
         V_TOD = self.number_sides
-        rA = self.radious_ap
+        rA = self.radious_ap.get_value("m")
+        xrc = self.xrc.get_value("m")
+        yrc = self.yrc.get_value("m")
+        zrc = self.zrc.get_value("m")
+
         phi   = np.radians(360/V_TOD) if (V_TOD > 0) else 2*np.pi
         match self.array:
             case "A":
@@ -359,11 +342,11 @@ class TertiaryOpticalDevice(Model):
 
     def paraboloid_get_z_points(       #PB_Z
             self,
-            x: float | list | np.ndarray,
-            y: float | list | np.ndarray,
-            xo: float | list | np.ndarray,
-            yo: float | list | np.ndarray,
-        ) -> float | list | np.ndarray:
+            x: float | list[float] | np.ndarray,
+            y: float | list[float] | np.ndarray,
+            xo: float | list[float] | np.ndarray,
+            yo: float | list[float] | np.ndarray,
+        ) -> float | list[float] | np.ndarray:
         """
         Function that return the z position in PB concentrator for a given (x,y) position
 
@@ -494,7 +477,7 @@ class TertiaryOpticalDevice(Model):
                 Cg    = (rA/rO)**2                      #Concentration ratio of each TOD
                 
             elif 'rA' in params and 'H' in params:
-                rA,H  = params['rA'], params['H']
+                rA, H  = params['rA'], params['H']
                 rO    = (rA**2 - H)**0.5               # Check if it is over the limits
                 if rO<0.0:
                     print("Height is too much for rA, will be replaced by height for min rO")
@@ -536,7 +519,7 @@ class TertiaryOpticalDevice(Model):
             Cg = params["Cg"]
             RtD = 180./np.pi
             rA = rO * Cg**0.5                   # CPC aperture radius
-            tht_mx = np.arcsin(1/Cg**0.5)       # half acceptance angle
+            tht_mx: float = np.arcsin(1/Cg**0.5)       # half acceptance angle
             fl = rO * (1+np.sin(tht_mx))     # Focal point
             phi_i = np.pi #/2+tht_mx
             phi_f = 2*tht_mx
@@ -818,14 +801,14 @@ class TertiaryOpticalDevice(Model):
         return R2
 
 
-    def TOD_A_rqrd(rO: float,*args) -> float:
-    #This function is to calculate the required area given some
-        A_rcv_rq, Array, CST, Cg = args
-        xrc,yrc,zrc = CST['xrc'], CST['yrc'], CST['zrc']
-        TOD = {'Type':'PB','Array':Array,'rO':rO,'Cg':Cg}
-        TOD   = TOD_Params( TOD, xrc,yrc,zrc)
-        A_rcv = TOD['A_rcv']
-        return (A_rcv - A_rcv_rq)
+    # def TOD_A_rqrd(rO: float,*args) -> float:
+    # #This function is to calculate the required area given some
+    #     A_rcv_rq, Array, CST, Cg = args
+    #     xrc,yrc,zrc = CST['xrc'], CST['yrc'], CST['zrc']
+    #     TOD = {'Type':'PB','Array':Array,'rO':rO,'Cg':Cg}
+    #     TOD   = TOD_Params( TOD, xrc,yrc,zrc)
+    #     A_rcv = TOD['A_rcv']
+    #     return (A_rcv - A_rcv_rq)
 
 
     #%% FINAL OPTICAL DEVICE: CPC AND PARABOLOID
@@ -898,22 +881,34 @@ class TertiaryOpticalDevice(Model):
     def mcrt_solver(         #TOD_NR
             self,
             R1: pd.DataFrame,
-            CST: dict,
+            # CST: dict,
+            zmin: Variable | None = None,
             refl_error: bool = True
         ) -> pd.DataFrame:
+        """Solver for both CPC and Paraboloid.
+        Both 3D and polygon options are possible. It uses Newton-Raphson for dataframes
+
+        Args:
+            R1 (pd.DataFrame): Dataframe with rays coming from HB
+            zmin (Variable): minimum height for TOD
+            refl_error (bool, optional): Whether to include reflection errors. Defaults to True.
+
+        Returns:
+            pd.DataFrame: Dataframe with outputs from object
+        """
 
         PB_Z = self.paraboloid_get_z_points
         CPC_Fxyz = self.CPC_surface_points
         CPC_enter = self.CPC_enter
         geometry = self.geometry
-        array = array
+        array = self.array
         N_TOD = self.number_tods
         V_TOD = self.number_sides
         H_TOD = self.height.get_value("m")
         rA = self.radious_ap.get_value("m")
         rO = self.radious_out.get_value("m")
         (x0,y0) = self.array_centers
-        zmin = self.zmin.get_value("m")
+        z_min = zmin.get_value("m") if isinstance(zmin,Variable) else 0.
         Cg = self.Cg.get_value("-")
 
         def PB_Fk(ki,R2,V):
@@ -925,7 +920,6 @@ class TertiaryOpticalDevice(Model):
 
         def CPC_Fk(ks,args):
             R2, Array, r_out, Cg, V = args
-            
             xn, yn, zn  = R2['xn'], R2['yn'], R2['zn']
             uxn, uyn, uzn  = R2['uxn'], R2['uyn'], R2['uzn']
             xo, yo = R2['xo'], R2['yo']
@@ -2034,6 +2028,48 @@ def add_reflection_error(
 
     #Sigma in rad
     N_rays = len(uxi)
+    
+    #Generating the random values for errors
+    R_theta = np.random.uniform(size=N_rays)
+    R_phi   = np.random.uniform(size=N_rays)
+    
+    phi_se   = 2*np.pi*R_phi
+    theta_se = ((-2*sigma_se**2)*np.log(1-R_theta))**0.5
+    tan_se = np.tan(theta_se)
+    sinphi = np.sin(phi_se)
+    cosphi = np.cos(phi_se)
+    
+    #Cross product between (uxb,uyb,uzb) x (1,0,0) to get an arbitrary perpendicular vector to ub
+    #uxt, uyt, uzt = (0, uzi, -uyi)
+    
+    #Rotated vector that is perpendicular to ub
+    uxr = -sinphi * (uyi**2 + uzi**2)
+    uyr =  uzi*cosphi + uxi*uyi*sinphi
+    uzr = -uyi*cosphi + uxi*uzi*sinphi
+    
+    #Vector including mirror errors
+    uxe, uye, uze = uxr*tan_se, uyr*tan_se, uzr*tan_se
+    uf_mod = ( (uxi+uxe)**2 + (uyi+uye)**2 + (uzi+uze)**2 )**0.5
+    
+    #Final vector including errors and normalized
+    uxf = (uxi+uxe) / uf_mod
+    uyf = (uyi+uye) / uf_mod
+    uzf = (uzi+uze) / uf_mod
+    
+    return (uxf,uyf,uzf)
+
+def add_reflection_error_polars(
+        col_x : pl.Expr,
+        col_y : pl.Expr,
+        col_z : pl.Expr,
+        # uxi: pd.Series,
+        # uyi: pd.Series,
+        # uzi: pd.Series,
+        sigma_se: float = 2.02e-3
+    ) -> pl.Expr:
+
+    #Sigma in rad
+    N_rays = col_x.len()
     
     #Generating the random values for errors
     R_theta = np.random.uniform(size=N_rays)

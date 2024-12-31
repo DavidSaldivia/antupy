@@ -2,18 +2,21 @@
 module with a simple units manager
 """
 import numpy as np
-from typing import Optional
+from typing import Iterable
 
 #-------------------------
 # Unit conversion factors
-CONVERSIONS: dict[str,dict[str,float]] = {
+CONVERSIONS: dict[str,dict[str|None,float]] = {
     "unassigned" : {
         "None": np.nan,
+        None: np.nan,
     },
     "adim" : {
         "-": 1e0,
         "": 1e0,
         " ": 1e0,
+        "(-)": 1e0,
+        "()": 1e0,
     },
     "length" : {
         "m": 1e0,
@@ -34,7 +37,7 @@ CONVERSIONS: dict[str,dict[str,float]] = {
         "L": 1e3,
         },
     "time": {
-        "s": 1e0,
+        "s": 1e0, "sec": 1e0,
         "min": 1e0/60,
         "h": 1e0/3600, "hr": 1e0/3600,
         "d": 1e0/(24*3600), "day": 1e0/(24*3600),
@@ -112,7 +115,7 @@ CONVERSIONS: dict[str,dict[str,float]] = {
     },
 }
 
-UNIT_TYPES = dict()
+UNIT_TYPES: dict[str|None, str] = dict()
 for type_unit in CONVERSIONS.keys():
     for unit in CONVERSIONS[type_unit].keys():
         UNIT_TYPES[unit] = type_unit
@@ -128,19 +131,21 @@ class Variable():
     def __init__(
             self,
             value: float,
-            unit: Optional[str] = None,
+            unit: str | None = None,
             type:str = "scalar"
         ):
         self.value = value
         self.unit = unit if unit is not None else "None"
         self.type = type
 
-    def get_value(self, unit: Optional[str] = None):
+    def get_value(self, unit: str | None = None):
         
         if unit is None:
             unit = self.unit
+
         if self.unit == unit:
             return self.value
+        
         if UNIT_TYPES[unit] == UNIT_TYPES[self.unit]:
             conv_factor = conversion_factor(self.unit, unit)
             return self.value * conv_factor
@@ -155,14 +160,24 @@ class Array():
     """
     Similar to Variable() but for lists (iterators, actually).
     """
-    def __init__(self, values: list, unit: Optional[str] = None, type="scalar"):
+    def __init__(self, values: Iterable, unit: str | None = None):
         self.values = values
         self.unit = unit
         self.type = type
 
-    def get_values(self, unit=None):
+    def get_values(self, unit=None) -> Iterable:
         values = self.values
-        if self.unit != unit: #Check units
+        if unit is None:
+            unit = self.unit
+
+        if self.unit == unit:
+            return values
+        
+        if UNIT_TYPES[unit] == UNIT_TYPES[self.unit]:
+            conv_factor = conversion_factor(self.unit, unit)
+            values_out = [v*conv_factor for v in values]
+            return values_out
+        if self.unit != unit:
             raise ValueError(
                 f"The variable used have different units: {unit} and {self.unit}"
                 )
@@ -173,7 +188,7 @@ class Array():
 
 
 #-------------------------
-def conversion_factor(unit1: str, unit2: str) -> float:
+def conversion_factor(unit1: str|None, unit2: str|None) -> float:
     """ Function to obtain conversion factor between units.
     The units must be in the UNIT_CONV dictionary.
     If they are units from different phyisical quantities an error is raised.

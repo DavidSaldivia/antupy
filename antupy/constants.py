@@ -1,10 +1,3 @@
-"""
-module with:
-    - DIRECTORY
-    - DEFINITIONS
-    - DEFAULTS
-"""
-
 class DIRECTORY:
     pass
 
