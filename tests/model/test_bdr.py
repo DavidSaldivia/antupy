@@ -1,4 +1,4 @@
-from antupy.model import bdr
+from antupy.models import bdr
 
 def test_load_default():
 

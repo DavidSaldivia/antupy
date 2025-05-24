@@ -1,2 +1,0 @@
-from antupy.constants import DIRECTORY
-from antupy.units import conversion_factor as CF

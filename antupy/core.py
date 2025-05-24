@@ -13,8 +13,8 @@ class Output(TypedDict):
 
 class Analyser():
     def get_simulation_instance(self, cases: Iterable) -> Simulation:
-        ...
+        return Simulation()
     def run_simulation(self) -> Output:
-        ...
+        return Output()
 
     

@@ -5,31 +5,36 @@ import pandas as pd
 from typing import Protocol, Self, TypedDict, TypeAlias
 
 
-# base classes
+
+
+# class Simulator(Protocol):
+#     def layout(self) -> Layout:
+#         ...
+#     def run_simulation(self) -> Output:
+#         ...
+
 class Analyser(Protocol):
-    def input(self) -> Input:
+    def inputs(self) -> Input:
         ...
-    def get_simulation_instance() -> Simulator:
+    def get_simulation_instance(self) -> Simulation:
         ...
     def output(self) -> dict[str,float|dict]:
         ...
 
-
-class Simulator(Protocol):
-    def layout() -> Layout:
+class Simulation(Protocol):
+    components: dict[str,Model|TimeSeriesGenerator|None]
+    layout: Layout | None
+    output: Output | None
+    def run(self) -> None:
         ...
-    def run_simulation() -> Output:
-        ...
-
 
 class Model(Protocol):
     solver: Solver
     @classmethod
-    def set_model(cls, by:tuple[str|None,str|None] = (None,None)) -> Self:
+    def set_model(cls, by:tuple[str|None,str|None]) -> Self:
         ...
     def simulate(self, ts:pd.DataFrame) -> pd.DataFrame:
         ...
-
 
 class TimeSeriesGenerator(Protocol):
     @classmethod
@@ -40,7 +45,7 @@ class TimeSeriesGenerator(Protocol):
 
 
 class Solver(Protocol):
-    def run_simulation(self, model: Model, ts: pd.DataFrame) -> pd.DataFrame:
+    def run_solver(self, ts: pd.DataFrame) -> pd.DataFrame:
         ...
 
 
