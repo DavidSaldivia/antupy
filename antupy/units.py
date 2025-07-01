@@ -3,6 +3,7 @@ module with a simple units manager
 """
 import numpy as np
 from typing import Iterable
+from dataclasses import dataclass, field
 
 CONVERSION_FUNDAMENTALS: dict[str,dict[str|None,float]] = {
     "adim" : {
@@ -124,6 +125,14 @@ CONVERSIONS_DERIVED: dict[str,dict[str|None,float]] = {
     "cost" : {
         "AUD": 1e0,
         "USD": 1.4e0,
+        "MM AUD": 1e-6,
+        "MM USD": 1.4e-6,
+    },
+    "cost_specific" : {
+        "AUD/MW": 1e0,
+        "USD/MW": 1.4e0,
+        "MM AUD/MW": 1e-6,
+        "MM USD/MW": 1.4e-6,
     },
 #-------------------
     "density": {
@@ -134,6 +143,11 @@ CONVERSIONS_DERIVED: dict[str,dict[str|None,float]] = {
         "J/kgK": 1e0, "J/kg-K": 1e0,
         "kJ/kgK": 1e-3, "kJ/kg-K": 1e-3,
     },
+    "viscosity": {
+        "Pa-s": 1e0,
+        "mPa-s": 1e3,
+        "kg/ms": 1e0
+    }
 }
 
 CONVERSIONS : dict[str,dict[str|None,float]] = CONVERSIONS_DERIVED | CONVERSION_FUNDAMENTALS
@@ -142,26 +156,24 @@ for type_unit in CONVERSIONS.keys():
     for unit in CONVERSIONS[type_unit].keys():
         UNIT_TYPES[unit] = type_unit
 
+@dataclass(frozen=True)
 class Variable():
     """
     Class to represent parameters and variables in the system.
     It is used to store the values with their units.
-    If you have a Variable instance, always obtain the value with the get_value method.
+    If you have a Variable instance, you can obtain the value in different units with the u[str] method.
     In this way you make sure you are getting the value with the expected unit.
-    get_value internally converts unit if it is possible.
+    "u" internally converts unit if it is possible.
     """
-    def __init__(
-            self,
-            value: float,
-            unit: str | None = None,
-            type: str = "scalar"
-        ):
-        self.value = value
-        self.unit = unit if unit is not None else "None"
-        self.type = type
+
+    value: float | None
+    unit: str | None = None
+    type: str = "scalar"
 
     def __mul__(self, other):
         """ Overloading the multiplication operator. """
+        if self.value is None or other.value is None:
+            return Variable(None, [self.unit, other.unit])
         if isinstance(other, Variable):
             return Variable(self.value * other.value, [self.unit, other.unit])
         elif isinstance(other, (int, float)):
@@ -171,6 +183,8 @@ class Variable():
 
     def __rmul__(self, other):
         """ Overloading the multiplication operator. """
+        if self.value is None or other.value is None:
+            return Variable(None, [self.unit, other.unit])
         if isinstance(other, Variable):
             return Variable(self.value * other.value, [other.unit, self.unit])
         elif isinstance(other, (int, float)):
@@ -178,7 +192,7 @@ class Variable():
         else:
             raise TypeError(f"Cannot multiply {type(self)} with {type(other)}")
 
-    def get_value(self, unit: str | None = None):
+    def get_value(self, unit: str | None = None) -> float:
         """ Get the value of the variable in the requested unit.
         If the unit is not compatible with the variable unit, an error is raised.
         If the unit is None, the value is returned in the variable unit.
@@ -186,38 +200,41 @@ class Variable():
         
         if unit is None:
             unit = self.unit
-
+        if self.value is None:
+            raise ValueError("Variable value is None.")
         if self.unit == unit:
             return self.value
-        
         if UNIT_TYPES[unit] == UNIT_TYPES[self.unit]:
             return self.value * conversion_factor(self.unit, unit)
         else:
             raise ValueError( f"Variable unit ({self.unit}) and wanted unit ({unit}) are not compatible.")
 
     def set_unit(self, unit: str | None = None):
-        """ Set the unit of the variable. """
-        if UNIT_TYPES[unit] == UNIT_TYPES[self.unit]:
+        """ Set the primary unit of the variable. """
+        self.unit = unit
+        if (UNIT_TYPES[unit] == UNIT_TYPES[self.unit]) and (self.value is not None):
             self.value = self.value * conversion_factor(self.unit, unit)
         else:
             raise ValueError(
                 f"unit ({unit}) is not compatible with existing primary unit ({self.unit})."
             )
 
+    def u(self, unit: str | None = None) -> float:
+        """ Method to obtain the value of the variable in the requested unit.
+        If the unit is not compatible with the variable unit, an error is raised.
+        If the unit is None, the value is returned in the variable unit.
+        """
+        return self.get_value(unit)
+
     @property
     def v(self) -> float:
         """ Property to obtain the value of the variable (in its primary unit). """
-        return self.value
-    
-    @property
-    def u(self) -> str:
-        """ Property to obtain the primary unit of the variable. """
-        return self.unit
+        return self.value if self.value is not None else np.nan
     
     @property
     def units(self) -> str:
         """ Property to obtain the compatible units of the variable. """
-        return UNIT_TYPES[self.u]
+        return UNIT_TYPES[self.unit]
     
     def __repr__(self) -> str:
         return f"{self.value:} [{self.unit}]"
