@@ -1,0 +1,55 @@
+import numpy as np
+from antupy.units import Variable
+from antupy.props import DryAir
+from antupy.props import HumidAir
+from antupy.props import SaturatedWater
+from antupy.props import SaturatedSteam
+from antupy.props import SeaWater
+
+def test_prop_dry_air():
+    air = DryAir()
+    temp = Variable(300., "K")
+    assert np.round(air.rho(temp).u("kg/m3"), 3) == 1.176
+    assert np.round(air.cp(temp).u("kJ/kg-K"), 3) == 1.005
+    assert np.round(air.k(temp).u("W/m-K"), 3) == 0.026
+    assert np.round(air.viscosity(temp).u("m2/s") * 1e5, 3) == 1.573
+
+def test_prop_humid_air():
+    air = HumidAir()
+    temp = Variable(300., "K")
+    pressure = Variable(101325, "Pa")
+    abshum = Variable(0.01, "-")
+    assert np.round(air.rho(temp, pressure, abshum).u("kg/m3"), 3) == 1.146
+    assert np.round(air.cp(temp, abshum).u("kJ/kg-K"), 3) == 1.024
+    assert np.round(air.k(temp, abshum).u("W/m-K"), 3) == 0.026
+    # assert np.round(air.viscosity(temp,abshum).u("Pa-s") * 1e5, 3) == 1.573
+    # viscosity is not implemented correctly. Check the equation in props.py
+
+def test_prop_water():
+    water = SaturatedWater()
+    temp = Variable(300., "K")
+
+    assert np.round(water.rho(temp).u("kg/m3"), 1) == 996.4
+    assert np.round(water.cp(temp).u("kJ/kg-K"), 2) == 4.18
+    assert np.round(water.k(temp).u("W/m-K"), 3) == 0.61
+    # assert np.round(water.viscosity(temp).u("Pa-s") * 1e5, 3) == 1.573
+
+def test_prop_vapor():
+    steam = SaturatedSteam()
+
+    temp = Variable(99.63, "C")
+
+    assert np.round(steam.rho(temp).u("kg/m3"), 3) == 0.59
+    assert np.round(steam.cp(temp).u("kJ/kg-K"), 2) == 2.03
+    assert np.round(steam.k(temp).u("W/m-K"), 3) == 0.024
+
+def test_prop_seawater():
+    seawater = SeaWater()
+
+
+if __name__ == "__main__":
+    test_prop_dry_air()
+    test_prop_humid_air()
+    test_prop_water()
+    test_prop_vapor()
+    test_prop_seawater()

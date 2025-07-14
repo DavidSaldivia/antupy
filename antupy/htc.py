@@ -14,6 +14,7 @@ def temp_sky_simplest(temp_amb: float) -> float:
     """
     return (temp_amb - 15.)
 
+
 def h_conv_Holman(
         T_s: float,
         T_inf: float,
@@ -88,7 +89,7 @@ def h_conv_Experiment(
         fluid: ct.Solution
     ) -> float:
     """
-    Correlation for natural convection in upper hot surface horizontal plate Holman
+    Correlation for natural convection in upper hot surface horizontal plate
     T_s, T_inf          : surface and free fluid temperatures [K]
     L                   : characteristic length [m]
     """

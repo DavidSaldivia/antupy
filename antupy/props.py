@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from antupy.units import Variable
 from typing import Protocol
 
+import cantera as ct
 import numpy as np
 
 class Fluid(Protocol):
@@ -142,13 +143,11 @@ class SaturatedWater():
             T: float|Variable = Variable(273.15, "K")
         ) -> Variable:
         if isinstance(T, Variable):
-            temp = T.u("K")
+            temp = T.u("C")
         elif isinstance(T, (int, float)):
             temp = T
         A = (9.999e2, 2.034e-2, -6.162e-3, 2.261e-5, -4.657e-8)
-        aux = sum([
-            A[i]*temp**i for i in range(len(A))
-        ])
+        aux = sum([A[i]*temp**i for i in range(len(A))])
         return Variable(aux, "kg/m3")
     
     def cp(
@@ -210,10 +209,9 @@ class SaturatedWater():
             temp = T.u("K")
         elif isinstance(T, (int, float)):
             temp = T
-        return Variable(
-            (2.501e6 - 2.369e3*temp + 2.678e-1*temp**2 - 8.103e-3*temp**3 - 2.079e-5*temp**4) / 1000.,
-            "kJ/kg"
-        )
+        A = (2.501e6, -2.369e3, 2.678e-1, -8.103e-3, -2.079e-5)
+        aux = sum([ A[i] * temp**i for i in range(len(A)) ])
+        return Variable(aux / 1000.,"kJ/kg")
     
     def saturation_pressure(
             self,
@@ -262,7 +260,7 @@ class SaturatedWater():
             "K"
         )
 
-class SaturatedVapor():
+class SaturatedSteam():
     def rho(
             self,
             T: float|Variable = Variable(273.15, "K")
@@ -273,9 +271,7 @@ class SaturatedVapor():
             temp = T
         A = (-4.062329056, 0.10277044, -9.76300388e-4,
              4.475240795e-6, -1.004596894e-8, 8.9154895e-12)
-        aux = sum([
-            A[i] * temp**i for i in range(len(A))
-        ])
+        aux = sum([A[i] * temp**i for i in range(len(A))])
         return Variable(aux, "kg/m3")
 
     def cp(
@@ -298,9 +294,7 @@ class SaturatedVapor():
         elif isinstance(T, (int, float)):
             temp = T
         A = (1.3046e-2, -3.756191e-5, 2.217964e-7, -1.111562e-10)
-        aux = sum([
-            A[i] * temp**i for i in range(len(A))
-        ])
+        aux = sum([ A[i] * temp**i for i in range(len(A)) ])
         return Variable(aux, "W/m-K")
 
     def viscosity(
@@ -312,9 +306,7 @@ class SaturatedVapor():
         elif isinstance(T, (int, float)):
             temp = T
         A = (2.562435e-6, 1.816683e-8, 2.579066e-11, -1.067299e-14)
-        aux = sum([
-            A[i] * temp**i for i in range(len(A))
-        ])
+        aux = sum([ A[i] * temp**i for i in range(len(A)) ])
         return Variable(aux, "Pa-s")
     
 
@@ -345,9 +337,7 @@ class SeaWater():
             -0.012247*G[0] + 1.74e-3*G[1] + 9e-6*G[2],
             6.92e-4*G[0] - 8.7e-5*G[1] - 5.3e-5*G[2]
         )
-        aux = sum([
-            A[i] * F[i] for i in range(len(A))
-        ])
+        aux = sum([ A[i] * F[i] for i in range(len(A)) ])
         return Variable(aux * 1e3, "kg/m3")
     
     def cp(
@@ -388,7 +378,7 @@ class SeaWater():
         A = 2e-4
         B = 3.7e-2
         C = 3e-2
-        aux = (1 - temp/( 647.3 + C*s ))**(1./3.)
+        aux = (1 - temp/( 647.3 + C*s ))**(1/3)
         aux = aux * 0.434 * ( 2.3 - ( 343.5 + B*s )/temp)
         aux = - 6 + aux + np.log10(240 + A*s)
         return Variable(10.**aux * 1000., "W/m-K")
@@ -435,13 +425,346 @@ class SeaWater():
         return Variable(aux, "N/m")
 
 class DryAir():
-    ...
+    def rho(
+            self,
+            T: float|Variable = Variable(273.15, "K"),
+        ) -> Variable:
+        if isinstance(T, Variable):
+            temp = T.u("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        temps = np.concatenate((
+            [223,], np.arange(243, 374, 10), np.arange(423, 574, 50)
+        ))
+        values = np.array([1.582, 1.452, 1.394, 1.342,
+                           1.292, 1.247, 1.204, 1.164,
+                           1.127, 1.092, 1.060, 1.030,
+                           1.000, 0.973, 0.946, 0.835,
+                           0.746, 0.675, 0.616])
+        return Variable(float(np.interp(temp, temps, values)), "kg/m3")
+
+    def cp(
+            self,
+            T: float|Variable = Variable(273.15, "K"),
+        ) -> Variable:
+        if isinstance(T, Variable):
+            temp = T.u("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        temps = np.arange(250, 851, 50)
+        values = np.array([1.003, 1.005, 1.008,
+                           1.013, 1.020, 1.029,
+                           1.040, 1.051, 1.063,
+                           1.075, 1.087, 1.099,
+                           1.121])
+        return Variable(float(np.interp(temp, temps, values)), "kJ/kg-K")
+
+    def k(
+            self,
+            T: float|Variable = Variable(273.15, "K"),
+        ) -> Variable:
+        if isinstance(T, Variable):
+            temp = T.u("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        A = (-4.937787e-4, 1.018087e-4, -4.627937e-8, 1.250603e-11)
+        aux = sum([ A[i] * temp**i for i in range(len(A)) ])
+        return Variable(aux, "W/m-K")
+
+    def viscosity(
+            self,
+            T: float|Variable = Variable(273.15, "K"),
+        ) -> Variable:
+        if isinstance(T, Variable):
+            temp = T.u("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        temps = np.concatenate((
+            [223,], np.arange(243, 374, 10), np.arange(423, 574, 50)
+        ))
+        values = np.array([0.921, 1.08, 1.16, 1.24,
+                           1.33, 1.42, 1.51, 1.60,
+                           1.69, 1.79, 1.89, 1.99, 
+                           2.09, 2.19, 2.30, 2.85,
+                           3.45, 4.08, 4.75])
+        return Variable(
+            float(np.interp(temp, temps, values)) * 1e-5,
+            "m2/s"
+        )
+    
+    def humidity(
+            self,
+            T: float|Variable = Variable(273.15, "K"),
+        ) -> Variable:
+        if isinstance(T, Variable):
+            temp = T.u("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        temps = np.concatenate((
+            np.arange(253, 324, 2), np.arange(328, 369, 5)
+        ))
+        values = np.array([ 0.63, 0.77, 0.93, 1.11,
+                           1.34, 1.60, 1.91, 2.27,
+                           2.69, 3.19, 3.78, 4.37,
+                           5.03, 5.79, 6.65, 7.63, 
+                           8.75, 9.97, 11.4, 12.9, 
+                           14.7, 16.6, 18.8, 21.4, 
+                           24.0, 27.2, 30.6, 34.4, 
+                           38.8, 43.5, 48.8, 54.8, 
+                           61.3, 68.9, 77.0, 86.2, 
+                           114., 152., 204., 276.,
+                           382., 545., 828., 1400., 3120.])
+        return Variable(float(np.interp(temp, temps, values))*1.e-3, "-")
+
 
 class HumidAir():
-    ...
+    def rho(
+            self,
+            T: float|Variable = Variable(273.15, "K"),
+            P: float|Variable = Variable(101.325, "kPa"),
+            AH: float|Variable = Variable(0.001, "-")
+        ) -> Variable:
+        if isinstance(T, Variable):
+            temp = T.u("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        if isinstance(P, Variable):
+            pressure = P.u("Pa")
+        elif isinstance(P, (int, float)):
+            pressure = P
+        if isinstance(AH, Variable):
+            abshum = AH.u("-")
+        elif isinstance(AH, (int, float)):
+            abshum = AH
+        aux = (1 - abshum) * (1 - abshum / ( abshum + 0.62198 ) ) * pressure / (287.08 * temp)
+        return Variable(aux, "kg/m3")
+
+    def cp(
+            self,
+            T: float|Variable = Variable(273.15, "K"),
+            AH: float|Variable = Variable(0.001, "-")
+        ) -> Variable:
+        if isinstance(AH, Variable):
+            abshum = AH.u("-")
+        elif isinstance(AH, (int, float)):
+            abshum = AH
+        else:
+            raise TypeError("AH must be a Variable or a number.")
+        return DryAir().cp(T) + abshum * SaturatedSteam().cp(T)
+
+    def k(
+            self,
+            T: float|Variable = Variable(273.15, "K"),
+            AH: float|Variable = Variable(0.001, "-")
+        ) -> Variable:
+        if isinstance(AH, Variable):
+            abshum = AH.u("-")
+        elif isinstance(AH, (int, float)):
+            abshum = AH
+        Ma = 28.97
+        Mv = 18.016
+        Xa = 1 / (1 + 1.608*abshum)
+        Xv = abshum / (abshum + 0.622)
+        k_a = DryAir().k(T)
+        k_v = SaturatedSteam().k(T)
+        return (Xa*Ma**0.33*k_a + Xv*Mv**0.33*k_v) / (Xa*Ma**0.33 + Xv*Mv**0.33)
+
+    def viscosity(
+            self,
+            T: float|Variable = Variable(273.15, "K"),
+            AH: float|Variable = Variable(0.001, "-")
+        ) -> Variable:
+        if isinstance(AH, Variable):
+            abshum = AH.u("-")
+        elif isinstance(AH, (int, float)):
+            abshum = AH
+        Ma = 28.97
+        Mv = 18.016
+        Xa = 1 / (1 + 1.608*abshum)
+        Xv = abshum / (abshum + 0.622)
+        mu_a = DryAir().viscosity(T)
+        mu_v = SaturatedSteam().viscosity(T)
+        return (Xa*Ma**0.5*mu_a + Xv*Mv**0.5*mu_v) / (Xa*Ma**0.5 + Xv*Mv**0.5)
+
+    def enthalpy(
+            self,
+            T: float|Variable = Variable(273.15, "K"),
+            AH: float|Variable = Variable(0.001, "-")
+        ) -> Variable:
+        if isinstance(T, Variable):
+            temp = T.u("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        if isinstance(AH, Variable):
+            abshum = AH.u("-")
+        elif isinstance(AH, (int, float)):
+            abshum = AH
+        if temp < 273.15-50:
+            aux = 1.005*temp + abshum * (2500.9 + 1.82*temp)
+        else:
+            aux = 1.005*temp + abshum * (2507.523 + 1.69*temp)
+
+        return Variable(aux*1000., "kJ/kg")
+
+class CO2():
+    _ct_solution = ct.Solution('gri30.yaml','gri30') # type: ignore
+
+    def rho(self, temp: float, pressure: float) -> float:
+        # Calculate specific heat capacity of CO2 at given temperature and pressure
+        self._ct_solution.TPY = temp, pressure, 'CO2:1.00'
+        return self._ct_solution.density_mass
+    
+    def cp(self, temp: float, pressure: float) -> float:
+        # Calculate specific heat capacity of CO2 at given temperature and pressure
+        self._ct_solution.TPY = temp, pressure, 'CO2:1.00'
+        return self._ct_solution.cp
+    
+    def k(self, temp: float, pressure: float) -> float:
+        # Calculate thermal conductivity of CO2 at given temperature and pressure
+        self._ct_solution.TPY = temp, pressure, 'CO2:1.00'
+        return self._ct_solution.thermal_conductivity
+    
+    def viscosity(self, temp: float, pressure: float) -> float:
+        # Calculate viscosity of CO2 at given temperature and pressure
+        self._ct_solution.TPY = temp, pressure, 'CO2:1.00'
+        return self._ct_solution.viscosity
+
 
 class TherminolVP1():
-    ...
+    def rho(
+            self,
+            T: float|Variable = Variable(273.15, "K")
+        ) -> Variable:
+        if isinstance(T, Variable):
+            temp = T.u("C")
+        elif isinstance(T, (int, float)):
+            temp = T - 273.15
+        temps = (16, 38, 60, 82, 
+                 104, 127, 149, 171, 
+                 193, 216, 238, 257, 
+                 271, 293, 316, 338, 
+                 360, 382, 399, 416)
+        values = (1068, 1050, 1032, 1014,
+                  995, 977, 958, 939, 
+                  919, 899, 879, 860,
+                  847, 824, 800, 775,
+                  749, 720, 696, 670)
+        return Variable(float(np.interp(temp, temps, values)), "kg/m3")
+
+    def cp(
+            self,
+            T: float|Variable = Variable(273.15, "K")
+        ) -> Variable:
+        if isinstance(T, Variable):
+            temp = T.u("C")
+        elif isinstance(T, (int, float)):
+            temp = T - 273.15
+        temps = (16, 38, 60, 82, 
+                 104, 127, 149, 171, 
+                 193, 216, 238, 257, 
+                 271, 293, 316, 338, 
+                 360, 382, 399, 416)
+        values = (1530, 1600, 1660, 1730,
+                  1790, 1850, 1910, 1970,
+                  2030, 2090, 2150, 2200,
+                  2240, 2300, 2360, 2420,
+                  2480, 2560, 2620, 2700)
+        return Variable(np.interp(temp, temps, values)[0], "J/kg-K")
+
+    def k(
+            self,
+            T: float|Variable = Variable(273.15, "K")
+        ) -> Variable:
+        if isinstance(T, Variable):
+            temp = T.u("C")
+        elif isinstance(T, (int, float)):
+            temp = T - 273.15
+        temps = (16, 38, 60, 82, 
+                 104, 127, 149, 171, 
+                 193, 216, 238, 257, 
+                 271, 293, 316, 338, 
+                 360, 382, 399, 416)
+        values = (0.1367, 0.1346, 0.1323, 0.1298,
+                  0.1271, 0.1243, 0.1213, 0.1181,
+                  0.1148, 0.1113, 0.1076, 0.1043,
+                  0.1018, 0.0977, 0.0934, 0.0890,
+                  0.0844, 0.0796, 0.0759, 0.0721)
+        return Variable(np.interp(temp, temps, values)[0], "W/m-K")
+    
+    def viscosity(
+            self,
+            T: float|Variable = Variable(273.15, "K")
+        ) -> Variable:
+        if isinstance(T, Variable):
+            temp = T.u("C")
+        elif isinstance(T, (int, float)):
+            temp = T - 273.15
+        temps = (16, 38, 60, 82, 
+                 104, 127, 149, 171, 
+                 193, 216, 238, 257, 
+                 271, 293, 316, 338, 
+                 360, 382, 399, 416)
+        values = (4.89, 2.73, 1.761, 1.244,
+                  0.934, 0.731, 0.591, 0.490,
+                  0.414, 0.355, 0.309, 0.276,
+                  0.256, 0.229, 0.206, 0.1866,
+                  0.1703, 0.1562, 0.1470, 0.1387)
+        return Variable(np.interp(temp, temps, values)[0]*1e-6, "Pa-s")
+
 
 class Syltherm800():
-    ...
+    def rho(
+            self,
+            T: float|Variable = Variable(273.15, "K")
+        ) -> Variable:
+        if isinstance(T, Variable):
+            temp = T.u("C")
+        elif isinstance(T, (int, float)):
+            temp = T - 273.15
+        temps = np.arange(-40, 401, 40)
+        values = (990.61, 953.16, 917.07, 881.68, 
+                  846.35, 810.45, 773.33, 734.35, 
+                  692.87, 648.24, 599.83, 547.00)
+        return Variable(np.interp(temp, temps, values)[0], "kg/m3")
+
+    def cp(
+            self,
+            T: float|Variable = Variable(273.15, "K")
+        ) -> Variable:
+        if isinstance(T, Variable):
+            temp = T.u("C")
+        elif isinstance(T, (int, float)):
+            temp = T - 273.15
+        temps = np.arange(-40, 401, 40)
+        values = (1506, 1574, 1643, 1711, 
+                  1779, 1847, 1916, 1984, 
+                  2052, 2121, 2189, 2257)
+        return Variable(np.interp(temp, temps, values)[0], "J/kg-K")
+
+    def k(
+            self,
+            T: float|Variable = Variable(273.15, "K")
+        ) -> Variable:
+        if isinstance(T, Variable):
+            temp = T.u("C")
+        elif isinstance(T, (int, float)):
+            temp = T - 273.15
+        temps = np.arange(-40, 401, 40)
+        values = (0.1463, 0.1388, 0.1312, 0.1237, 
+                  0.1162, 0.1087, 0.1012, 0.0936, 
+                  0.0861, 0.0786, 0.0711, 0.0635)
+        return Variable(np.interp(temp, temps, values)[0], "W/m-K")
+    
+    def viscosity(
+            self,
+            T: float|Variable = Variable(273.15, "K")
+        ) -> Variable:
+        if isinstance(T, Variable):
+            temp = T.u("C")
+        elif isinstance(T, (int, float)):
+            temp = T - 273.15
+        temps = np.arange(-40, 401, 40)
+        values = (51.05, 15.33, 7.00, 3.86, 
+                  2.36, 1.54, 1.05, 0.74, 
+                  0.54, 0.41, 0.31, 0.25)
+        return Variable(np.interp(temp, temps, values)[0]*1e-6, "Pa-s")
