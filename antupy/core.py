@@ -1,5 +1,5 @@
 """
-module with the general settings for an analysis
+module with the core classes for AntuPy
 """
 
 from collections.abc import Iterable
@@ -17,4 +17,3 @@ class Analyser():
     def run_simulation(self) -> Output:
         return Output()
 
-    
