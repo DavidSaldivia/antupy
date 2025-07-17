@@ -3,9 +3,11 @@ module with a simple units manager
 """
 from __future__ import annotations
 import numpy as np
-from typing import Iterable, Self
+from typing import Iterable, Self, TYPE_CHECKING
 from dataclasses import dataclass, field
 
+if TYPE_CHECKING:
+    from antupy.core import Var
 
 BASE_UNITS: dict[str, tuple[float, str,str]] = {
     "-": (1e0, "adimensional", "adim"),
@@ -44,16 +46,25 @@ DERIVED_UNITS: dict[str, tuple[float,str,str,str]] = {
 
 RELATED_UNITS: dict[str, tuple[float,str,str,str]] = {
     "L": (1e-3, "m3", "liter", "volume"),
+    "l": (1e-3, "m3", "liter", "volume"),
     "sec": (1e0, "s", "second", "time"),
     "min": (60., "s", "minute", "time"),
     "hr": (3600., "s", "hour", "time"),
-    "day": (86400, "s", "day", "time"),
+    "day": (86400., "s", "day", "time"),
+    "wk": (24*3600*7, "s", "year", "time"),
+    "week": (24*3600*7, "s", "year", "time"),
+    "mo": (24*3600*30, "s", "year", "time"),
+    "month": (24*3600*30, "s", "year", "time"),
     "yr": (31536000, "s", "year", "time"),
+    "year": (31536000, "s", "year", "time"),
+    "au": (149597870700, "m", "astronomic_unit", "length"),
     "Wh": (3600, "J", "watt-hour", "energy"),
+    "Wp": (1e0, "W", "watt-peak", "power"),
     "cal": (4184, "J", "calorie", "energy"),
     "ha": (1e4, "m2", "hectar", "surface"),
     "°C": (1e0, "K", "celcius", "temperature"),
     "degC": (1e0, "K", "celcius", "temperature"),
+    "ppm": (1000, "mL/L", "parts_per_million", "concentration"),
 }
 
 PREFIXES: dict[str, float] = {
@@ -151,6 +162,10 @@ class Unit():
         else:
             return f"{self.base_factor:.2e}[{top_str if top_str != "" else "1"}/{bottom_str}]"
 
+    @property
+    def u(self)->str:
+        return self.label_unit 
+
     def _update_base_repr(self, name: str, exponent: int):
         exponent_prev = self.base_units.get(name,0)
         self.base_units[name] = exponent+exponent_prev
@@ -172,11 +187,11 @@ class Unit():
                 name = comp
                 exponent = exp_sign
             if name in UNITS:
-                factor = 1.0
+                factor = 1.0 #UNITS[name][0]
             elif name == "":
                 factor = 1.0
             elif name[0] in PREFIXES and name[1:] in UNITS:
-                factor = PREFIXES[name[0]] * UNITS[name[1:]][0]
+                factor = PREFIXES[name[0]]
                 name = name[1:]
             else:
                 raise ValueError(f"Unit '{name}' not recognized.")
@@ -220,6 +235,84 @@ class Unit():
                 factor_ *= (new_factor2*new_factor1)**np.sign(exponent)
             self.base_factor = factor_
         return None
+
+
+def _conv_temp(temp: Variable|Var, unit: str|None) -> float:
+    if temp.value is None or unit is None:
+        raise ValueError("Value or unit is None")
+    if temp.unit == "K" and unit in ["°C", "degC"]:
+        return temp.value - 273.15
+    elif temp.unit in ["°C", "degC"] and unit == "K":
+        return temp.value + 273.15
+    else:
+        return temp.value
+
+
+def _mul_units(unit1: str|None, unit2: str|None) -> str:
+    """ Function to merge two units into a single unit by multiplication.
+    """
+    if unit1 is None:
+        return unit2 if unit2 is not None else ""
+    if unit2 is None:
+        return unit1
+    top = []
+    bottom = []
+    if "/" in unit1:
+        top1, bottom1 = unit1.split("/")
+        top = top + top1.split("-")
+        bottom = bottom + bottom1.split("-")
+    else:
+        top = top + unit1.split("-")
+    if "/" in unit2:
+        top2, bottom2 = unit2.split("/")
+        top = top + top2.split("-")
+        bottom = bottom + bottom2.split("-")
+    else:
+        top = top + unit2.split("-")
+    for unit in top:
+        if unit in bottom:
+            top.remove(unit)
+            bottom.remove(unit)
+    if len(bottom) > 0:
+        if len(top) == 0:
+            return f"1/{'-'.join(bottom)}"
+        return f"{'-'.join(top)}/{'-'.join(bottom)}"
+    else:
+        return f"{'-'.join(top)}"
+
+
+def _div_units(unit1: str|None, unit2: str|None) -> str:
+    """ Function to merge two units into a single unit by division
+    """
+    if unit1 is None:
+        return unit2 if unit2 is not None else ""
+    if unit2 is None:
+        return unit1
+    top = []
+    bottom = []
+    if "/" in unit1:
+        top1, bottom1 = unit1.split("/")
+        top = top + top1.split("-")
+        bottom = bottom + bottom1.split("-")
+    else:
+        top = top + unit1.split("-")
+    if "/" in unit2:
+        top2, bottom2 = unit2.split("/")
+        top = top + bottom2.split("-")
+        bottom = bottom + top2.split("-")
+    else:
+        bottom = bottom + unit2.split("-")
+    for unit in top:
+        if unit in bottom:
+            top.remove(unit)
+            bottom.remove(unit)
+    if len(bottom) > 0:
+        if len(top) == 0:
+            return f"1/{'-'.join(bottom)}"
+        return f"{'-'.join(top)}/{'-'.join(bottom)}"
+    else:
+        return f"{'-'.join(top)}"
+    
 
 
 
@@ -571,23 +664,6 @@ class Array():
     def __repr__(self) -> str:
         return f"{self.values:} [{self.unit}]"
 
-
-def conv_factor(unit1: str|None, unit2: str|None) -> float:
-    """ Function to obtain conversion factor between units.
-    The units must be in the UNIT_CONV dictionary.
-    If they are units from different phyisical quantities an error is raised.
-    """
-    if UNIT_TYPES[unit1] == "temperature" or UNIT_TYPES[unit2] == "temperature":
-        raise ValueError( f"There is not conversion factor for temperature units." )
-    if UNIT_TYPES[unit1] == UNIT_TYPES[unit2]:
-        type_unit = UNIT_TYPES[unit1]
-        conv_factor = CONVERSIONS[type_unit][unit2] / CONVERSIONS[type_unit][unit1]
-    else:
-        raise ValueError(f"Units {unit1=} and {unit2=} do not represent the same physical quantity.")
-    return conv_factor
-
-
-
 def conversion_factor(unit1: str|None, unit2: str|None) -> float:
     """ Function to obtain conversion factor between units.
     The units must be in the UNIT_CONV dictionary.
@@ -602,79 +678,6 @@ def conversion_factor(unit1: str|None, unit2: str|None) -> float:
         raise ValueError(f"Units {unit1=} and {unit2=} do not represent the same physical quantity.")
     return conv_factor
 
-def _conv_temp(temp: Variable, unit: str|None) -> float:
-    if temp.value is None or unit is None:
-        raise ValueError("Value or unit is None")
-    if temp.unit == "K" and unit == "C":
-        return temp.value - 273.15
-    elif temp.unit == "C" and unit == "K":
-        return temp.value + 273.15
-    else:
-        return temp.value
-
-def _mul_units(unit1: str|None, unit2: str|None) -> str:
-    """ Function to merge two units into a single unit by multiplication.
-    """
-    if unit1 is None:
-        return unit2 if unit2 is not None else ""
-    if unit2 is None:
-        return unit1
-    top = []
-    bottom = []
-    if "/" in unit1:
-        top1, bottom1 = unit1.split("/")
-        top = top + top1.split("-")
-        bottom = bottom + bottom1.split("-")
-    else:
-        top = top + unit1.split("-")
-    if "/" in unit2:
-        top2, bottom2 = unit2.split("/")
-        top = top + top2.split("-")
-        bottom = bottom + bottom2.split("-")
-    else:
-        top = top + unit2.split("-")
-    for unit in top:
-        if unit in bottom:
-            top.remove(unit)
-            bottom.remove(unit)
-    if len(bottom) > 0:
-        if len(top) == 0:
-            return f"1/{'-'.join(bottom)}"
-        return f"{'-'.join(top)}/{'-'.join(bottom)}"
-    else:
-        return f"{'-'.join(top)}"
-
-def _div_units(unit1: str|None, unit2: str|None) -> str:
-    """ Function to merge two units into a single unit by division
-    """
-    if unit1 is None:
-        return unit2 if unit2 is not None else ""
-    if unit2 is None:
-        return unit1
-    top = []
-    bottom = []
-    if "/" in unit1:
-        top1, bottom1 = unit1.split("/")
-        top = top + top1.split("-")
-        bottom = bottom + bottom1.split("-")
-    else:
-        top = top + unit1.split("-")
-    if "/" in unit2:
-        top2, bottom2 = unit2.split("/")
-        top = top + bottom2.split("-")
-        bottom = bottom + top2.split("-")
-    else:
-        bottom = bottom + unit2.split("-")
-    for unit in top:
-        if unit in bottom:
-            top.remove(unit)
-            bottom.remove(unit)
-    if len(bottom) > 0:
-        if len(top) == 0:
-            return f"1/{'-'.join(bottom)}"
-        return f"{'-'.join(top)}/{'-'.join(bottom)}"
-    else:
-        return f"{'-'.join(top)}"
 
 #---------------------
 def main():

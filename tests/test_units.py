@@ -1,5 +1,6 @@
 from antupy.units import Variable, conversion_factor    
 from antupy.units import Unit
+from antupy.core import Var, CF
 from antupy.units import BASE_UNITS, DERIVED_UNITS, RELATED_UNITS, PREFIXES
 
 def test_unit_uniqueness():
@@ -40,46 +41,52 @@ def test_unit_translation():
         (Unit("ha"), Unit("m2",1e4)),
         (Unit("ha"), Unit("m-m",1e4)),
         (Unit("degC"), Unit("K")),
+        (Unit("g/L"), Unit("kg/m3")),
+        # (Unit("km2"), Unit("m2", 1e6)),
     ]:
         print(f"{a}({a.si}),{b}({b.si})")
         assert a==b, f"{a},{b}"
 
-def test_conversion_factor():
-    assert conversion_factor("m3/s", "L/min") == 60000.
-    assert conversion_factor("W", "kJ/hr") == 3.6
+def test_CF():
+    assert CF("m", "km").v == 0.001
+    assert CF("W", "kJ/hr").v == 3.6
+    assert CF("m3/s", "L/min").v == 60000.
+    assert CF("m", "km") == Var(0.001, "km/m")
+    assert CF("W", "kJ/hr") == Var(3.6, "kJ/hr-W")
+    assert CF("m3/s", "L/min") == Var(60000., "L-s/min-m3")
 
 def test_conversion_temp():
-    temp1 = Variable(300., "K")
-    temp2 = Variable(20., "C")
-    assert temp1.u("C") == 300-273.15
+    temp1 = Var(300., "K")
+    temp2 = Var(20., "°C")
+    assert temp1.u("°C") == 300-273.15
     assert temp1.u("K") == 300.
-    assert temp2.u("C") == 20.
+    assert temp2.u("°C") == 20.
     assert temp2.u("K") == 20+273.15
 
 def test_conversion_time():
-    time_sim = Variable(365, "d")
-    assert time_sim.u('d') == 365
+    time_sim = Var(365, "day")
+    assert time_sim.u('day') == 365
     assert time_sim.u('hr') == 8760.
     assert time_sim.u('s') == 31536000.0
 
-def test_add_variables():
-    time_sim1 = Variable(365,"d")
-    time_sim2 = Variable(1, "d")
-    assert (time_sim1 + time_sim2).u("d") == 366
+def test_add_vars():
+    time_sim1 = Var(365,"day")
+    time_sim2 = Var(24, "hr")
+    assert (time_sim1 + time_sim2).u("day") == 366
 
-def test_mul_variables():
-    time_sim = Variable(1, "d")
-    time_sim.set_unit("hr")
-    nom_power = Variable(100, "kW")
-    nom_power.set_unit("kJ/hr")
+def test_mul_vars():
+    time_sim = Var(1, "day")
+    nom_power = Var(100, "kW")
     energy = nom_power * time_sim
-
-    assert energy.u("kJ") == 8640000.0
-    assert (8*energy/2 - energy*2).u("kWh") == 4800.
+    assert energy.u("kW-hr") == 24*100
+    assert energy.u("kWh") == 24*100
+    assert energy.u("kJ") == 24*100*3600
+    assert (8*energy/2 - energy*2) == 2*Var(100*24., "kWh")
 
 
 def main():
     test_unit_translation()
+    test_mul_vars()
 
 if __name__ == "__main__":
     main()
