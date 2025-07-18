@@ -1,11 +1,29 @@
 """
 module with the core classes for AntuPy
 """
+from __future__ import annotations
 from dataclasses import dataclass
 from typing import Self
 import numpy as np
 
 from antupy.units import Unit, _conv_temp, _mul_units, _div_units
+
+def CF(unit1: str|Unit, unit2: str|Unit) -> Var:
+    if isinstance(unit1, Unit):
+        u1 = unit1
+    else:
+        u1 = Unit(unit1)    
+    if isinstance(unit2, Unit):
+        u2 = unit2
+    else:
+        u2 = Unit(unit2)
+    if u1.base_units == u2.base_units:
+        return Var(
+            u1.base_factor / u2.base_factor,
+            _div_units(u2.label_unit, u1.label_unit)
+        )
+    else:
+        raise ValueError(f"{unit1} and {unit2} are not compatible.")
 
 class Var():
     """
@@ -127,7 +145,7 @@ class Var():
         if self.unit == unit:
             return self.value
         if self.unit.base_units == Unit(unit).base_units:
-            if unit in ["°C", "degC"]:
+            if unit in ["°C", "degC","K"]:
                 return _conv_temp(self, unit)
             return self.value * CF(self.unit.u, unit).v
         else:
@@ -137,11 +155,6 @@ class Var():
     def v(self) -> float:
         """ Property to obtain the value of the variable (in its primary unit). """
         return self.value if self.value is not None else np.nan
-    
-    # @property
-    # def units(self) -> str:
-    #     """ Property to obtain the compatible units of the variable. """
-    #     return UNIT_TYPES[self.unit]
     
     def set_unit(self, unit: str | None = None) -> None:
         """ Set the primary unit of the variable. """
@@ -154,23 +167,6 @@ class Var():
                 f"unit ({unit}) is not compatible with existing primary unit ({self.unit})."
             )
         return None
-
-def CF(unit1: str|Unit, unit2: str|Unit) -> Var:
-    if isinstance(unit1, Unit):
-        u1 = unit1
-    else:
-        u1 = Unit(unit1)    
-    if isinstance(unit2, Unit):
-        u2 = unit2
-    else:
-        u2 = Unit(unit2)
-    if u1.base_units == u2.base_units:
-        return Var(
-            u1.base_factor / u2.base_factor,
-            _div_units(u2.label_unit, u1.label_unit)
-        )
-    else:
-        raise ValueError(f"{unit1} and {unit2} are not compatible.")
 
 
 from collections.abc import Iterable

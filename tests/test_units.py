@@ -1,4 +1,3 @@
-from antupy.units import Variable, conversion_factor    
 from antupy.units import Unit
 from antupy.core import Var, CF
 from antupy.units import BASE_UNITS, DERIVED_UNITS, RELATED_UNITS, PREFIXES
@@ -6,7 +5,6 @@ from antupy.units import BASE_UNITS, DERIVED_UNITS, RELATED_UNITS, PREFIXES
 def test_unit_uniqueness():
     UNITS_NOPREFIX = list((BASE_UNITS|DERIVED_UNITS|RELATED_UNITS).keys())
     UNITS = [ f"{prefix}{unit}" for prefix in PREFIXES for unit in UNITS_NOPREFIX ]
-    #UNITS should have only one repeated (kg)
     assert len(UNITS) == len(set(UNITS)), "Units are not unique"
 
 def test_unit_split_comps():
@@ -42,9 +40,10 @@ def test_unit_translation():
         (Unit("ha"), Unit("m-m",1e4)),
         (Unit("degC"), Unit("K")),
         (Unit("g/L"), Unit("kg/m3")),
+        (Unit("lm"), Unit("cd-sr")),
         # (Unit("km2"), Unit("m2", 1e6)),
     ]:
-        print(f"{a}({a.si}),{b}({b.si})")
+        # print(f"{a}({a.si}),{b}({b.si})")
         assert a==b, f"{a},{b}"
 
 def test_CF():

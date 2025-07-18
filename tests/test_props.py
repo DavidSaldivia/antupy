@@ -45,9 +45,9 @@ def test_prop_water():
     assert np.round(water.k(temp).u("W/m-K"), 3) == 0.61
     # assert np.round(water.viscosity(temp).u("Pa-s") * 1e5, 3) == 1.573
 
-def test_prop_vapor():
+def test_prop_steam():
     steam = SaturatedSteam()
-    temp = Var(99.63, "C")
+    temp = Var(99.63, "°C")
     assert np.round(steam.rho(temp).u("kg/m3"), 3) == 0.59
     assert np.round(steam.cp(temp).u("kJ/kg-K"), 2) == 2.03
     assert np.round(steam.k(temp).u("W/m-K"), 3) == 0.024
@@ -60,5 +60,5 @@ if __name__ == "__main__":
     test_prop_dry_air()
     test_prop_humid_air()
     test_prop_water()
-    test_prop_vapor()
+    test_prop_steam()
     test_prop_seawater()

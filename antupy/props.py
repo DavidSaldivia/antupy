@@ -143,7 +143,7 @@ class SaturatedWater():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("C")
+            temp = T.u("°C")
         elif isinstance(T, (int, float)):
             temp = T
         A = (9.999e2, 2.034e-2, -6.162e-3, 2.261e-5, -4.657e-8)
@@ -266,13 +266,12 @@ class SaturatedSteam():
             T: float|Var = Var(273.15, "K")
     ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("K")
+            temp = T.u("°C")
         elif isinstance(T, (int, float)):
             temp = T
         A = (-4.062329056, 0.10277044, -9.76300388e-4,
              4.475240795e-6, -1.004596894e-8, 8.9154895e-12)
-        aux = sum([A[i] * temp**i for i in range(len(A))])
-        return Var(aux, "kg/m3")
+        return Var(sum([A[i] * temp**i for i in range(len(A))]), "kg/m3")
 
     def cp(
             self,
