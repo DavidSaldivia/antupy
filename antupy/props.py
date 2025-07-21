@@ -49,7 +49,7 @@ class Carbo():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("K")
+            temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
         return Var(148 * temp**0.3093, "J/kg-K")
@@ -143,7 +143,7 @@ class SaturatedWater():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("°C")
+            temp = T.gv("°C")
         elif isinstance(T, (int, float)):
             temp = T
         A = (9.999e2, 2.034e-2, -6.162e-3, 2.261e-5, -4.657e-8)
@@ -155,7 +155,7 @@ class SaturatedWater():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("K")
+            temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
         aux = 8.15599e3 - 2.80627e1*temp + 5.11283e-2*temp**2 - 2.17582e-13*temp**6
@@ -166,7 +166,7 @@ class SaturatedWater():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("K")
+            temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
         A = (0.80201, -0.25992, 0.10024, -0.032005)
@@ -181,7 +181,7 @@ class SaturatedWater():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("K")
+            temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
         aux = 4.2844e-5 + 1 / ( 0.157*(temp+64.994)**2 - 91.296 )
@@ -192,7 +192,7 @@ class SaturatedWater():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("K")
+            temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
         aux = temp / 647.096
@@ -206,7 +206,7 @@ class SaturatedWater():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("K")
+            temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
         A = (2.501e6, -2.369e3, 2.678e-1, -8.103e-3, -2.079e-5)
@@ -218,7 +218,7 @@ class SaturatedWater():
             T: float|Var = Var(273.15, "K")
     ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("K")
+            temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
         Pc = 22089.
@@ -237,7 +237,7 @@ class SaturatedWater():
             T: float|Var = Var(273.15, "K")
     ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("K")
+            temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
         A = [-5800., 1.391, -4.846e-2, 4.176e-5, -1.445e-8, 6.545]
@@ -252,7 +252,7 @@ class SaturatedWater():
             P: float|Var = Var(101.325, "kPa")
     ) -> Var:
         if isinstance(P, Var):
-            pressure = P.u("kPa")
+            pressure = P.gv("kPa")
         elif isinstance(P, (int, float)):
             pressure = P
         return Var(
@@ -266,7 +266,7 @@ class SaturatedSteam():
             T: float|Var = Var(273.15, "K")
     ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("°C")
+            temp = T.gv("°C")
         elif isinstance(T, (int, float)):
             temp = T
         A = (-4.062329056, 0.10277044, -9.76300388e-4,
@@ -278,7 +278,7 @@ class SaturatedSteam():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("K")
+            temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
         aux = (1.3605e3 + 2.31334*temp - 2.46784e-10*temp**5 + 5.91332e-13*temp**6)
@@ -289,7 +289,7 @@ class SaturatedSteam():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("K")
+            temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
         A = (1.3046e-2, -3.756191e-5, 2.217964e-7, -1.111562e-10)
@@ -301,7 +301,7 @@ class SaturatedSteam():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("K")
+            temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
         A = (2.562435e-6, 1.816683e-8, 2.579066e-11, -1.067299e-14)
@@ -319,11 +319,11 @@ class SeaWater():
             X: float|Var = Var(35000, "ppm")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("C")
+            temp = T.gv("C")
         elif isinstance(T, (int, float)):
             temp = T
         if isinstance(X, Var):
-            salinity = X.u("ppm")
+            salinity = X.gv("ppm")
         elif isinstance(X, (int, float)):
             salinity = X
         A1 = (2*temp - 200) / 160.
@@ -345,11 +345,11 @@ class SeaWater():
             X: float|Var = Var(35000, "ppm")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("C")
+            temp = T.gv("C")
         elif isinstance(T, (int, float)):
             temp = T
         if isinstance(X, Var):
-            salinity = X.u("ppm")
+            salinity = X.gv("ppm")
         elif isinstance(X, (int, float)):
             salinity = X
         s = salinity / 1000.
@@ -366,11 +366,11 @@ class SeaWater():
             X: float|Var = Var(35000, "ppm")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("C")
+            temp = T.gv("C")
         elif isinstance(T, (int, float)):
             temp = T
         if isinstance(X, Var):
-            salinity = X.u("ppm")
+            salinity = X.gv("ppm")
         elif isinstance(X, (int, float)):
             salinity = X
         s = salinity / 1000.
@@ -388,11 +388,11 @@ class SeaWater():
             X: float|Var = Var(35000, "ppm")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("C")
+            temp = T.gv("C")
         elif isinstance(T, (int, float)):
             temp = T
         if isinstance(X, Var):
-            salinity = X.u("ppm")
+            salinity = X.gv("ppm")
         elif isinstance(X, (int, float)):
             salinity = X
         s = salinity / 1000.
@@ -408,14 +408,14 @@ class SeaWater():
             X: float|Var = Var(35000, "ppm")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("C")
+            temp = T.gv("C")
         elif isinstance(T, (int, float)):
             temp = T
         if isinstance(X, Var):
-            salinity = X.u("ppm")
+            salinity = X.gv("ppm")
         elif isinstance(X, (int, float)):
             salinity = X
-        surface_tension_l = SaturatedWater().surface_tension(T).u("N/m")
+        surface_tension_l = SaturatedWater().surface_tension(T).gv("N/m")
         s = salinity / 1000.
         if (temp>40.):
             aux = surface_tension_l
@@ -429,7 +429,7 @@ class DryAir():
             T: float|Var = Var(273.15, "K"),
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("K")
+            temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
         temps = np.concatenate((
@@ -447,7 +447,7 @@ class DryAir():
             T: float|Var = Var(273.15, "K"),
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("K")
+            temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
         temps = np.arange(250, 851, 50)
@@ -463,7 +463,7 @@ class DryAir():
             T: float|Var = Var(273.15, "K"),
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("K")
+            temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
         A = (-4.937787e-4, 1.018087e-4, -4.627937e-8, 1.250603e-11)
@@ -475,7 +475,7 @@ class DryAir():
             T: float|Var = Var(273.15, "K"),
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("K")
+            temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
         temps = np.concatenate((
@@ -496,7 +496,7 @@ class DryAir():
             T: float|Var = Var(273.15, "K"),
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("K")
+            temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
         temps = np.concatenate((
@@ -524,19 +524,19 @@ class HumidAir():
             AH: float|Var = Var(0.001, "-")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("K")
+            temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
         else:
             raise ValueError(f"{type(T)=} is not a valid type")
         if isinstance(P, Var):
-            pressure = P.u("Pa")
+            pressure = P.gv("Pa")
         elif isinstance(P, (int, float)):
             pressure = P
         else:
             raise ValueError(f"{type(P)=} is not a valid type")
         if isinstance(AH, Var):
-            abshum = AH.u("-")
+            abshum = AH.gv("-")
         elif isinstance(AH, (int, float)):
             abshum = AH
         else:
@@ -550,7 +550,7 @@ class HumidAir():
             AH: float|Var = Var(0.001, "-")
         ) -> Var:
         if isinstance(AH, Var):
-            abshum = AH.u("-")
+            abshum = AH.gv("-")
         elif isinstance(AH, (int, float)):
             abshum = AH
         else:
@@ -563,7 +563,7 @@ class HumidAir():
             AH: float|Var = Var(0.001, "-")
         ) -> Var:
         if isinstance(AH, Var):
-            abshum = AH.u("-")
+            abshum = AH.gv("-")
         elif isinstance(AH, (int, float)):
             abshum = AH
         Ma = 28.97
@@ -580,7 +580,7 @@ class HumidAir():
             AH: float|Var = Var(0.001, "-")
         ) -> Var:
         if isinstance(AH, Var):
-            abshum = AH.u("-")
+            abshum = AH.gv("-")
         elif isinstance(AH, (int, float)):
             abshum = AH
         Ma = 28.97
@@ -597,11 +597,11 @@ class HumidAir():
             AH: float|Var = Var(0.001, "-")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("K")
+            temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
         if isinstance(AH, Var):
-            abshum = AH.u("-")
+            abshum = AH.gv("-")
         elif isinstance(AH, (int, float)):
             abshum = AH
         if temp < 273.15-50:
@@ -641,7 +641,7 @@ class TherminolVP1():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("C")
+            temp = T.gv("C")
         elif isinstance(T, (int, float)):
             temp = T - 273.15
         temps = (16, 38, 60, 82, 
@@ -661,7 +661,7 @@ class TherminolVP1():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("C")
+            temp = T.gv("C")
         elif isinstance(T, (int, float)):
             temp = T - 273.15
         temps = (16, 38, 60, 82, 
@@ -674,14 +674,14 @@ class TherminolVP1():
                   2030, 2090, 2150, 2200,
                   2240, 2300, 2360, 2420,
                   2480, 2560, 2620, 2700)
-        return Var(np.interp(temp, temps, values)[0], "J/kg-K")
+        return Var(np.interp(temp, temps, values), "J/kg-K")
 
     def k(
             self,
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("C")
+            temp = T.gv("C")
         elif isinstance(T, (int, float)):
             temp = T - 273.15
         temps = (16, 38, 60, 82, 
@@ -694,14 +694,14 @@ class TherminolVP1():
                   0.1148, 0.1113, 0.1076, 0.1043,
                   0.1018, 0.0977, 0.0934, 0.0890,
                   0.0844, 0.0796, 0.0759, 0.0721)
-        return Var(np.interp(temp, temps, values)[0], "W/m-K")
+        return Var(np.interp(temp, temps, values), "W/m-K")
     
     def viscosity(
             self,
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("C")
+            temp = T.gv("C")
         elif isinstance(T, (int, float)):
             temp = T - 273.15
         temps = (16, 38, 60, 82, 
@@ -714,7 +714,7 @@ class TherminolVP1():
                   0.414, 0.355, 0.309, 0.276,
                   0.256, 0.229, 0.206, 0.1866,
                   0.1703, 0.1562, 0.1470, 0.1387)
-        return Var(np.interp(temp, temps, values)[0]*1e-6, "Pa-s")
+        return Var(np.interp(temp, temps, values)*1e-6, "Pa-s")
 
 
 class Syltherm800():
@@ -723,53 +723,53 @@ class Syltherm800():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("C")
+            temp = T.gv("C")
         elif isinstance(T, (int, float)):
             temp = T - 273.15
         temps = np.arange(-40, 401, 40)
         values = (990.61, 953.16, 917.07, 881.68, 
                   846.35, 810.45, 773.33, 734.35, 
                   692.87, 648.24, 599.83, 547.00)
-        return Var(np.interp(temp, temps, values)[0], "kg/m3")
+        return Var(np.interp(temp, temps, values), "kg/m3")
 
     def cp(
             self,
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("C")
+            temp = T.gv("C")
         elif isinstance(T, (int, float)):
             temp = T - 273.15
         temps = np.arange(-40, 401, 40)
         values = (1506, 1574, 1643, 1711, 
                   1779, 1847, 1916, 1984, 
                   2052, 2121, 2189, 2257)
-        return Var(np.interp(temp, temps, values)[0], "J/kg-K")
+        return Var(np.interp(temp, temps, values), "J/kg-K")
 
     def k(
             self,
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("C")
+            temp = T.gv("C")
         elif isinstance(T, (int, float)):
             temp = T - 273.15
         temps = np.arange(-40, 401, 40)
         values = (0.1463, 0.1388, 0.1312, 0.1237, 
                   0.1162, 0.1087, 0.1012, 0.0936, 
                   0.0861, 0.0786, 0.0711, 0.0635)
-        return Var(np.interp(temp, temps, values)[0], "W/m-K")
+        return Var(np.interp(temp, temps, values), "W/m-K")
     
     def viscosity(
             self,
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.u("C")
+            temp = T.gv("C")
         elif isinstance(T, (int, float)):
             temp = T - 273.15
         temps = np.arange(-40, 401, 40)
         values = (51.05, 15.33, 7.00, 3.86, 
                   2.36, 1.54, 1.05, 0.74, 
                   0.54, 0.41, 0.31, 0.25)
-        return Var(np.interp(temp, temps, values)[0]*1e-6, "Pa-s")
+        return Var(np.interp(temp, temps, values)*1e-6, "Pa-s")

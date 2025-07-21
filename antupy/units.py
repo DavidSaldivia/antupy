@@ -7,7 +7,7 @@ from typing import Iterable, Self, TYPE_CHECKING
 from dataclasses import dataclass, field
 
 if TYPE_CHECKING:
-    from antupy.core import Var
+    from antupy.core import Var, Array
 
 BASE_UNITS: dict[str, tuple[float, str,str]] = {
     "-": (1e0, "adimensional", "adim"),
@@ -246,7 +246,7 @@ class Unit():
             self.base_factor = factor_
         return None
 
-def _conv_temp(temp: Var, unit: str|None) -> float:
+def _conv_temp(temp: Var|Array, unit: str|None) -> float|np.ndarray:
     if temp.value is None or unit is None:
         raise ValueError("Value or unit is None")
     if temp.unit.u == "K" and unit in ["°C", "degC"]:
