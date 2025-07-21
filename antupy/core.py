@@ -167,6 +167,18 @@ class Var():
                 f"unit ({unit}) is not compatible with existing primary unit ({self.unit})."
             )
         return None
+    
+    def su(self, unit: str|None = None) -> None:
+        """Alias of self.set_unit"""
+        self.set_unit(unit)
+        return None
+
+
+class Array:
+    pass
+
+class Frame:
+    pass
 
 
 from collections.abc import Iterable
