@@ -2,7 +2,6 @@
 module with the core classes for AntuPy
 """
 from __future__ import annotations
-from dataclasses import dataclass
 from typing import Self
 import numpy as np
 
@@ -52,7 +51,7 @@ class Var():
         if self.unit == other.unit:
             return Var(self.value + other.value, self.unit)
         elif self.unit.base_units == other.unit.base_units:
-            return Var(self.value + other.u(self.unit.label_unit), self.unit)
+            return Var(self.value + other.gv(self.unit.label_unit), self.unit)
         else:
             raise TypeError(f"Cannot add {self.unit} with {other.unit}. Units are not compatible.")
         
@@ -65,7 +64,7 @@ class Var():
         if self.unit == other.unit:
             return Var(self.value - other.value, self.unit)
         elif self.unit.base_units == other.unit.base_units:
-            return Var(self.value - other.u(self.unit.u), self.unit)
+            return Var(self.value - other.gv(self.unit.u), self.unit)
         else:
             raise TypeError(f"Cannot subtract {self.unit} with {other.unit}. Units are not compatible.")
 
@@ -78,7 +77,7 @@ class Var():
         if self.unit == other.unit:
             return Var(self.value + other.value, other.unit)
         elif self.unit.base_units == other.unit.base_units:
-            return Var(other.value + self.u(other.unit.u), other.unit)
+            return Var(other.value + self.gv(other.unit.u), other.unit)
         else:
             raise TypeError(f"Cannot add {self.unit} with {other.unit}. Units are not compatible.")
 
@@ -133,7 +132,7 @@ class Var():
     def __repr__(self) -> str:
         return f"{self.value:} [{self.unit.u}]"
 
-    def u(self, unit: str | None = None) -> float:
+    def get_value(self, unit: str | None = None) -> float:
         """ Method to obtain the value of the variable in the requested unit.
         If the unit is not compatible with the variable unit, an error is raised.
         If the unit is None, the value is returned in the variable unit.
@@ -151,10 +150,6 @@ class Var():
         else:
             raise ValueError( f"Var unit ({self.unit}) and wanted unit ({unit}) are not compatible.")
 
-    @property
-    def v(self) -> float:
-        """ Property to obtain the value of the variable (in its primary unit). """
-        return self.value if self.value is not None else np.nan
     
     def set_unit(self, unit: str | None = None) -> None:
         """ Set the primary unit of the variable. """
@@ -167,6 +162,19 @@ class Var():
                 f"unit ({unit}) is not compatible with existing primary unit ({self.unit})."
             )
         return None
+
+    @property
+    def u(self) -> str:
+        """ Property to obtain the label unit of the variable"""
+        return self.unit.label_unit
+
+    @property
+    def v(self) -> float:
+        """ Property to obtain the value of the variable in its label unit. """
+        return self.value if self.value is not None else np.nan
+
+    def gv(self, unit: str|None = None) -> float:
+        return self.get_value(unit)
     
     def su(self, unit: str|None = None) -> None:
         """Alias of self.set_unit"""
@@ -174,7 +182,8 @@ class Var():
         return None
 
 
-class Array:
+class Array():
+    
     pass
 
 class Frame:
