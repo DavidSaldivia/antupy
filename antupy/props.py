@@ -1,9 +1,11 @@
 from dataclasses import dataclass
-from antupy.core import Var
 from typing import Protocol
 
 import cantera as ct
+import CoolProp.CoolProp as CP
 import numpy as np
+
+from antupy import Var
 
 class Fluid(Protocol):
     def rho (self, T: float|Var) -> Var:
@@ -260,54 +262,103 @@ class SaturatedWater():
             "K"
         )
 
+# class SaturatedSteam():
+#     def rho(
+#             self,
+#             T: float|Var = Var(273.15, "K")
+#     ) -> Var:
+#         if isinstance(T, Var):
+#             temp = T.gv("°C")
+#         elif isinstance(T, (int, float)):
+#             temp = T
+#         A = (-4.062329056, 0.10277044, -9.76300388e-4,
+#              4.475240795e-6, -1.004596894e-8, 8.9154895e-12)
+#         return Var(sum([A[i] * temp**i for i in range(len(A))]), "kg/m3")
+
+#     def cp(
+#             self,
+#             T: float|Var = Var(273.15, "K")
+#         ) -> Var:
+#         if isinstance(T, Var):
+#             temp = T.gv("K")
+#         elif isinstance(T, (int, float)):
+#             temp = T
+#         aux = (1.3605e3 + 2.31334*temp - 2.46784e-10*temp**5 + 5.91332e-13*temp**6)
+#         return Var(aux, "J/kg-K")
+    
+#     def k(
+#             self,
+#             T: float|Var = Var(273.15, "K")
+#         ) -> Var:
+#         if isinstance(T, Var):
+#             temp = T.gv("K")
+#         elif isinstance(T, (int, float)):
+#             temp = T
+#         A = (1.3046e-2, -3.756191e-5, 2.217964e-7, -1.111562e-10)
+#         aux = sum([ A[i] * temp**i for i in range(len(A)) ])
+#         return Var(aux, "W/m-K")
+
+#     def viscosity(
+#             self,
+#             T: float|Var = Var(273.15, "K")
+#         ) -> Var:
+#         if isinstance(T, Var):
+#             temp = T.gv("K")
+#         elif isinstance(T, (int, float)):
+#             temp = T
+#         A = (2.562435e-6, 1.816683e-8, 2.579066e-11, -1.067299e-14)
+#         aux = sum([ A[i] * temp**i for i in range(len(A)) ])
+#         return Var(aux, "Pa-s")
+
 class SaturatedSteam():
     def rho(
             self,
-            T: float|Var = Var(273.15, "K")
+            T: float|Var = Var(273.15, "K"),
     ) -> Var:
-        if isinstance(T, Var):
-            temp = T.gv("°C")
-        elif isinstance(T, (int, float)):
-            temp = T
-        A = (-4.062329056, 0.10277044, -9.76300388e-4,
-             4.475240795e-6, -1.004596894e-8, 8.9154895e-12)
-        return Var(sum([A[i] * temp**i for i in range(len(A))]), "kg/m3")
-
-    def cp(
-            self,
-            T: float|Var = Var(273.15, "K")
-        ) -> Var:
         if isinstance(T, Var):
             temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
-        aux = (1.3605e3 + 2.31334*temp - 2.46784e-10*temp**5 + 5.91332e-13*temp**6)
-        return Var(aux, "J/kg-K")
+        else:
+            raise ValueError(f"{type(T)=} is not a valid type")
+        return Var(CP.PropsSI('D', 'T', temp, 'Q', 1.0, 'Water'), "kg/m3")
+    
+    def cp(
+            self,
+            T: float|Var = Var(273.15, "K"),
+    ) -> Var:
+        if isinstance(T, Var):
+            temp = T.gv("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        else:
+            raise ValueError(f"{type(T)=} is not a valid type")
+        return Var(CP.PropsSI('C', 'T', temp, 'Q', 1.0, 'Water'), "J/kg-K")
     
     def k(
             self,
-            T: float|Var = Var(273.15, "K")
-        ) -> Var:
+            T: float|Var = Var(273.15, "K"),
+    ) -> Var:
         if isinstance(T, Var):
             temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
-        A = (1.3046e-2, -3.756191e-5, 2.217964e-7, -1.111562e-10)
-        aux = sum([ A[i] * temp**i for i in range(len(A)) ])
-        return Var(aux, "W/m-K")
-
+        else:
+            raise ValueError(f"{type(T)=} is not a valid type")
+        return Var(CP.PropsSI('L', 'T', temp, 'Q', 1.0, 'Water'), "W/m-K")
+    
     def viscosity(
             self,
-            T: float|Var = Var(273.15, "K")
-        ) -> Var:
+            T: float|Var = Var(273.15, "K"),
+    ) -> Var:
         if isinstance(T, Var):
             temp = T.gv("K")
         elif isinstance(T, (int, float)):
             temp = T
-        A = (2.562435e-6, 1.816683e-8, 2.579066e-11, -1.067299e-14)
-        aux = sum([ A[i] * temp**i for i in range(len(A)) ])
-        return Var(aux, "Pa-s")
-    
+        else:
+            raise ValueError(f"{type(T)=} is not a valid type")
+        return Var(CP.PropsSI('V', 'T', temp, 'Q', 1.0, 'Water'), "Pa-s")
+        
 
 class CompressedWater():
     ...
@@ -319,7 +370,7 @@ class SeaWater():
             X: float|Var = Var(35000, "ppm")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.gv("C")
+            temp = T.gv("°C")
         elif isinstance(T, (int, float)):
             temp = T
         if isinstance(X, Var):
@@ -516,6 +567,85 @@ class DryAir():
         return Var(float(np.interp(temp, temps, values))*1.e-3, "-")
 
 
+class Air():
+    def rho(
+            self,
+            T: float|Var = Var(273.15, "K"),
+            P: float|Var = Var(101.325, "kPa"),
+    )-> Var:
+        if isinstance(T, Var):
+            temp = T.gv("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        else:
+            raise ValueError(f"{type(T)=} is not a valid type")
+        if isinstance(P, Var):
+            pressure = P.gv("Pa")
+        elif isinstance(P, (int, float)):
+            pressure = P
+        else:
+            raise ValueError(f"{type(P)=} is not a valid type")
+        return Var(CP.PropsSI('D', 'T', temp, 'P', pressure, 'Air'), "kg/m3")
+    
+    def cp(
+            self,
+            T: float|Var = Var(273.15, "K"),
+            P: float|Var = Var(101.325, "kPa"),
+    )-> Var:
+        if isinstance(T, Var):
+            temp = T.gv("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        else:
+            raise ValueError(f"{type(T)=} is not a valid type")
+        if isinstance(P, Var):
+            pressure = P.gv("Pa")
+        elif isinstance(P, (int, float)):
+            pressure = P
+        else:
+            raise ValueError(f"{type(P)=} is not a valid type")
+        return Var(CP.PropsSI('C', 'T', temp, 'P', pressure, 'Air'), "J/kg-K")
+
+    def k(
+            self,
+            T: float|Var = Var(273.15, "K"),
+            P: float|Var = Var(101.325, "kPa"),
+    )-> Var:
+        if isinstance(T, Var):
+            temp = T.gv("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        else:
+            raise ValueError(f"{type(T)=} is not a valid type")
+        if isinstance(P, Var):
+            pressure = P.gv("Pa")
+        elif isinstance(P, (int, float)):
+            pressure = P
+        else:
+            raise ValueError(f"{type(P)=} is not a valid type")
+        return Var(CP.PropsSI('L', 'T', temp, 'P', pressure, 'Air'), "W/m-K")
+    
+    def viscosity(
+            self,
+            T: float|Var = Var(273.15, "K"),
+            P: float|Var = Var(101.325, "kPa"),
+    )-> Var:
+        if isinstance(T, Var):
+            temp = T.gv("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        else:
+            raise ValueError(f"{type(T)=} is not a valid type")
+        if isinstance(P, Var):
+            pressure = P.gv("Pa")
+        elif isinstance(P, (int, float)):
+            pressure = P
+        else:
+            raise ValueError(f"{type(P)=} is not a valid type")
+        return Var(CP.PropsSI('V', 'T', temp, 'P', pressure, 'Air'), "Pa-s")
+    
+
+
 class HumidAir():
     def rho(
             self,
@@ -614,25 +744,21 @@ class HumidAir():
 class CO2():
     _ct_solution = ct.Solution('gri30.yaml','gri30') # type: ignore
 
-    def rho(self, temp: float, pressure: float) -> float:
-        # Calculate specific heat capacity of CO2 at given temperature and pressure
+    def rho(self, temp: float, pressure: float) -> Var:
         self._ct_solution.TPY = temp, pressure, 'CO2:1.00'
-        return self._ct_solution.density_mass
+        return Var(self._ct_solution.density_mass, "kg/m3")
     
-    def cp(self, temp: float, pressure: float) -> float:
-        # Calculate specific heat capacity of CO2 at given temperature and pressure
+    def cp(self, temp: float, pressure: float) -> Var:
         self._ct_solution.TPY = temp, pressure, 'CO2:1.00'
-        return self._ct_solution.cp
+        return Var(self._ct_solution.cp, "J/kg-K")
     
-    def k(self, temp: float, pressure: float) -> float:
-        # Calculate thermal conductivity of CO2 at given temperature and pressure
+    def k(self, temp: float, pressure: float) -> Var:
         self._ct_solution.TPY = temp, pressure, 'CO2:1.00'
-        return self._ct_solution.thermal_conductivity
+        return Var(self._ct_solution.thermal_conductivity, "W/m-K")
     
-    def viscosity(self, temp: float, pressure: float) -> float:
-        # Calculate viscosity of CO2 at given temperature and pressure
+    def viscosity(self, temp: float, pressure: float) -> Var:
         self._ct_solution.TPY = temp, pressure, 'CO2:1.00'
-        return self._ct_solution.viscosity
+        return Var(self._ct_solution.viscosity, "Pa-s")
 
 
 class TherminolVP1():

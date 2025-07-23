@@ -2,7 +2,9 @@
 module with the core classes for AntuPy
 """
 from __future__ import annotations
+from dataclasses import dataclass, field
 from typing import Self
+
 import numpy as np
 
 from antupy.units import Unit, _conv_temp, _mul_units, _div_units
@@ -32,17 +34,23 @@ def _assign_unit(unit: str|Unit|None = None) -> Unit:
     else:
         raise TypeError(f"{type(unit)} is not a valid type for unit.")
 
+@dataclass(frozen=True)
 class Var():
     """
     Class to represent parameters and variables in the system.
     It is used to store the values with their units.
-    If you have a Var instance, you can obtain the value in different units with the u([str]) method.
+    If you have a Var instance, you can obtain the value in different units with the gv([str]) method.
     In this way you make sure you are getting the value with the expected unit.
-    "u" internally converts unit if it is possible.
+    "gv" internally converts unit if it is possible.
     """
-    def __init__(self, value: float|None=None, unit:str|Unit|None = None):
-        self.value: float | None = value
-        self.unit: Unit = _assign_unit(unit)
+    value: float|None = None
+    unit_: str|Unit|None = None
+    unit: Unit = field(init=False)
+    def __post_init__(self):
+        object.__setattr__(self, "unit", _assign_unit(self.unit_))
+    # def __init__(self, value: float|None=None, unit:str|Unit|None = None):
+    #     self.value: float | None = value
+    #     self.unit: Unit = _assign_unit(unit)
 
     def __add__(self, other: Self):
         """ Overloading the addition operator. """
@@ -122,6 +130,8 @@ class Var():
         else:
             raise TypeError(f"Cannot divide {type(self)} by {type(other)}")
         
+    
+        
     def __eq__(self, other) -> bool:
         """ Overloading the equality operator. """
         if not isinstance(other, Var) or other.value is None:
@@ -137,7 +147,7 @@ class Var():
     def get_value(self, unit: str | None = None) -> float:
         """ Method to obtain the value of the variable in the requested unit.
         If the unit is not compatible with the variable unit, an error is raised.
-        If the unit is None, the value is returned in the variable unit.
+        If the unit is None, the value is returned in the Var's label unit.
         """
         if unit is None:
             unit = self.unit.u
@@ -153,17 +163,15 @@ class Var():
             raise ValueError( f"Var unit ({self.unit}) and wanted unit ({unit}) are not compatible.")
 
     
-    def set_unit(self, unit: str | None = None) -> None:
+    def set_unit(self, unit: str | None = None) -> Var:
         """ Set the primary unit of the variable. """
         unit = str(unit)
         if (self.unit.base_units == Unit(unit).base_units) and (self.value is not None):
-            self.value = self.value * CF(self.unit, unit).v
-            self.unit = Unit(unit)
+            return Var(self.value * CF(self.unit, unit).v, Unit(unit))
         else:
             raise ValueError(
-                f"unit ({unit}) is not compatible with existing primary unit ({self.unit})."
+                f"unit ({unit}) is not compatible with existing unit label ({self.unit})."
             )
-        return None
 
     @property
     def u(self) -> str:
@@ -179,25 +187,31 @@ class Var():
         """Alias for self.get_value()"""
         return self.get_value(unit)
     
-    def su(self, unit: str|None = None) -> None:
+    def su(self, unit: str|None = None) -> Var:
         """Alias of self.set_unit"""
-        self.set_unit(unit)
-        return None
+        return self.set_unit(unit)
 
-
+@dataclass(frozen=True)
 class Array():
     """
     Class to represent data with the same units, such as timeseries, parametric analysis variables, etc.
     It is represented by the attributes values:np.ndarray and a unit:Unit.
     """
-    _round = 5
-    def __init__(
-            self,
-            v: np.ndarray|list|None=None,
-            unit: str|Unit|None = None
-        ):
-        self.value: np.ndarray = np.array(v)
-        self. unit: Unit = _assign_unit(unit)
+    value_: np.ndarray|list|None= None
+    unit_: str|Unit|None = None
+
+    value: np.ndarray = field(init=False)
+    unit: Unit = field(init=False)
+    def __post_init__(self):
+        object.__setattr__(self, "value", np.array(self.value_))
+        object.__setattr__(self, "unit", _assign_unit(self.unit_))
+    # def __init__(
+    #         self,
+    #         v: np.ndarray|list|None=None,
+    #         u: str|Unit|None = None
+    #     ):
+    #     self.value: np.ndarray = np.array(v)
+    #     self.unit: Unit = _assign_unit(u)
     
     def __add__(self, other: Self):
         """ Overloading the addition operator. """
@@ -276,10 +290,7 @@ class Array():
         if not isinstance(other, Array) or other.value is None:
             return False
         return (
-            (
-                np.round(self.value, self._round) 
-                == np.round(other.value * CF(other.unit.u, self.unit.u).v, self._round)
-            ).all()
+            np.allclose(self.value, other.value * CF(other.unit.u, self.unit.u).v)
             and self.unit.base_units == other.unit.base_units
         )
 
@@ -302,17 +313,15 @@ class Array():
         else:
             raise ValueError( f"Var unit ({self.unit}) and wanted unit ({unit}) are not compatible.")
 
-    def set_unit(self, unit: str | None = None) -> None:
+    def set_unit(self, unit: str | None = None) -> Array:
         """ Set the primary unit of the variable. """
         unit = str(unit)
         if (self.unit.base_units == Unit(unit).base_units) and (self.value is not None):
-            self.value = self.value * CF(self.unit, unit).v
-            self.unit = Unit(unit)
+            return Array(self.value * CF(self.unit, unit).v, Unit(unit))
         else:
             raise ValueError(
                 f"unit ({unit}) is not compatible with existing primary unit ({self.unit})."
             )
-        return None
 
     @property
     def u(self) -> str:
@@ -328,10 +337,9 @@ class Array():
         """Alias for self.get_value()"""
         return self.get_value(unit)
     
-    def su(self, unit: str|None = None) -> None:
+    def su(self, unit: str|None = None) -> Array:
         """Alias of self.set_unit"""
-        self.set_unit(unit)
-        return None
+        return self.set_unit(unit)
 
 class Frame:
     pass

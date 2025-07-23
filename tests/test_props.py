@@ -1,5 +1,6 @@
 import numpy as np
-from antupy.core import Var
+from antupy import Var
+from antupy.props import Air
 from antupy.props import DryAir
 from antupy.props import HumidAir
 from antupy.props import SaturatedWater
@@ -17,6 +18,19 @@ def test_prop_dry_air():
     assert np.round(air.k(temp).gv("W/m-K"), 3) == 0.026
     assert np.round(air.viscosity(temp).gv("m2/s") * 1e5, 3) == 1.573
 
+def test_prop_air():
+    air = Air()
+    temp = Var(300., "K")
+    pressure = Var(1, "atm")
+    assert air.rho(temp, pressure) == air.rho(temp, pressure)
+    assert air.cp(temp, pressure) == air.cp(temp, pressure)
+    assert air.k(temp, pressure) == air.k(temp, pressure)
+    assert np.round(air.rho(temp, pressure).gv("kg/m3"), 3) == 1.177
+    assert np.round(air.cp(temp, pressure).gv("kJ/kg-K"), 3) == 1.006
+    assert np.round(air.k(temp, pressure).gv("W/m-K"), 3) == 0.026
+    assert np.round(air.viscosity(temp, pressure).gv("Pa-s") * 1e5, 3) == 1.854
+
+
 def test_prop_humid_air():
     air = HumidAir()
     temp = Var(300., "K")
@@ -33,7 +47,7 @@ def test_prop_humid_air():
     # viscosity is not implemented correctly. Check the equation in props.py
 
 
-def test_prop_water():
+def test_prop_sat_water():
     water = SaturatedWater()
     temp = Var(300., "K")
     assert water.rho(temp) == water.rho(temp)
@@ -45,12 +59,12 @@ def test_prop_water():
     assert np.round(water.k(temp).gv("W/m-K"), 3) == 0.61
     # assert np.round(water.viscosity(temp).u("Pa-s") * 1e5, 3) == 1.573
 
-def test_prop_steam():
+def test_prop_sat_steam():
     steam = SaturatedSteam()
     temp = Var(99.63, "°C")
-    assert np.round(steam.rho(temp).gv("kg/m3"), 3) == 0.59
-    assert np.round(steam.cp(temp).gv("kJ/kg-K"), 2) == 2.03
-    assert np.round(steam.k(temp).gv("W/m-K"), 3) == 0.024
+    assert np.round(steam.rho(temp).gv("kg/m3"), 3) == 0.591
+    assert np.round(steam.cp(temp).gv("kJ/kg-K"), 2) == 2.08
+    assert np.round(steam.k(temp).gv("W/m-K"), 3) == 0.025
 
 def test_prop_seawater():
     seawater = SeaWater()
@@ -59,6 +73,6 @@ def test_prop_seawater():
 if __name__ == "__main__":
     test_prop_dry_air()
     test_prop_humid_air()
-    test_prop_water()
-    test_prop_steam()
+    test_prop_sat_water()
+    test_prop_sat_steam()
     test_prop_seawater()
