@@ -1,3 +1,5 @@
+import math
+
 from antupy.core import Var, CF
 
 def test_CF():
@@ -25,13 +27,14 @@ def test_conversion_temp():
     assert temp2.gv("K") == 20+273.15
 
 
-def test_add_vars():
+def test_add_sub_vars():
     time_sim1 = Var(365,"day")
     time_sim2 = Var(24, "hr")
     assert (time_sim1 + time_sim2).gv("day") == 366
+    assert (time_sim1 - time_sim2).gv("day") == 364
 
 
-def test_mul_vars():
+def test_mul_div_vars():
     time_sim = Var(1, "day")
     nom_power = Var(100, "kW")
     energy = nom_power * time_sim
@@ -39,3 +42,25 @@ def test_mul_vars():
     assert energy.gv("kWh") == 24*100
     assert energy.gv("kJ") == 24*100*3600
     assert (8*energy/2 - energy*2) == 2*Var(100*24., "kWh")
+
+
+def test_comparison_vars():
+    assert Var(1000, "m") == Var(1, "km")
+    assert Var(100, "m") < Var(1, "km")
+    assert Var(1000, "m") <= Var(1, "km") or Var(100, "m") <= Var(1, "km")
+    assert Var(1, "day") > Var(1, "hr")
+    assert Var(1, "day") >= Var(1, "hr") or Var(1,"day") >= Var(24, "hr")
+
+
+def test_unary_vars():
+    assert -Var(1,"m") == Var(-1, "m")
+    assert +Var(1,"m") == Var(1, "m")
+    assert abs(Var(-1,"m")) == Var(1, "m")
+
+
+def test_math_methods():
+    assert round(Var(1.141, "m"), 1) == Var(1.1, "m")
+    assert round(Var(1.141, "m")) == Var(1, "m")
+    assert math.trunc(Var(1.141, "m")) == Var(1, "m")
+    assert math.floor(Var(1.141, "m")) == Var(1, "m")
+    assert math.ceil(Var(1.141, "m")) == Var(2, "m")

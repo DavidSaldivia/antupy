@@ -262,6 +262,8 @@ def _conv_temp(temp: Var|Array, unit: str|None) -> float|np.ndarray:
         return temp.value - 273.15
     elif temp.unit.u in ["°C", "degC"] and unit == "K":
         return temp.value + 273.15
+    elif (temp.unit.u in ["°C", "degC"] and unit in ["°C", "degC"]):
+        return temp.value
     elif temp.unit.u == unit:
         return temp.value
     else:

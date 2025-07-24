@@ -4,6 +4,7 @@ module with the core classes for AntuPy
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Self
+import math
 
 import numpy as np
 
@@ -48,9 +49,6 @@ class Var():
     unit: Unit = field(init=False)
     def __post_init__(self):
         object.__setattr__(self, "unit", _assign_unit(self.unit_))
-    # def __init__(self, value: float|None=None, unit:str|Unit|None = None):
-    #     self.value: float | None = value
-    #     self.unit: Unit = _assign_unit(unit)
 
     def __add__(self, other: Self):
         """ Overloading the addition operator. """
@@ -102,7 +100,7 @@ class Var():
                 return Var(None, self.unit)
             return Var(self.value * other, self.unit)
         else:
-            raise TypeError(f"Cannot multiply {type(self)} with {type(other)}")
+            return NotImplemented
 
     def __rmul__(self, other: Self|float|int):
         """ Overloading the multiplication operator. """
@@ -115,7 +113,7 @@ class Var():
                 return Var(None, self.unit)
             return Var(self.value * other, self.unit)
         else:
-            raise TypeError(f"Cannot multiply {type(self)} with {type(other)}")
+            return NotImplemented
 
     def __truediv__(self, other: Self|float|int):
         """ Overloading the division operator. """
@@ -128,16 +126,77 @@ class Var():
                 return Var(None, self.unit)
             return Var(self.value / other, self.unit)
         else:
-            raise TypeError(f"Cannot divide {type(self)} by {type(other)}")
-        
+            return NotImplemented
+    
+    def __int__(self) -> int:
+        return int(self.v)
+
+    def __float__(self) -> float:
+        return float(self.v)
+
     def __eq__(self, other) -> bool:
         """ Overloading the equality operator. """
-        if not isinstance(other, Var) or other.value is None:
+        if not isinstance(other, Var):
+            return NotImplemented
+        if other.value is None:
             return False
         return (
             self.value == other.value * CF(other.unit.u, self.unit.u).v
             and self.unit.base_units == other.unit.base_units
         )
+
+    def __lt__(self, other) -> bool:
+        if isinstance(other, Var):
+            return self.v < other.gv(self.unit.u)
+        elif isinstance(other, (int,float)):
+            return self.v < other
+        else:
+            return NotImplemented
+        
+    def __le__(self, other) -> bool:
+        if isinstance(other, Var):
+            return self.v <= other.gv(self.unit.u)
+        elif isinstance(other, (int,float)):
+            return self.v <= other
+        else:
+            return NotImplemented
+        
+    def __gt__(self, other) -> bool:
+        if isinstance(other, Var):
+            return self.v > other.gv(self.unit.u)
+        elif isinstance(other, (int,float)):
+            return self.v > other
+        else:
+            return NotImplemented
+        
+    def __ge__(self, other) -> bool:
+        if isinstance(other, Var):
+            return self.v >= other.gv(self.unit.u)
+        elif isinstance(other, (int,float)):
+            return self.v >= other
+        else:
+            return NotImplemented
+    
+    def __neg__(self) -> Var:
+        return Var(-self.value if self.value is not None else None, self.unit)
+    
+    def __pos__(self) -> Var:
+        return Var(+self.value if self.value is not None else None, self.unit)
+    
+    def __abs__(self) -> Var:
+        return Var(abs(self.value) if self.value is not None else None, self.unit)
+    
+    def __round__(self, ndigits=0) -> Var:
+        return Var(round(self.value, ndigits) if self.value is not None else None, self.unit)
+
+    def __trunc__(self) -> Var:
+        return Var(math.trunc(self.value) if self.value is not None else None, self.unit)
+
+    def __floor__(self) -> Var:
+        return Var(math.floor(self.value) if self.value is not None else None, self.unit)
+
+    def __ceil__(self) -> Var:
+        return Var(math.ceil(self.value) if self.value is not None else None, self.unit)
 
     def __repr__(self) -> str:
         return f"{self.value:} [{self.unit.u}]"
@@ -159,7 +218,6 @@ class Var():
             return self.value * CF(self.unit.u, unit).v
         else:
             raise ValueError( f"Var unit ({self.unit}) and wanted unit ({unit}) are not compatible.")
-
     
     def set_unit(self, unit: str | None = None) -> Var:
         """ Set the primary unit of the variable. """
@@ -189,6 +247,7 @@ class Var():
         """Alias of self.set_unit"""
         return self.set_unit(unit)
 
+
 @dataclass(frozen=True)
 class Array():
     """
@@ -200,6 +259,7 @@ class Array():
 
     value: np.ndarray = field(init=False)
     unit: Unit = field(init=False)
+    
     def __post_init__(self):
         object.__setattr__(self, "value", np.array(self.value_))
         object.__setattr__(self, "unit", _assign_unit(self.unit_))
@@ -284,6 +344,15 @@ class Array():
             np.allclose(self.value, other.value * CF(other.unit.u, self.unit.u).v)
             and self.unit.base_units == other.unit.base_units
         )
+    
+    def __len__(self) -> int:
+        return len(self.v)
+    
+    def __getitem__(self, key) -> Var:
+        return Var(float(self.value[key]), self.u)
+    
+    def __iter__(self):
+        return (Var(v, self.u) for v in self.value)
 
     def __repr__(self) -> str:
         return f"{self.value:} [{self.unit.u}]"

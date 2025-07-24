@@ -145,7 +145,7 @@ class SaturatedWater():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.gv("°C")
+            temp = T.gv("degC")
         elif isinstance(T, (int, float)):
             temp = T
         A = (9.999e2, 2.034e-2, -6.162e-3, 2.261e-5, -4.657e-8)
@@ -268,7 +268,7 @@ class SaturatedWater():
 #             T: float|Var = Var(273.15, "K")
 #     ) -> Var:
 #         if isinstance(T, Var):
-#             temp = T.gv("°C")
+#             temp = T.gv("degC")
 #         elif isinstance(T, (int, float)):
 #             temp = T
 #         A = (-4.062329056, 0.10277044, -9.76300388e-4,
@@ -370,7 +370,7 @@ class SeaWater():
             X: float|Var = Var(35000, "ppm")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.gv("°C")
+            temp = T.gv("degC")
         elif isinstance(T, (int, float)):
             temp = T
         if isinstance(X, Var):
@@ -396,7 +396,7 @@ class SeaWater():
             X: float|Var = Var(35000, "ppm")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.gv("C")
+            temp = T.gv("degC")
         elif isinstance(T, (int, float)):
             temp = T
         if isinstance(X, Var):
@@ -417,7 +417,7 @@ class SeaWater():
             X: float|Var = Var(35000, "ppm")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.gv("C")
+            temp = T.gv("degC")
         elif isinstance(T, (int, float)):
             temp = T
         if isinstance(X, Var):
@@ -428,7 +428,7 @@ class SeaWater():
         A = 2e-4
         B = 3.7e-2
         C = 3e-2
-        aux = (1 - temp/( 647.3 + C*s ))**(1/3)
+        aux = (1 - temp/( 647.3 + C*s ))**(1./3)
         aux = aux * 0.434 * ( 2.3 - ( 343.5 + B*s )/temp)
         aux = - 6 + aux + np.log10(240 + A*s)
         return Var(10.**aux * 1000., "W/m-K")
@@ -439,7 +439,7 @@ class SeaWater():
             X: float|Var = Var(35000, "ppm")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.gv("C")
+            temp = T.gv("degC")
         elif isinstance(T, (int, float)):
             temp = T
         if isinstance(X, Var):
@@ -459,7 +459,7 @@ class SeaWater():
             X: float|Var = Var(35000, "ppm")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.gv("C")
+            temp = T.gv("degC")
         elif isinstance(T, (int, float)):
             temp = T
         if isinstance(X, Var):
@@ -767,7 +767,7 @@ class TherminolVP1():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.gv("C")
+            temp = T.gv("degC")
         elif isinstance(T, (int, float)):
             temp = T - 273.15
         temps = (16, 38, 60, 82, 
@@ -787,7 +787,7 @@ class TherminolVP1():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.gv("C")
+            temp = T.gv("degC")
         elif isinstance(T, (int, float)):
             temp = T - 273.15
         temps = (16, 38, 60, 82, 
@@ -807,7 +807,7 @@ class TherminolVP1():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.gv("C")
+            temp = T.gv("degC")
         elif isinstance(T, (int, float)):
             temp = T - 273.15
         temps = (16, 38, 60, 82, 
@@ -827,7 +827,7 @@ class TherminolVP1():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.gv("C")
+            temp = T.gv("degC")
         elif isinstance(T, (int, float)):
             temp = T - 273.15
         temps = (16, 38, 60, 82, 
@@ -849,7 +849,7 @@ class Syltherm800():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.gv("C")
+            temp = T.gv("degC")
         elif isinstance(T, (int, float)):
             temp = T - 273.15
         temps = np.arange(-40, 401, 40)
@@ -863,7 +863,7 @@ class Syltherm800():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.gv("C")
+            temp = T.gv("degC")
         elif isinstance(T, (int, float)):
             temp = T - 273.15
         temps = np.arange(-40, 401, 40)
@@ -877,7 +877,7 @@ class Syltherm800():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.gv("C")
+            temp = T.gv("degC")
         elif isinstance(T, (int, float)):
             temp = T - 273.15
         temps = np.arange(-40, 401, 40)
@@ -891,7 +891,7 @@ class Syltherm800():
             T: float|Var = Var(273.15, "K")
         ) -> Var:
         if isinstance(T, Var):
-            temp = T.gv("C")
+            temp = T.gv("degC")
         elif isinstance(T, (int, float)):
             temp = T - 273.15
         temps = np.arange(-40, 401, 40)
