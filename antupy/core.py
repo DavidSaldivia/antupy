@@ -130,8 +130,6 @@ class Var():
         else:
             raise TypeError(f"Cannot divide {type(self)} by {type(other)}")
         
-    
-        
     def __eq__(self, other) -> bool:
         """ Overloading the equality operator. """
         if not isinstance(other, Var) or other.value is None:
@@ -338,18 +336,18 @@ class Frame:
     pass
 
 
-from collections.abc import Iterable
-from typing import TypedDict
+# from collections.abc import Iterable
+# from typing import TypedDict
 
-class Simulation():
-    pass
+# class Simulation():
+#     pass
 
-class Output(TypedDict):
-    pass
+# class Output(TypedDict):
+#     pass
 
-class Analyser():
-    def get_simulation_instance(self, cases: Iterable) -> Simulation:
-        return Simulation()
-    def run_simulation(self) -> Output:
-        return Output()
+# class Analyser():
+#     def get_simulation_instance(self, cases: Iterable) -> Simulation:
+#         return Simulation()
+#     def run_simulation(self) -> Output:
+#         return Output()
 
