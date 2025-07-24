@@ -205,13 +205,6 @@ class Array():
     def __post_init__(self):
         object.__setattr__(self, "value", np.array(self.value_))
         object.__setattr__(self, "unit", _assign_unit(self.unit_))
-    # def __init__(
-    #         self,
-    #         v: np.ndarray|list|None=None,
-    #         u: str|Unit|None = None
-    #     ):
-    #     self.value: np.ndarray = np.array(v)
-    #     self.unit: Unit = _assign_unit(u)
     
     def __add__(self, other: Self):
         """ Overloading the addition operator. """

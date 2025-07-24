@@ -211,7 +211,7 @@ class Unit():
             elif name == "":
                 factor = 1.0
             elif name[0] in PREFIXES and name[1:] in UNITS:
-                factor = PREFIXES[name[0]]
+                factor = PREFIXES[name[0]] ** (exponent*exp_sign)
                 name = name[1:]
             else:
                 raise ValueError(f"Unit '{name}' not recognized.")
