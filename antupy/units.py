@@ -3,8 +3,7 @@ module with a simple units manager
 """
 from __future__ import annotations
 import numpy as np
-from typing import Iterable, Self, TYPE_CHECKING
-from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from antupy.core import Var, Array
