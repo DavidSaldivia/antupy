@@ -24,6 +24,7 @@ pandas-stubs = "^2.2.3.241009"
 isort = "^5.13.2"
 black = "^24.10.0"
 flake8 = "^7.1.1"
+sphinx = "^8.2.3"
 
 [build-system]
 requires = ["poetry-core"]
