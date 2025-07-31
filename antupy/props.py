@@ -741,7 +741,86 @@ class HumidAir():
 
         return Var(aux*1000., "kJ/kg")
 
+
 class CO2():
+    def rho(
+            self,
+            T: float|Var = Var(273.15, "K"),
+            P: float|Var = Var(101.325, "kPa"),
+    )-> Var:
+        if isinstance(T, Var):
+            temp = T.gv("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        else:
+            raise ValueError(f"{type(T)=} is not a valid type")
+        if isinstance(P, Var):
+            pressure = P.gv("Pa")
+        elif isinstance(P, (int, float)):
+            pressure = P
+        else:
+            raise ValueError(f"{type(P)=} is not a valid type")
+        return Var(CP.PropsSI('D', 'T', temp, 'P', pressure, 'CO2'), "kg/m3")
+    
+    def cp(
+            self,
+            T: float|Var = Var(273.15, "K"),
+            P: float|Var = Var(101.325, "kPa"),
+    )-> Var:
+        if isinstance(T, Var):
+            temp = T.gv("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        else:
+            raise ValueError(f"{type(T)=} is not a valid type")
+        if isinstance(P, Var):
+            pressure = P.gv("Pa")
+        elif isinstance(P, (int, float)):
+            pressure = P
+        else:
+            raise ValueError(f"{type(P)=} is not a valid type")
+        return Var(CP.PropsSI('C', 'T', temp, 'P', pressure, 'CO2'), "J/kg-K")
+
+    def k(
+            self,
+            T: float|Var = Var(273.15, "K"),
+            P: float|Var = Var(101.325, "kPa"),
+    )-> Var:
+        if isinstance(T, Var):
+            temp = T.gv("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        else:
+            raise ValueError(f"{type(T)=} is not a valid type")
+        if isinstance(P, Var):
+            pressure = P.gv("Pa")
+        elif isinstance(P, (int, float)):
+            pressure = P
+        else:
+            raise ValueError(f"{type(P)=} is not a valid type")
+        return Var(CP.PropsSI('L', 'T', temp, 'P', pressure, 'CO2'), "W/m-K")
+    
+    def viscosity(
+            self,
+            T: float|Var = Var(273.15, "K"),
+            P: float|Var = Var(101.325, "kPa"),
+    )-> Var:
+        if isinstance(T, Var):
+            temp = T.gv("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        else:
+            raise ValueError(f"{type(T)=} is not a valid type")
+        if isinstance(P, Var):
+            pressure = P.gv("Pa")
+        elif isinstance(P, (int, float)):
+            pressure = P
+        else:
+            raise ValueError(f"{type(P)=} is not a valid type")
+        return Var(CP.PropsSI('V', 'T', temp, 'P', pressure, 'CO2'), "Pa-s")
+
+
+class CO2_cantera():
     _ct_solution = ct.Solution('gri30.yaml','gri30') # type: ignore
 
     def rho(self, temp: float, pressure: float) -> Var:
