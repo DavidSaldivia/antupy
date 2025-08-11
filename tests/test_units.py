@@ -40,7 +40,9 @@ def test_unit_translation():
         (Unit("degC"), Unit("K")),
         (Unit("g/L"), Unit("kg/m3")),
         (Unit("lm"), Unit("cd-sr")),
-        # (Unit("km2"), Unit("m2", 1e6)),
+        (Unit("km2"), Unit("m2", 1e6)),
+        (Unit("ha"), Unit("m2", 1e4)),
+        (Unit("mm2"), Unit("m2", 1e-6)),
     ]:
         # print(f"{a}({a.si}),{b}({b.si})")
         assert a==b, f"{a},{b}"

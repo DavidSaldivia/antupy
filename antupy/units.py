@@ -3,21 +3,21 @@ module with a simple units manager
 """
 from __future__ import annotations
 import numpy as np
-from typing import Iterable, Self, TYPE_CHECKING
-from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from antupy.core import Var
+    from antupy.core import Var, Array
 
 BASE_UNITS: dict[str, tuple[float, str,str]] = {
     "-": (1e0, "adimensional", "adim"),
     "s": (1e0, "second", "time"),
     "m": (1e0, "meter", "length"),
     "g": (1e0, "kilogram", "mass"),
-    "K": (1e0, "Kelvin", "temperature"),
-    "A": (1e0, "Ampere", "current"),
+    "K": (1e0, "kelvin", "temperature"),
+    "A": (1e0, "ampere", "current"),
     "mol": (1e0, "mole", "substance"),
     "cd": (1e0, "candela", "luminous_intensity"),
+    "USD": (1e0, "US_dollar", "money")
 }
 
 DERIVED_UNITS: dict[str, tuple[float,str,str,str]] = {
@@ -71,7 +71,14 @@ RELATED_UNITS: dict[str, tuple[float,str,str,str]] = {
     "ha": (1e4, "m2", "hectar", "surface"),
     "°C": (1e0, "K", "celcius", "temperature"),
     "degC": (1e0, "K", "celcius", "temperature"),
+    "bar": (1e5, "Pa", "bar", "pressure"),
+    "psi": (6894.76, "Pa", "psi", "pressure"),
+    "atm": (101325, "Pa", "atmosphere", "pressure"),
+    "mmHg": (133.322, "Pa", "mm_of_mercury", "pressure"),
     "ppm": (1000, "mL/L", "parts_per_million", "concentration"),
+    "deg": (np.pi/180., "rad", "degree", "plane_angle"),
+    "AUD": (1.4, "USD", "AU_dollar", "money"),
+    "CLP": (1e-3, "USD", "CL_pesos", "money"),
 }
 
 PREFIXES: dict[str, float] = {
@@ -109,6 +116,7 @@ class UnitDict(TypedDict, total=False):
     A: int
     mol: int
     cd: int
+    USD: int
 
 BASE_ADIM: UnitDict = {
     "s": 0,
@@ -118,6 +126,7 @@ BASE_ADIM: UnitDict = {
     "A": 0,
     "mol": 0,
     "cd": 0,
+    "USD": 0,
 }
 
 UnitPool = list[tuple[str, int]]
@@ -228,7 +237,7 @@ class Unit():
             elif name == "":
                 factor = 1.0
             elif name[0] in PREFIXES and name[1:] in UNITS:
-                factor = PREFIXES[name[0]]
+                factor = PREFIXES[name[0]] ** (exponent*exp_sign)
                 name = name[1:]
             else:
                 raise ValueError(f"Unit '{name}' not recognized.")
@@ -273,13 +282,15 @@ class Unit():
             self.base_factor = factor_
         return None
 
-def _conv_temp(temp: Var, unit: str|None) -> float:
+def _conv_temp(temp: Var|Array, unit: str|None) -> float|np.ndarray:
     if temp.value is None or unit is None:
         raise ValueError("Value or unit is None")
     if temp.unit.u == "K" and unit in ["°C", "degC"]:
         return temp.value - 273.15
     elif temp.unit.u in ["°C", "degC"] and unit == "K":
         return temp.value + 273.15
+    elif (temp.unit.u in ["°C", "degC"] and unit in ["°C", "degC"]):
+        return temp.value
     elif temp.unit.u == unit:
         return temp.value
     else:
@@ -365,32 +376,7 @@ CONSTANTS: dict[str, tuple[float, str]] = {
 }
 
 USEFUL_QUANTITIES = {
-    "pressure": {
-        "Pa": 1e0,
-        "bar": 1e-5,
-        "psi": 1e0/6894.76,
-        "atm": 1e0/101325,
-        "kPa": 1e-3,
-        "MPa": 1e-6,
-        "mmHg": 1e0/133.322,
-    },
-    "angular": {
-        "rad": 1e0,
-        "deg": 180./np.pi,
-    },
-    "cost" : {
-        "AUD": 1e0,
-        "USD": 1.4e0,
-        "MM AUD": 1e-6,
-        "MM USD": 1.4e-6,
-    },
-    "cost_specific" : {
-        "AUD/MW": 1e0,
-        "USD/MW": 1.4e0,
-        "MM AUD/MW": 1e-6,
-        "MM USD/MW": 1.4e-6,
-    },
-#-------------------
+
     "density": {
         "kg/m3": 1e0,
         "g/cm3": 1e-3,
