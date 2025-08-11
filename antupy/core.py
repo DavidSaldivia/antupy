@@ -11,6 +11,31 @@ import numpy as np
 from antupy.units import Unit, _conv_temp, _mul_units, _div_units
 
 def CF(unit1: str|Unit, unit2: str|Unit) -> Var:
+    """
+    Conversion factor between two units.
+    It returns a Var instance with the conversion factor and the unit label.
+    If the units are not compatible, it raises a ValueError.
+    
+    Args:
+        unit1 (str|Unit): first unit
+        unit2 (str|Unit): second unit
+    
+    Returns:
+        Var: conversion factor between the two units
+    
+    Raises:
+        ValueError: if the units are not compatible
+    
+    Examples:
+        >>> from antupy.core import CF
+        >>> CF("m", "km").v
+        0.001
+        >>> CF("W", "kJ/hr")
+        3.6 ["kJ/hr-W"]
+        >>> CF("m3/s", "L/min")
+        60000.0 ["L-s/min-m3"]
+    
+        """
     if isinstance(unit1, Unit):
         u1 = unit1
     else:
@@ -43,6 +68,22 @@ class Var():
     If you have a Var instance, you can obtain the value in different units with the gv([str]) method.
     In this way you make sure you are getting the value with the expected unit.
     "gv" internally converts unit if it is possible.
+
+    Example:
+        >>> from antupy.core import Var
+        >>> v1 = Var(5.0, "kg")
+        >>> v2 = Var(500, "g")
+        >>> v3 = v1 + v2
+        >>> print(v3)
+        5.5 [kg]
+        >>> print(v3.set_unit("g"))
+        5500.0 [g]
+        >>> print(v3.get_value("ton"))
+        0.0055 [ton]
+        >>> print(v3.get_value("Pa"))
+        Traceback (most recent call last):
+            ...
+
     """
     value: float|None = None
     unit_: str|Unit|None = None
