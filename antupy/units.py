@@ -124,7 +124,27 @@ UnitPool = list[tuple[str, int]]
 
 class Unit():
     """
-    Class containing any unit string in its base units expression
+    Class containing any unit valid with SI unit system.
+    To initiate it, pass a "unit label", which correspond to a valid str.
+    It converts it internally to a base representation, which is a dictionary
+    with the 7 base SI units as keys and their respective exponents as values.
+    Parameters:
+        label_unit: Valid string with the unit label, e.g. "kg-m/s2"
+        base_factor: Multiplicative factor to convert to base SI units.
+        base_units: Dictionary with the 7 base SI units as keys and their respective exponents as values.
+    Examples:
+        >>> u1 = Unit("kg-m/s2")
+        >>> print(u1)
+        [kg-m/s2]
+        >>> print(u1.si)
+        1.00e+03[m-g/s2]
+        >>> u2 = Unit("N")
+        >>> print(u2)
+        [N]
+        >>> print(u2.si)
+        1.00e+03[m-g/s2]
+        >>> u1 == u2
+        True
     """
 
     def __init__(self, unit: str = "-", base_factor: float = 1e0):
@@ -146,6 +166,10 @@ class Unit():
     
     @property
     def si(self) -> str:
+        """
+        Returns the unit in base SI representation.
+        The base SI representation is a string with the base factor and the base units in integer exponents
+        """
         top_str = ""
         bottom_str = ""
         d = [(k,int(v)) for (k,v) in self.base_units.items()]    #type: ignore
@@ -171,6 +195,9 @@ class Unit():
 
     @property
     def u(self)->str:
+        """
+        Returns the unit label.
+        This is just a shorter alias for label_unit."""
         return self.label_unit 
 
     def _update_base_repr(self, name: str, exponent: int):
