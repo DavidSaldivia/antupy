@@ -16,8 +16,8 @@ author = 'David Saldivia'
 extensions = [
     'sphinx.ext.duration',
     'sphinx.ext.doctest',
-    "sphinx.ext.napoleon",
     'sphinx.ext.autodoc',
+    "sphinx.ext.napoleon",
     'sphinx.ext.autosummary',
 ]
 
@@ -42,5 +42,5 @@ autoclass_content = "class"
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'alabaster'
+html_theme = 'furo'
 html_static_path = ['_static']

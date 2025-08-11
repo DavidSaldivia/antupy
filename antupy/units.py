@@ -3,7 +3,7 @@ module with a simple units manager
 """
 from __future__ import annotations
 import numpy as np
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
     from antupy.core import Var, Array
@@ -107,8 +107,21 @@ PREFIXES: dict[str, float] = {
     "Q": 1e30, # "quetta"
 }
 
-from typing import TypedDict
 class UnitDict(TypedDict, total=False):
+    """
+    Dictionary with the 7 base SI units as keys and their respective exponents as values.
+    keys are:
+
+    - s: second (time)
+    - m: meter (length)
+    - g: gram (mass)
+    - K: kelvin (temperature)
+    - A: ampere (current)
+    - mol: mole (substance)
+    - cd: candela (luminous intensity)
+    - USD: US dollar (money)
+
+    """
     s: int
     m: int
     g: int
@@ -137,10 +150,13 @@ class Unit():
     To initiate it, pass a "unit label", which correspond to a valid str.
     It converts it internally to a base representation, which is a dictionary
     with the 7 base SI units as keys and their respective exponents as values.
+
     Parameters:
-        label_unit: Valid string with the unit label, e.g. "kg-m/s2"
+
+        label_unit (str): Valid string with the unit label, e.g. "kg-m/s2"
         base_factor: Multiplicative factor to convert to base SI units.
-        base_units: Dictionary with the 7 base SI units as keys and their respective exponents as values.
+        base_units (UnitDict): Dictionary with the 7 base SI units as keys and their respective exponents as values.
+
     Examples:
         >>> u1 = Unit("kg-m/s2")
         >>> print(u1)
@@ -159,7 +175,7 @@ class Unit():
     def __init__(self, unit: str = "-", base_factor: float = 1e0):
         self.base_units: UnitDict = BASE_ADIM.copy()
         self.base_factor: float = base_factor
-        self.label_unit = unit
+        self.label_unit: str = unit
         self._translate_to_base()
 
     def __repr__(self) -> str:

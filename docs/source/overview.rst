@@ -1,3 +1,11 @@
-The `antupy` variable system
-=============================
-`antupy` works in its core with a Unit management module `units`, which include the class `Unit` compatible with the SI unit system. From this, three type of variables are possible. The `Var` class to manage single variables in the form of `(value:float, unit:str)` structure. The `Array` class for structures in the form of `(array:np.ndarray, unit:str)` and the `DataFrame` class for 2D-structures such as `(frame: pd.DataFrame|pl.DataFrame, unit:str)`.
+Usage
+=====
+
+Installation
+------------
+
+To use antupy, first install it using pip:
+
+.. code-block:: console
+
+   (.venv) $ pip install antupy
