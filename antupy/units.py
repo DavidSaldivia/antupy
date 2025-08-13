@@ -12,12 +12,12 @@ BASE_UNITS: dict[str, tuple[float, str,str]] = {
     "-": (1e0, "adimensional", "adim"),
     "s": (1e0, "second", "time"),
     "m": (1e0, "meter", "length"),
-    "g": (1e0, "kilogram", "mass"),
+    "g": (1e0, "gram", "mass"),
     "K": (1e0, "kelvin", "temperature"),
     "A": (1e0, "ampere", "current"),
     "mol": (1e0, "mole", "substance"),
     "cd": (1e0, "candela", "luminous_intensity"),
-    "USD": (1e0, "US_dollar", "money")
+    "USD": (1e0, "us_dollar", "money")
 }
 
 DERIVED_UNITS: dict[str, tuple[float,str,str,str]] = {
@@ -109,8 +109,8 @@ PREFIXES: dict[str, float] = {
 
 class UnitDict(TypedDict, total=False):
     """
-    Dictionary with the 7 base SI units as keys and their respective exponents as values.
-    keys are:
+    Dictionary with the eight base units (adimensional is not included) as keys and their respective exponents as values.
+    Keys are:
 
     - s: second (time)
     - m: meter (length)

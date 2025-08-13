@@ -1,14 +1,14 @@
 The ``antupy`` variable system
 ================================
-``antupy`` works in its core with a Unit management module ``units``, which include the class ``Unit`` compatible with the SI unit system. From this, three type of variables are possible. The ``Var`` class to manage single variables in the form of ``(value:float, unit:str)`` structure. The ``Array`` class for structures in the form of ``(array:np.ndarray, unit:str)``.
+``antupy`` works in its core with a Unit management module ``units``, which include the class ``Unit`` mostly compatible with the SI unit system. From this, two classes are built. The ``Var`` class to manage single variables in the form of ``(value:float, unit:str)`` structure. The ``Array`` class for structures in the form of ``(array:np.ndarray, unit:str)``.
 
 The ``Var`` class is used to represent scalar values, while the ``Array`` class is used for vectors or time series data. Both classes are designed to handle units and conversions seamlessly, allowing for easy manipulation of physical quantities in simulations.
 
 The ``Var`` class
 -------------------
-The ``Var`` class is a simple representation of a variable with a value and a unit. It allows for basic arithmetic operations, unit conversions, and comparisons. The class ensures that operations between variables are consistent in terms of units, providing a robust framework for handling physical quantities.
+The :py:class:`~antupy.core.Var` class is a simple representation of a variable with a value and a unit. It allows for basic arithmetic operations, unit conversions, and comparisons. The class ensures that operations between variables are consistent in terms of units, providing a robust framework for handling physical quantities.
 
-.. autoclass:: antupy.core.Var
+.. autoclass:: antupy.Var
     :members:
 
 Using the ``Var`` class
@@ -21,12 +21,13 @@ To create a variable, you can instantiate the ``Var`` class with a value and a u
     mass = Var(5.0, "kg")
     pressure = Var(101325, "Pa")
 
-Retrieving the properties in different units with get_value or simple gv and 
+Retrieving the properties in different units with ``get_value`` or simple ``gv`` and  provide a compatible unit as argument.
 
 .. code-block:: python
     
     print(mass.get_value("g"))  # Outputs: 5000.0 '[g]'
     print(mass.gv("ton"))  # Outputs: 0.005 '[ton]'
+    print(mass.gv("s"))   # Outputs: ValueError
 
 You can perform arithmetic operations, like addition and subtraction, if both units represent the same quantities. The units will be automatically handled, and the result will be in the first variable's unit. For example:
 
@@ -50,6 +51,10 @@ You can multiply and divide variables with different units, and the resulting un
     print((8*energy/2 - energy*2).su("kWh")) # Outputs: 4800 ["kWh"]
     print((8*energy/2 - energy*2).su("m"))  # Outputs: Traceback (most recent call last): ...
 
+Be careful while converting between temperature units. You can convert between Celsius and Kelvin when using ``get_value``. However, you cannot add or substract between them.  ``°F`` is not supported.
+
+The ``CF`` function
+---------------------
 
 The module also provides a ``CF`` function, to provide useful conversion factors for common units. The function accepts two strings, and return a ``Var`` object with the corresponding conversion factor. For example, to convert from meters to kilometers:
 

@@ -20,14 +20,14 @@ MONTHS_NAMES_LONG  = [
 MONTHS_TYPICAL_DAY   = [0,17, 47, 75, 105, 135, 162, 198, 228, 258, 288, 318, 344]
 
 # Physical Constants
-Gsc       = 1367.           #[W/m2] Solar constant
-Tbb_sun   = 5777.           #[K] Effective temperature of Sun
+rad_solar_constant = 1367.           #[W/m2] Solar constant
+temp_sun_bb = 5777.           #[K] Effective temperature of Sun
 
 # Conversion Units
 DtR       = np.pi / 180.
 RtD       = 1. / DtR
 
-class Sun:
+class SunPosition:
     def __init__( self ):
         
         self.latitude = -38.7359           #[°] Latitude of solar position
@@ -39,7 +39,7 @@ class Sun:
         self.m     = 3                  #[-] day and month of position
         self.d     = 21                 #[-] day of position expressed according to month
         self.Gbn   = 950                #[W/m2]
-        self.Tbb   = Tbb_sun            #[K] Effective temperature of Sun
+        self.Tbb   = temp_sun_bb        #[K] Effective temperature of Sun
     
     def update(self, **kwargs):
         """
@@ -142,17 +142,23 @@ class Sun:
         B_r = B * DtR
         
         #Extraterrestrial radiation [W/m^2]
-        Gon = Gsc * (1.00011 + 0.034221*np.cos(B_r) + 1.28e-3*np.sin(B_r)
-                     + 7.19e-4*np.cos(2.*B_r) + 7.7e-5*np.sin(2.*B_r))
+        Gon = rad_solar_constant * (
+            1.00011 + 0.034221*np.cos(B_r) + 1.28e-3*np.sin(B_r)
+            + 7.19e-4*np.cos(2.*B_r) + 7.7e-5*np.sin(2.*B_r)
+        )
 
         #Equation of Time [min]
-        ET = 229.2 * (7.5e-5 + 1.868e-3*np.cos(B_r) - 0.032077*np.sin(B_r)
-                      - 0.014615*np.cos(2.*B_r) - 0.04089*np.sin(2.*B_r))
+        ET = 229.2 * (
+            7.5e-5 + 1.868e-3*np.cos(B_r) - 0.032077*np.sin(B_r)
+            - 0.014615*np.cos(2.*B_r) - 0.04089*np.sin(2.*B_r)
+        )
         
         #Declination [°]
-        declination = RtD * (6.918e-3 - 0.399912*np.cos(B_r) + 0.070257*np.sin(B_r)
-                      - 6.758e-3*np.cos(2*B_r) + 9.07e-4*np.sin(2*B_r)
-                      - 2.697e-3*np.cos(3*B_r) + 1.48e-3*np.sin(3*B_r) )
+        declination = RtD * (
+            6.918e-3 - 0.399912*np.cos(B_r) + 0.070257*np.sin(B_r)
+            - 6.758e-3*np.cos(2*B_r) + 9.07e-4*np.sin(2*B_r)
+            - 2.697e-3*np.cos(3*B_r) + 1.48e-3*np.sin(3*B_r)
+        )
         
         # Sunset and sunrise hours
         hsunset  = np.arccos(-np.tan(declination*DtR) * np.tan(latitude*DtR)) *RtD     #[°]
@@ -280,8 +286,14 @@ class Plane:
     theta: float | None = None           # [°] Incidence angle
     Gon: float | None = None             # [W/m2] Global radiation on the plane
 
+
+@dataclass
+class Surface:
+    pass
+
+
 def solar_variables(
-        sun: Sun,
+        sun: SunPosition,
         plane: Plane
     ):
     """
@@ -302,8 +314,6 @@ def solar_variables(
         theta    =  [°] Incidence angle
         Rb       =  [-] Rb factor (for radiation models)
     """    
-
-
 
     declination = sun.declination
     L = sun.latitude
@@ -369,9 +379,10 @@ def solar_variables(
         'Rb':Rb
     }
 
+
 def radiative_models(
         model: int,
-        sun: Sun,
+        sun: SunPosition,
         plane: Plane,
         params: dict[str,float],
     ) -> dict:
@@ -455,12 +466,11 @@ def radiative_models(
         Ib = None
     return {'It':It, 'Ib':Ib}
 
+
 def probability_clarity_indexes(Kt_av, Kt):
     """Inputs: KT_av, Kt are monthly average and daily clarity indexes"""
-    
     Ktmin = 0.05
     Ktmax = ( 0.6313 + 0.267*Kt_av - 11.9 * (Kt_av - 0.75)**8 )
-    
     x = ( Ktmax - Ktmin ) / ( Ktmax - Kt_av )
     g = -1.498 + ( 1.184*x - 27.182 * np.exp( -1.5*x ) ) / ( Ktmax - Ktmin )
     return min(
