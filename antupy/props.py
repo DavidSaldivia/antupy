@@ -8,12 +8,11 @@ import numpy as np
 from antupy import Var
 
 class Fluid(Protocol):
-    def rho (self, T: float|Var) -> Var:
-        ...
-    def cp  (self, T: float|Var) -> Var:
-        ...
-    def k (self, T: float|Var) -> Var:
-        ...
+    def rho (self, T: float|Var) -> Var: ...
+    def cp  (self, T: float|Var) -> Var: ...
+    def k (self, T: float|Var) -> Var: ...
+    def viscosity(self, T: float|Var) -> Var: ...
+
 
 class Material(Protocol):
     def rho (self, T: float|Var) -> Var:
@@ -140,10 +139,7 @@ class Glass():
 
 
 class SaturatedWater():
-    def rho(
-            self,
-            T: float|Var = Var(273.15, "K")
-        ) -> Var:
+    def rho( self, T: float|Var = Var(273.15, "K") ) -> Var:
         if isinstance(T, Var):
             temp = T.gv("degC")
         elif isinstance(T, (int, float)):
@@ -152,10 +148,7 @@ class SaturatedWater():
         aux = sum([A[i]*temp**i for i in range(len(A))])
         return Var(aux, "kg/m3")
     
-    def cp(
-            self,
-            T: float|Var = Var(273.15, "K")
-        ) -> Var:
+    def cp( self, T: float|Var = Var(273.15, "K")) -> Var:
         if isinstance(T, Var):
             temp = T.gv("K")
         elif isinstance(T, (int, float)):
@@ -261,54 +254,7 @@ class SaturatedWater():
             42.6776 - 3892.7 / (np.log(pressure/1000) - 9.48654) - 273.15,
             "K"
         )
-
-# class SaturatedSteam():
-#     def rho(
-#             self,
-#             T: float|Var = Var(273.15, "K")
-#     ) -> Var:
-#         if isinstance(T, Var):
-#             temp = T.gv("degC")
-#         elif isinstance(T, (int, float)):
-#             temp = T
-#         A = (-4.062329056, 0.10277044, -9.76300388e-4,
-#              4.475240795e-6, -1.004596894e-8, 8.9154895e-12)
-#         return Var(sum([A[i] * temp**i for i in range(len(A))]), "kg/m3")
-
-#     def cp(
-#             self,
-#             T: float|Var = Var(273.15, "K")
-#         ) -> Var:
-#         if isinstance(T, Var):
-#             temp = T.gv("K")
-#         elif isinstance(T, (int, float)):
-#             temp = T
-#         aux = (1.3605e3 + 2.31334*temp - 2.46784e-10*temp**5 + 5.91332e-13*temp**6)
-#         return Var(aux, "J/kg-K")
     
-#     def k(
-#             self,
-#             T: float|Var = Var(273.15, "K")
-#         ) -> Var:
-#         if isinstance(T, Var):
-#             temp = T.gv("K")
-#         elif isinstance(T, (int, float)):
-#             temp = T
-#         A = (1.3046e-2, -3.756191e-5, 2.217964e-7, -1.111562e-10)
-#         aux = sum([ A[i] * temp**i for i in range(len(A)) ])
-#         return Var(aux, "W/m-K")
-
-#     def viscosity(
-#             self,
-#             T: float|Var = Var(273.15, "K")
-#         ) -> Var:
-#         if isinstance(T, Var):
-#             temp = T.gv("K")
-#         elif isinstance(T, (int, float)):
-#             temp = T
-#         A = (2.562435e-6, 1.816683e-8, 2.579066e-11, -1.067299e-14)
-#         aux = sum([ A[i] * temp**i for i in range(len(A)) ])
-#         return Var(aux, "Pa-s")
 
 class SaturatedSteam():
     def rho(
@@ -360,8 +306,82 @@ class SaturatedSteam():
         return Var(CP.PropsSI('V', 'T', temp, 'Q', 1.0, 'Water'), "Pa-s")
         
 
-class CompressedWater():
-    ...
+class Water():
+    def rho(
+            self,
+            T: float|Var = Var(273.15, "K"),
+            P: float|Var = Var(101325, "Pa")
+    ) -> Var:
+        if isinstance(T, Var):
+            temp = T.gv("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        else:
+            raise ValueError(f"{type(T)=} is not a valid type")
+        if isinstance(P, Var):
+            pressure = P.gv("Pa")
+        elif isinstance(P, (int, float)):
+            pressure = P
+        else:
+            raise ValueError(f"{type(P)=} is not a valid type")
+        return Var(CP.PropsSI('D', 'T', temp, 'P', pressure, 'Water'), "kg/m3")
+    
+    def cp(
+            self,
+            T: float|Var = Var(273.15, "K"),
+            P: float|Var = Var(101325, "Pa")
+    ) -> Var:
+        if isinstance(T, Var):
+            temp = T.gv("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        else:
+            raise ValueError(f"{type(T)=} is not a valid type")
+        if isinstance(P, Var):
+            pressure = P.gv("Pa")
+        elif isinstance(P, float):
+            pressure = P
+        else:
+            raise ValueError(f"{type(P)=} is not a valid type")
+        return Var(CP.PropsSI('C', 'T', temp, 'P', pressure, 'Water'), "J/kg-K")
+
+    def k(
+            self,
+            T: float|Var = Var(273.15, "K"),
+            P: float|Var = Var(101325, "Pa")
+    ) -> Var:
+        if isinstance(T, Var):
+            temp = T.gv("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        else:
+            raise ValueError(f"{type(T)=} is not a valid type")
+        if isinstance(P, Var):
+            pressure = P.gv("Pa")
+        elif isinstance(P, (int, float)):
+            pressure = P
+        else:
+            raise ValueError(f"{type(P)=} is not a valid type")
+        return Var(CP.PropsSI('L', 'T', temp, 'P', pressure, 'Water'), "W/m-K")
+
+    def viscosity(
+            self,
+            T: float|Var = Var(273.15, "K"),
+            P: float|Var = Var(101325, "Pa")
+    ) -> Var:
+        if isinstance(T, Var):
+            temp = T.gv("K")
+        elif isinstance(T, (int, float)):
+            temp = T
+        else:
+            raise ValueError(f"{type(T)=} is not a valid type")
+        if isinstance(P, Var):
+            pressure = P.gv("Pa")
+        elif isinstance(P, float):
+            pressure = P
+        else:
+            raise ValueError(f"{type(P)=} is not a valid type")
+        return Var(CP.PropsSI('V', 'T', temp, 'P', pressure, 'Water'), "Pa-s")
 
 class SeaWater():
     def rho(

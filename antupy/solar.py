@@ -27,7 +27,7 @@ temp_sun_bb = 5777.           #[K] Effective temperature of Sun
 DtR       = np.pi / 180.
 RtD       = 1. / DtR
 
-class SunPosition:
+class Sun:
     def __init__( self ):
         
         self.latitude = -38.7359           #[°] Latitude of solar position
@@ -293,7 +293,7 @@ class Surface:
 
 
 def solar_variables(
-        sun: SunPosition,
+        sun: Sun,
         plane: Plane
     ):
     """
@@ -382,7 +382,7 @@ def solar_variables(
 
 def radiative_models(
         model: int,
-        sun: SunPosition,
+        sun: Sun,
         plane: Plane,
         params: dict[str,float],
     ) -> dict:

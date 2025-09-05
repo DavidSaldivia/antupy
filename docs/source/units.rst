@@ -76,7 +76,7 @@ Finally, you can show the SI representation by using the ``si`` property.
 
 
 The ``units`` classes
------------------
+------------------------
 
 .. autoclass:: antupy.units.Unit
     :members:

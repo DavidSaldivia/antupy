@@ -16,26 +16,79 @@ def CF(unit1: str|Unit, unit2: str|Unit) -> Var:
     It returns a Var instance with the conversion factor and the unit label.
     If the units are not compatible, it raises a ValueError.
     
-    Args:
-        unit1 (str|Unit): first unit
-        unit2 (str|Unit): second unit
+    This function computes the multiplicative factor needed to convert a value
+    from unit1 to unit2. The result is returned as a Var object containing
+    the conversion factor and a compound unit representing the ratio.
     
-    Returns:
-        Var: conversion factor between the two units
+    Parameters
+    ----------
+    unit1 : str or Unit
+        The source unit (unit to convert from). Can be a unit string 
+        (e.g., "m", "kg/s") or a Unit object.
+    unit2 : str or Unit  
+        The target unit (unit to convert to). Can be a unit string
+        (e.g., "km", "g/s") or a Unit object.
     
-    Raises:
-        ValueError: if the units are not compatible
+    Returns
+    -------
+    Var
+        A Var object where:
+        - value: the numerical conversion factor
+        - unit: compound unit representing unit2/unit1
     
-    Examples:
-        >>> from antupy.core import CF
-        >>> CF("m", "km").v
-        0.001
-        >>> CF("W", "kJ/hr")
-        3.6 ["kJ/hr-W"]
-        >>> CF("m3/s", "L/min")
-        60000.0 ["L-s/min-m3"]
+    Raises
+    ------
+    ValueError
+        If the units are not dimensionally compatible (e.g., trying to
+        convert between length and mass units).
+    TypeError
+        If unit1 or unit2 are not valid unit types.
     
-        """
+    Examples
+    --------
+    Basic unit conversions:
+    
+    >>> from antupy.core import CF
+    >>> cf = CF("m", "km")
+    >>> print(cf.v)  # Get the numerical value
+    0.001
+    >>> print(cf)    # Show the full conversion factor
+    0.001 [km/m]
+    
+    Energy unit conversion:
+    
+    >>> cf_energy = CF("J", "kWh")
+    >>> print(cf_energy)
+    2.7777777777777776e-07 [kWh/J]
+    
+    Flow rate conversion:
+    
+    >>> cf_flow = CF("m3/s", "L/min")
+    >>> print(cf_flow)
+    60000.0 [L-min/m3-s]
+    
+    Usage in unit conversion:
+    
+    >>> # Convert 5 meters to kilometers
+    >>> distance_m = 5000  # meters
+    >>> distance_km = distance_m * CF("m", "km").v
+    >>> print(f"{distance_m} m = {distance_km} km")
+    5000 m = 5.0 km
+    
+    Notes
+    -----
+    The conversion factor represents how many units of unit2 equal one unit
+    of unit1. For example, CF("m", "km") returns 0.001 because 1 meter = 
+    0.001 kilometers.
+    
+    The function only works with dimensionally compatible units. For example,
+    you cannot convert between "kg" (mass) and "m" (length).
+    
+    See Also
+    --------
+    Var.gv : Get value in different units
+    antupy.units.Unit : The underlying unit representation
+    """
     if isinstance(unit1, Unit):
         u1 = unit1
     else:
@@ -60,6 +113,7 @@ def _assign_unit(unit: str|Unit|None = None) -> Unit:
     else:
         raise TypeError(f"{type(unit)} is not a valid type for unit.")
 
+
 @dataclass(frozen=True)
 class Var():
     """
@@ -68,28 +122,65 @@ class Var():
     If you have a Var instance, you can obtain the value in different units with the gv([str]) method.
     In this way you make sure you are getting the value with the expected unit.
     "gv" internally converts unit if it is possible.
-
-    Example:
-        >>> from antupy.core import Var
-        >>> v1 = Var(5.0, "kg")
-        >>> v2 = Var(500, "g")
-        >>> v3 = v1 + v2
-        >>> print(v3)
-        5.5 [kg]
-        >>> print(v3.set_unit("g"))
-        5500.0 [g]
-        >>> print(v3.get_value("ton"))
-        0.0055 [ton]
-        >>> print(v3.get_value("Pa"))
-        Traceback (most recent call last):
-            ...
-
+    
+    Parameters
+    ----------
+    value : float or None, optional
+        The numerical value of the variable. If None, represents an undefined
+        or uninitialized variable. Default is None.
+    _unit : str, Unit, or None, optional
+        The unit of the variable. Can be a unit string (e.g., "kg", "m/s2"),
+        a Unit object, or None for dimensionless quantities. Default is None.
+    
+    unit : Unit
+        The Unit object representing the variable's unit.
+    
+    Examples
+    --------
+    Creating variables with units:
+    
+    >>> from antupy.core import Var
+    >>> mass = Var(5.0, "kg")
+    >>> velocity = Var(10, "m/s")
+    
+    Arithmetic operations with automatic unit handling:
+    
+    >>> v1 = Var(5.0, "kg")
+    >>> v2 = Var(500, "g")
+    >>> total_mass = v1 + v2  # Automatically converts g to kg
+    >>> print(total_mass)
+    5.5 [kg]
+    
+    Unit conversions:
+    
+    >>> energy = Var(1000, "J")
+    >>> energy_in_kj = energy.gv("kJ")
+    >>> print(energy_in_kj)
+    1.0
+    
+    Physical calculations:
+    
+    >>> force = mass * Var(9.81, "m/s2")  # F = ma
+    >>> print(force)
+    49.05 [kg-m/s2]
+    
+    Notes
+    -----
+    - The class is immutable (frozen dataclass) to ensure variable integrity
+    - Operations between incompatible units raise TypeError
+    - Supports comparison operators with automatic unit conversion
+    - Can be converted to float/int for numerical operations
+    
+    See Also
+    --------
+    Array : For handling arrays of values with the same unit
+    antupy.units.Unit : The underlying unit representation class
     """
     value: float|None = None
-    unit_: str|Unit|None = None
+    _unit: str|Unit|None = None
     unit: Unit = field(init=False)
     def __post_init__(self):
-        object.__setattr__(self, "unit", _assign_unit(self.unit_))
+        object.__setattr__(self, "unit", _assign_unit(self._unit))
 
     def __add__(self, other: Self):
         """ Overloading the addition operator. """
@@ -292,19 +383,85 @@ class Var():
 @dataclass(frozen=True)
 class Array():
     """
-    Class to represent data with the same units, such as timeseries, parametric analysis variables, etc.
-    It is represented by the attributes values:np.ndarray and a unit:Unit.
+    A container for homogeneous numerical data with associated physical units.
+    
+    The Array class represents collections of values (like time series, parametric 
+    variables, or measurement arrays) that share the same physical unit. It provides 
+    automatic unit conversion and arithmetic operations while preserving dimensional 
+    consistency.
+
+    Parameters
+    ----------
+    value_ : np.ndarray, list, or None, optional
+        Input values as array-like or None. Default is None.
+    unit_ : str, Unit, or None, optional
+        Physical unit as string or Unit object. Default is None.
+
+    Attributes
+    ----------
+    value : np.ndarray
+        The numerical values as a numpy array.
+    unit : Unit
+        The physical unit associated with all values.
+
+    Raises
+    ------
+    TypeError
+        If units are incompatible during arithmetic operations.
+    ValueError
+        If requested unit conversion is not dimensionally consistent.
+
+    Examples
+    --------
+    Basic usage:
+    
+    >>> from antupy.core import Array
+    >>> temperatures = Array([20.0, 25.0, 30.0], "°C")
+    >>> print(temperatures)
+    [20. 25. 30.] [°C]
+
+    Arithmetic operations with unit conversion:
+    
+    >>> mass1 = Array([1.0, 2.0, 3.0], "kg")
+    >>> mass2 = Array([500, 1000, 1500], "g")
+    >>> total_mass = mass1 + mass2  # Automatic conversion
+    >>> print(total_mass)
+    [1.5 2.5 3.5] [kg]
+
+    Unit conversion:
+    
+    >>> print(total_mass.set_unit("g"))
+    [1500. 2500. 3500.] [g]
+    >>> print(total_mass.get_value("ton"))
+    [0.0015 0.0025 0.0035]
+
+    Iteration and indexing:
+    
+    >>> for temp in temperatures[:2]:
+    ...     print(f"Temperature: {temp}")
+    Temperature: 20.0 [°C]
+    Temperature: 25.0 [°C]
+
+    Notes
+    -----
+    All arithmetic operations automatically handle unit conversions when 
+    dimensions are compatible. Incompatible operations raise TypeError.
+    
+    See Also
+    --------
+    Var : For handling single values with units
+    antupy.units.Unit : The underlying unit representation class
     """
     value_: np.ndarray|list|None= None
-    unit_: str|Unit|None = None
+    _unit: str|Unit|None = None
 
     value: np.ndarray = field(init=False)
     unit: Unit = field(init=False)
     
     def __post_init__(self):
         object.__setattr__(self, "value", np.array(self.value_))
-        object.__setattr__(self, "unit", _assign_unit(self.unit_))
-    
+        object.__setattr__(self, "unit", _assign_unit(self._unit))
+
     def __add__(self, other: Self):
         """ Overloading the addition operator. """
         if not isinstance(other, Array):
@@ -445,6 +602,10 @@ class Array():
 class Frame:
     pass
 
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
 
 # from collections.abc import Iterable
 # from typing import TypedDict

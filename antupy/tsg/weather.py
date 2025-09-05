@@ -6,7 +6,7 @@
 import pandas as pd
 
 from antupy.constants import DIRECTORY
-from antupy.units import Variable
+from antupy.units import Var
 
 class Weather():
     def __init__(self):

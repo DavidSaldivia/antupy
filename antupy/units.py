@@ -109,18 +109,51 @@ PREFIXES: dict[str, float] = {
 
 class UnitDict(TypedDict, total=False):
     """
-    Dictionary with the eight base units (adimensional is not included) as keys and their respective exponents as values.
-    Keys are:
+    TypedDict representing the base unit representation with exponents.
+    
+    A dictionary structure containing the eight base units as keys and their 
+    respective exponents as integer values. This provides the standardized 
+    internal representation for all physical units in the system.
 
-    - s: second (time)
-    - m: meter (length)
-    - g: gram (mass)
-    - K: kelvin (temperature)
-    - A: ampere (current)
-    - mol: mole (substance)
-    - cd: candela (luminous intensity)
-    - USD: US dollar (money)
+    Attributes
+    ----------
+    s : int
+        Exponent for second (time)
+    m : int  
+        Exponent for meter (length)
+    g : int
+        Exponent for gram (mass)
+    K : int
+        Exponent for kelvin (temperature)
+    A : int
+        Exponent for ampere (current)
+    mol : int
+        Exponent for mole (substance)
+    cd : int
+        Exponent for candela (luminous intensity)
+    USD : int
+        Exponent for US dollar (money)
 
+    Examples
+    --------
+    >>> # Force unit (N = kg⋅m⋅s⁻²)
+    >>> force_dict: UnitDict = {
+    ...     "g": 1,  # kg represented as 10³ g
+    ...     "m": 1,  # meter
+    ...     "s": -2, # per second squared
+    ...     "K": 0, "A": 0, "mol": 0, "cd": 0, "USD": 0
+    ... }
+    
+    Notes
+    -----
+    This TypedDict is used internally by the Unit class to represent any physical quantity. It is not expected to be used directly by users.
+    The base units include an additional unit for money (USD) to facilitate financial calculations alongside physical quantities.
+    The mass unit is represented in grams (g) instead of kilograms (kg) to simplify prefix handling.
+    All exponents are integers.
+
+    See Also
+    --------
+    Unit : Main unit class that uses UnitDict for internal representation
     """
     s: int
     m: int
@@ -151,25 +184,52 @@ class Unit():
     It converts it internally to a base representation, which is a dictionary
     with the 7 base SI units as keys and their respective exponents as values.
 
-    Parameters:
+    Parameters
+    ----------
+    unit : str, optional
+        Valid string with the unit label, e.g. "kg-m/s2". Default is "-" (dimensionless).
+    base_factor : float, optional
+        Multiplicative factor to convert to base SI units. Default is 1.0.
 
-        label_unit (str): Valid string with the unit label, e.g. "kg-m/s2"
-        base_factor: Multiplicative factor to convert to base SI units.
-        base_units (UnitDict): Dictionary with the 7 base SI units as keys and their respective exponents as values.
+    Attributes
+    ----------
+    label_unit : str
+        The original unit label string.
+    base_factor : float
+        Multiplicative factor to convert to base SI units.
+    base_units : UnitDict
+        Dictionary with the 7 base SI units as keys and their respective exponents as values.
 
-    Examples:
-        >>> u1 = Unit("kg-m/s2")
-        >>> print(u1)
-        [kg-m/s2]
-        >>> print(u1.si)
-        1.00e+03[m-g/s2]
-        >>> u2 = Unit("N")
-        >>> print(u2)
-        [N]
-        >>> print(u2.si)
-        1.00e+03[m-g/s2]
-        >>> u1 == u2
-        True
+    Examples
+    --------
+    Creating units from labels:
+    
+    >>> u1 = Unit("kg-m/s2")
+    >>> print(u1)
+    [kg-m/s2]
+    >>> print(u1.si)
+    1.00e+03[m-g/s2]
+    
+    Unit equivalence:
+    
+    >>> u2 = Unit("N")
+    >>> print(u2)
+    [N]
+    >>> print(u2.si)
+    1.00e+03[m-g/s2]
+    >>> u1 == u2
+    True
+    
+    Notes
+    -----
+    The base representation uses seven SI base units: meter (m), gram (g), second (s), 
+    ampere (A), kelvin (K), mole (mol), and candela (cd). Note that gram is used instead 
+    of kilogram to simplify prefix handling.
+    
+    See Also
+    --------
+    Var : Variable class that uses Unit for dimensional consistency
+    Array : Array class that uses Unit for dimensional consistency
     """
 
     def __init__(self, unit: str = "-", base_factor: float = 1e0):

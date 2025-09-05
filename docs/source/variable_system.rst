@@ -1,5 +1,5 @@
-The ``antupy`` variable system
-================================
+The ``Var`` class is a simple representation of a variable with a value and a unit. It allows for basic arithmetic operations, unit conversions, and comparisons. The class ensures that operations between variables are consistent in terms of units, providing a robust framework for handling physical quantities.
+
 ``antupy`` works in its core with a Unit management module ``units``, which include the class ``Unit`` mostly compatible with the SI unit system. From this, two classes are built. The ``Var`` class to manage single variables in the form of ``(value:float, unit:str)`` structure. The ``Array`` class for structures in the form of ``(array:np.ndarray, unit:str)``.
 
 The ``Var`` class is used to represent scalar values, while the ``Array`` class is used for vectors or time series data. Both classes are designed to handle units and conversions seamlessly, allowing for easy manipulation of physical quantities in simulations.

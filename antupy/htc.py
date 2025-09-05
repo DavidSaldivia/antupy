@@ -1,6 +1,7 @@
 import numpy as np
 
-from antupy.props import Air
+from antupy import Var
+from antupy.props import Fluid, Air, Water
 
 SIGMA_CONSTANT = 5.67e-8
 
@@ -59,3 +60,62 @@ def h_horizontal_surface_upper_hot(
         return h
     else:
         raise ValueError(f"label {correlation} is not a valid correlation label.")
+    
+
+def h_ext_flat_plate(
+        temp_surf: float | Var = Var(300, "K"),
+        temp_fluid: float | Var = Var(400, "K"),
+        length: float | Var = Var(1, "m"),
+        u_inf: float | Var = Var(10, "m/s"),
+        fluid: Fluid = Water(),
+        Re_crit: float = 4e5
+) -> Var:
+    if isinstance(temp_surf, Var):
+        Ts = temp_surf.gv("K")
+    elif isinstance(temp_surf, (int, float)):
+        Ts = temp_surf
+    else:
+        raise ValueError(f"{type(temp_surf)=} is not a valid type")
+    if isinstance(temp_fluid, Var):
+        Tf = temp_fluid.gv("K")
+    elif isinstance(temp_fluid, (int, float)):
+        Tf = temp_fluid
+    else:
+        raise ValueError(f"{type(temp_fluid)=} is not a valid type")
+    if isinstance(length, Var):
+        L = length.gv("m")
+    elif isinstance(length, (int, float)):
+        L = length
+    else:
+        raise ValueError(f"{type(length)=} is not a valid type")
+    if isinstance(u_inf, Var):
+        u = u_inf.gv("m/s")
+    elif isinstance(u_inf, (int, float)):
+        u = u_inf
+    else:
+        raise ValueError(f"{type(u_inf)=} is not a valid type")
+    rho = fluid.rho(Tf).gv("kg/m3")
+    cp = fluid.cp(Tf).gv("J/kg-K")
+    mu = fluid.viscosity(Tf).gv("Pa-s")
+    k = fluid.k(Tf).gv("W/m-K")
+    Re_L = rho * u * L / mu
+    Pr = cp * mu / k
+    Nu_L = (
+        0.6774 * Pr**(1/3) * Re_crit**(1./2)
+        / (1 + (0.0468/Pr)**(2/3))**(1./4)
+        + 0.037*Pr**(1/3) * (Re_L**0.8 - Re_crit**0.8)
+        )
+    return Var(Nu_L * k / L, "W/m2-K")
+
+
+def h_ext_flat_plane_constant_flux() -> Var:
+    pass
+
+def h_ext_cylinder() -> Var:
+    # See page 614 from Nellis&Klein
+    pass
+
+def h_ext_sphere() -> Var:
+    # See page 619 from Nellis&Klein 
+    pass
+
