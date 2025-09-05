@@ -2,12 +2,13 @@
 module with the core classes for AntuPy
 """
 from __future__ import annotations
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Self
+from typing import Self, TypedDict
+
 import math
 
 import numpy as np
-
 from antupy.units import Unit, _conv_temp, _mul_units, _div_units
 
 def CF(unit1: str|Unit, unit2: str|Unit) -> Var:
@@ -602,23 +603,26 @@ class Array():
 class Frame:
     pass
 
+@dataclass
+class Simulation():
+    run_simulation = lambda self, verbose=True: None
+    out: Output = {}
+
+class Plant():
+    pass
+
+class Output(TypedDict):
+    pass
+
 
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
 
-# from collections.abc import Iterable
-# from typing import TypedDict
 
-# class Simulation():
-#     pass
-
-# class Output(TypedDict):
-#     pass
-
-# class Analyser():
-#     def get_simulation_instance(self, cases: Iterable) -> Simulation:
-#         return Simulation()
-#     def run_simulation(self) -> Output:
-#         return Output()
+class Analyser():
+    def get_simulation_instance(self, cases: Iterable) -> Simulation:
+        return Simulation()
+    def run_simulation(self) -> Output:
+        return Output()
 
