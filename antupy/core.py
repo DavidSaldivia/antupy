@@ -603,21 +603,20 @@ class Array():
 class Frame:
     pass
 
-@dataclass
-class Simulation():
-    run_simulation = lambda self, verbose=True: None
-    out: Output = {}
-
-class Plant():
-    pass
-
 class Output(TypedDict):
     pass
 
+@dataclass
+class Simulation():
+    run_simulation = lambda self, verbose=True: None
+    out: dict = field(default_factory=dict)
 
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
+
+@dataclass
+class Plant():
+    run_simulation = lambda self, verbose=True: None
+    out: dict = field(default_factory=dict)
+
 
 
 class Analyser():
@@ -625,4 +624,11 @@ class Analyser():
         return Simulation()
     def run_simulation(self) -> Output:
         return Output()
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+
+
 
