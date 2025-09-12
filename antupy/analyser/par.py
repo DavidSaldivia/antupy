@@ -23,41 +23,7 @@ from antupy.core import Var, Array, Simulation, Plant
 
 # Type aliases for better readability
 ParameterValue = Array | Iterable[str | int | float]
-SimulationObject = Simulation | Plant
-
-
-@dataclass
-class ParametricSettings:
-    """
-    Configuration settings for parametric analysis.
-    
-    Parameters
-    ----------
-    params_out : list[str]
-        List of output parameter names to extract from simulations.
-    save_results_detailed : bool, optional
-        Whether to save detailed simulation objects. Default is False.
-    dir_output : Path or str, optional
-        Directory to save results. Default is None.
-    path_results : Path or str, optional
-        Path for saving summary results CSV. Default is None.
-    verbose : bool, optional
-        Whether to print progress information. Default is True.
-    """
-    params_out: list[str] = field(default_factory=lambda: [
-        "eta_something", "annual_something", "specific_something", "average_something"
-    ])
-    save_results_detailed: bool = False
-    dir_output: Optional[Path | str] = None
-    path_results: Optional[Path | str] = None
-    verbose: bool = True
-
-    def __post_init__(self):
-        """Convert string paths to Path objects."""
-        if self.dir_output is not None:
-            self.dir_output = Path(self.dir_output)
-        if self.path_results is not None:
-            self.path_results = Path(self.path_results)
+SimulationType = Simulation | Plant
 
 
 class Parametric:
@@ -70,17 +36,33 @@ class Parametric:
     
     Parameters
     ----------
-    base_case : SimulationObject
+    base_case : SimulationType
         Base simulation or plant object to use as template.
-    settings : ParametricSettings, optional
-        Configuration settings for the analysis. Default creates new instance.
+    params_out : list[str]
+        List of output parameter names to extract from simulations.
+    save_results_detailed : bool, optional
+        Whether to save detailed simulation objects. Default is False.
+    dir_output : Path or str, optional
+        Directory to save results. Default is None.
+    path_results : Path or str, optional
+        Path for saving summary results CSV. Default is None.
+    verbose : bool, optional
+        Whether to print progress information. Default is True.
     
     Attributes
     ----------
-    base_case : SimulationObject
+    base_case : SimulationType
         The base simulation template.
-    settings : ParametricSettings
-        Analysis configuration settings.
+    params_out : list[str]
+        Output parameters to extract from simulations.
+    save_results_detailed : bool
+        Whether to save detailed simulation objects.
+    dir_output : Path or None
+        Directory for saving results.
+    path_results : Path or None
+        Path for saving summary results CSV.
+    verbose : bool
+        Whether to print progress information.
     cases : pd.DataFrame or None
         DataFrame containing all parameter combinations to analyze.
     units : dict[str, str] or None
@@ -96,32 +78,48 @@ class Parametric:
     >>> from antupy.core import Array
     >>> 
     >>> # Define parameter ranges
-    >>> params = {
+    >>> params_in = {
     ...     'temperature': Array([20, 25, 30], '°C'),
     ...     'flow_rate': Array([0.1, 0.2, 0.3], 'm3/s')
     ... }
     >>> 
     >>> # Create and run analysis
-    >>> study = Parametric(base_simulation)
-    >>> study.setup_cases(params)
-    >>> results = study.run_analysis()
+    >>> study = Parametric(base_simulation, params_out=['efficiency', 'cost'])
+    >>> results = study.run_analysis(params_in)
     
-    Custom output parameters:
+    With file saving:
     
-    >>> settings = ParametricSettings(
+    >>> study = Parametric(
+    ...     base_simulation, 
     ...     params_out=['efficiency', 'cost', 'emissions'],
+    ...     dir_output='results/',
+    ...     path_results='summary.csv',
     ...     verbose=True
     ... )
-    >>> study = Parametric(base_simulation, settings)
+    >>> results = study.run_analysis(params_in)
     """
     
     def __init__(
         self, 
-        base_case: SimulationObject, 
-        settings: Optional[ParametricSettings] = None
+        base_case: SimulationType,
+        params_in: dict[str, ParameterValue],
+        params_out: list[str],
+        save_results_detailed: bool = False,
+        dir_output: Path | str | None = None,
+        path_results: Path | str | None = None,
+        verbose: bool = True
     ):
         self.base_case = base_case
-        self.settings = settings or ParametricSettings()
+        self.params_in = params_in
+        self.params_out = params_out
+        self.save_results_detailed = save_results_detailed
+        self.verbose = verbose
+        
+        # Convert paths to Path objects
+        self.dir_output = Path(dir_output) if dir_output is not None else None
+        self.path_results = Path(path_results) if path_results is not None else None
+        
+        # Internal state
         self.cases: Optional[pd.DataFrame] = None
         self.units: Optional[dict[str, Optional[str]]] = None
         self.results: Optional[pd.DataFrame] = None
@@ -155,7 +153,16 @@ class Parametric:
         ... }
         >>> cases, units = study.setup_cases(params)
         """
+
         cols_in = list(params_in.keys())
+        
+        # Handle empty parameters case
+        if not cols_in:
+            empty_df = pd.DataFrame()
+            self.cases = empty_df
+            self.units = {}
+            return empty_df, {}
+        
         params_values = []
         params_units = {}
         
@@ -163,6 +170,9 @@ class Parametric:
             if isinstance(values, Array):
                 params_units[lbl] = values.u
                 values = values.gv(values.u)
+            elif isinstance(values, Iterable):
+                values = list(values)
+                params_units[lbl] = None
             else:
                 params_units[lbl] = None
             params_values.append(values)
@@ -180,91 +190,82 @@ class Parametric:
     
     def run_analysis(
         self, 
-        cases_in: Optional[pd.DataFrame] = None,
-        units_in: Optional[dict[str, Optional[str]]] = None
     ) -> pd.DataFrame:
         """
-        Execute parametric analysis across all cases.
+        Execute parametric analysis with given input parameters.
         
-        Runs simulations for each parameter combination and collects
-        specified output metrics.
+        Creates all parameter combinations and runs simulations for each,
+        collecting specified output metrics.
         
         Parameters
         ----------
-        cases_in : pd.DataFrame, optional
-            DataFrame with parameter combinations. Uses self.cases if None.
-        units_in : dict[str, Optional[str]], optional
-            Parameter units dictionary. Uses self.units if None.
+        params_in : dict[str, ParameterValue]
+            Dictionary mapping parameter names to their value ranges.
+            Values can be Array objects or iterables of strings/numbers.
             
         Returns
         -------
         pd.DataFrame
             Results DataFrame with input parameters and output metrics.
             
-        Raises
-        ------
-        ValueError
-            If no cases have been set up and none provided.
+        Examples
+        --------
+        >>> params = {
+        ...     'temp': Array([20, 30], '°C'),
+        ...     'size': ['small', 'large']
+        ... }
+        >>> results = study.run_analysis(params)
         """
-        # Use provided or stored cases
-        if cases_in is None:
-            if self.cases is None:
-                raise ValueError("No cases defined. Call setup_cases() first or provide cases_in.")
-            cases_in = self.cases
-            
-        if units_in is None:
-            units_in = self.units or {}
-            
-        params_in = cases_in.columns
+        # Setup cases from input parameters
+        cases_in, units_in = self.setup_cases(self.params_in)
+        
         results = cases_in.copy()
         
         # Initialize output columns
-        for col in self.settings.params_out:
+        for col in self.params_out:
             results[col] = np.nan
         
         # Create output directory if needed
-        if self.settings.dir_output is not None:
-            if isinstance(self.settings.dir_output, Path):
-                self.settings.dir_output.mkdir(parents=True, exist_ok=True)
-            elif isinstance(self.settings.dir_output, str):
-                self.settings.dir_output = Path(self.settings.dir_output)
-                self.settings.dir_output.mkdir(parents=True, exist_ok=True)
-            else:
-                raise TypeError("dir_output must be a Path, str, or None.")
+        if self.dir_output is not None:
+            self.dir_output.mkdir(parents=True, exist_ok=True)
 
         # Run simulations
         for index, row in results.iterrows():
-            idx = int(index) if isinstance(index, int) else int(index) #type: ignore
+            idx = int(index)  #type: ignore
             
-            if self.settings.verbose:
+            if self.verbose:
                 print(f'RUNNING SIMULATION {idx + 1}/{len(results)}')
                 
             # Create simulation copy and update parameters
             sim = copy.deepcopy(self.base_case)
-            self._update_parameters(sim, row[params_in], units_in)
+            self._update_parameters(sim, row[cases_in.columns], units_in)
             
             # Run simulation
-            sim.run_simulation(verbose=self.settings.verbose)
+            try:
+                sim.run_simulation(verbose=self.verbose)
+            except Exception as e:
+                print(f"Error occurred during simulation {idx + 1}: {e}")
+                continue
             
             # Extract outputs
             try:
-                params_out = self.settings.params_out
+                params_out = self.params_out
                 values_out = [sim.out[lbl] for lbl in params_out]
                 results.loc[idx, params_out] = values_out
             except Exception as e:
                 print(f"Error occurred while extracting outputs: {e}")
 
             # Save detailed results if requested
-            if self.settings.save_results_detailed and self.settings.dir_output:
-                pickle_path = self.settings.dir_output / f'sim_{idx}.plk'
+            if self.save_results_detailed and self.dir_output:
+                pickle_path = self.dir_output / f'sim_{idx}.plk'
                 with open(pickle_path, "wb") as file:
                     pickle.dump(sim, file, protocol=pickle.HIGHEST_PROTOCOL)
             
             # Save intermediate results
-            if self.settings.path_results is not None:
-                results.to_csv(self.settings.path_results)
+            if self.path_results is not None:
+                results.to_csv(self.path_results)
             
-            if self.settings.verbose:
+            if self.verbose:
                 print(results.loc[idx])
         
         self.results = results
@@ -272,7 +273,7 @@ class Parametric:
     
     def _update_parameters(
         self,
-        simulation: SimulationObject,
+        simulation: SimulationType,
         row_in: pd.Series,
         units_in: dict[str, Optional[str]]
     ) -> None:
@@ -284,7 +285,7 @@ class Parametric:
         
         Parameters
         ----------
-        simulation : SimulationObject
+        simulation : SimulationType
             Simulation instance to update.
         row_in : pd.Series
             Parameter values for this run.
@@ -304,11 +305,20 @@ class Parametric:
                 param_value = Var(value, unit) if unit is not None else value
                 
                 setattr(obj, param_name, param_value)
+                if hasattr(obj, "__post_init__") and not isinstance(obj, (Var, Array)):
+                    obj.__post_init__()
+
                 setattr(simulation, obj_name, obj)
+
             else:
                 # Direct attribute
-                setattr(simulation, key_str, value)
-    
+                unit = units_in.get(key_str)
+                param_value = Var(value, unit) if unit is not None else value
+                setattr(simulation, key_str, param_value)
+
+            if hasattr(simulation, "__post_init__"):
+                simulation.__post_init__()
+
     def save_results(self, filepath: Path | str) -> None:
         """
         Save analysis results to CSV file.
@@ -345,13 +355,13 @@ class Parametric:
         summary = {
             "total_cases": len(self.cases),
             "input_parameters": list(self.cases.columns),
-            "output_parameters": self.settings.params_out,
+            "output_parameters": self.params_out,
             "completed": self.results is not None,
         }
         
         if self.results is not None:
             # Add output statistics
-            for param in self.settings.params_out:
+            for param in self.params_out:
                 if param in self.results.columns:
                     values = self.results[param].dropna()
                     summary[f"{param}_stats"] = {
@@ -374,31 +384,54 @@ def settings(params_in: dict[str, ParameterValue] = {}) -> tuple[pd.DataFrame, d
 def analysis(
     cases_in: pd.DataFrame,
     units_in: dict[str, str | None],
+    params_in: dict[str, ParameterValue] = {},
     params_out: list[str] | None = None,
-    base_case: SimulationObject | None = None,
+    base_case: SimulationType | None = None,
     save_results_detailed: bool = False,
     dir_output: str | None = None,
     path_results: str | None = None,
     verbose: bool = True,
 ) -> pd.DataFrame:
-    """Legacy function for running analysis. Use Parametric class instead."""
+    """
+    Legacy function for running parametric analysis. 
+    
+    Note: This function is deprecated. Use the Parametric class directly:
+    
+    >>> parametric = Parametric(base_case, params_out)
+    >>> results = parametric.run_analysis(params_in)
+    """
     if params_out is None:
         params_out = ["eta_something", "annual_something", "specific_something", "average_something"]
     
-    settings_obj = ParametricSettings(
+    if base_case is None:
+        raise TypeError("base_case must be a Simulation or Plant instance.")
+    
+    # Create Parametric instance with new API
+    parametric = Parametric(
+        base_case=base_case,
+        params_in=params_in,
         params_out=params_out,
         save_results_detailed=save_results_detailed,
         dir_output=dir_output,
         path_results=path_results,
         verbose=verbose
     )
-    if base_case is not None:
-        parametric = Parametric(base_case, settings_obj)  # type: ignore
-    else:
-        raise TypeError("base_case must be a Simulation or Plant instance.")
     
-    return parametric.run_analysis(cases_in, units_in)
+    # Convert DataFrame back to parameter dict format
+    # This is a bit hacky but maintains backwards compatibility
+    params_dict = {}
+    for col in cases_in.columns:
+        unit = units_in.get(col)
+        if unit:
+            params_dict[col] = Array(cases_in[col].values.tolist(), unit)
+        else:
+            params_dict[col] = cases_in[col].values.tolist()
+    
+    return parametric.run_analysis()
 
+
+def main():
+    pass
 
 if __name__ == "__main__":
-    pass
+    main()

@@ -608,15 +608,20 @@ class Output(TypedDict):
 
 @dataclass
 class Simulation():
-    run_simulation = lambda self, verbose=True: None
     out: dict = field(default_factory=dict)
+
+    def __post_init__(self): ...
+
+    def run_simulation(self, verbose: bool = True) -> None: ...
 
 
 @dataclass
 class Plant():
-    run_simulation = lambda self, verbose=True: None
     out: dict = field(default_factory=dict)
+    
+    def __post_init__(self): ...
 
+    def run_simulation(self, verbose: bool = True) -> None: ...
 
 
 class Analyser():

@@ -238,6 +238,10 @@ def dot_notation_names(draw):
         parts.append(part)
     return '.'.join(parts)
 
+
+class TestEdgeCaseDiscovery:
+    """Tests specifically designed to discover edge cases."""
+    
     @given(
         dot_notation_names(),
         st.lists(st.floats(min_value=-100, max_value=100, allow_nan=False), min_size=1, max_size=10)
@@ -256,10 +260,6 @@ def dot_notation_names(draw):
         except (ValueError, AttributeError):
             # Some parameter names might not be valid - that's OK
             pass
-
-
-class TestEdgeCaseDiscovery:
-    """Tests specifically designed to discover edge cases."""
     
     @given(data_frames(
         columns=[
