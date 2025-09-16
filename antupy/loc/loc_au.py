@@ -3,7 +3,7 @@ from typing import Any, overload, Literal
 
 import pandas as pd
 
-from antupy.constants import ( DIRECTORY, DEFINITIONS, SIMULATIONS_IO)
+from antupy.ddd_au import ( DIRECTORY, DEFINITIONS, SIMULATIONS_IO)
 DIR_DATA = DIRECTORY.DIR_DATA
 FILE_POSTCODES = DIRECTORY.FILE_POSTCODES
 
@@ -25,6 +25,12 @@ class LocationAU():
             self.input_type = "coords"
         else:
             raise TypeError(f"{type(self.value)} is not a valid type for Location")
+
+    def __repr__(self) -> str:
+        return f"{self.value}"
+    
+    def __str__(self) -> str:
+        return f"{self.value}"
 
     @property
     def coords(self) -> tuple[float,float]:
@@ -146,7 +152,6 @@ def _from_coords(
 #------------------
 def main():
     
-    # location = Location("Sydney")
     location = LocationAU("Sydney")
     print(location.value)
     print(location.coords)
@@ -154,7 +159,6 @@ def main():
     print(location.postcode)
     print()
 
-    # location = Postcode(2035)
     location = LocationAU(2035)
     print(location.value)
     print(location.coords)
@@ -162,7 +166,6 @@ def main():
     print(location.postcode)
     print()
 
-    # location = Coords(value=DEFINITIONS.LOCATIONS_COORDINATES["Sydney"])
     location = LocationAU(DEFINITIONS.LOCATIONS_COORDINATES["Sydney"])
     print(location.value)
     print(location.coords)

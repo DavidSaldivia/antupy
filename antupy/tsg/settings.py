@@ -33,7 +33,7 @@ class TimeParams():
         """
         START = self.START.gv("hr")
         STOP = self.STOP.gv("hr")
-        return Var( int((STOP-START)/24), "d")
+        return Var( int((STOP-START)/24), "day")
     
     @property
     def PERIODS(self) -> Var:

@@ -120,14 +120,14 @@ class Parametric:
         self.path_results = Path(path_results) if path_results is not None else None
         
         # Internal state
-        self.cases: Optional[pd.DataFrame] = None
-        self.units: Optional[dict[str, Optional[str]]] = None
-        self.results: Optional[pd.DataFrame] = None
-    
+        self.cases: pd.DataFrame | None = None
+        self.units: dict[str, Optional[str]] | None = None
+        self.results: pd.DataFrame | None = None
+
     def setup_cases(
         self, 
         params_in: dict[str, ParameterValue]
-    ) -> tuple[pd.DataFrame, dict[str, Optional[str]]]:
+    ) -> tuple[pd.DataFrame, dict[str, str | None]]:
         """
         Create parametric run matrix from input parameters.
         
@@ -275,7 +275,7 @@ class Parametric:
         self,
         simulation: SimulationType,
         row_in: pd.Series,
-        units_in: dict[str, Optional[str]]
+        units_in: dict[str, str | None]
     ) -> None:
         """
         Update simulation parameters for specific run.

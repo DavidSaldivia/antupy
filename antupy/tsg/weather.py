@@ -4,31 +4,33 @@
 - weather data generator
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import pandas as pd
 
-from antupy.constants import DIRECTORY
-from antupy.units import Var
-
+from antupy.ddd_au import DIRECTORY
+from antupy import Var
+from antupy.tsg.settings import TimeParams
+from antupy.loc import Location
 
 import os
 import pandas as pd
 import numpy as np
 import xarray as xr
 
-from typing import Optional, Union, Any
+from typing import Optional, Union, Any, Literal, Protocol, runtime_checkable
 
-from antupy.constants import (
+from antupy.ddd_au import (
     DIRECTORY,
     DEFINITIONS,
-    DEFAULT,
+    DEFAULTS,
     SIMULATIONS_IO
 )
-from antupy.location.au import (
+from antupy.loc.loc_au import (
     LocationAU,
     _from_postcode
 )
+from antupy.loc.loc_cl import LocationCL
 
 DIR_DATA = DIRECTORY.DIR_DATA
 DEFINITION_SEASON = DEFINITIONS.SEASON
@@ -62,12 +64,10 @@ _VARIABLE_RANGES = {
     "temp_amb" : (10.0,40.0),
     "temp_mains" : (10.0,30.0),
 }
-_TYPES_SIMULATION = [
-    "tmy",                      # One year of data. Usually with tmy files.
-    "mc",                       # Random sample of temporal unit (e.g. days) from set (month, week, day).
-    "historical",               # Specific dates for a specific location (SolA, EE, EWS, etc).
-    "constant_day",             # Constant values each day
-    ]
+
+# Type alias for simulation types
+WeatherSimulationType = Literal["tmy", "mc", "historical", "constant_day"]
+
 _SIMS_PARAMS: dict[str, dict[str,Any]] = {
     "tmy": {
         "dataset": ['METEONORM',],
@@ -75,7 +75,7 @@ _SIMS_PARAMS: dict[str, dict[str,Any]] = {
     },
     "mc": {
         "dataset": ['METEONORM', 'MERRA2', 'NCI'],
-        "location": DEFAULT.LOCATION,
+        "location": DEFAULTS.LOCATION,
         "subset": ['all', 'annual', 'season', 'month', 'date'],
         "random": [True, False],
         "value": None,
@@ -100,82 +100,138 @@ DATASET_ALL = list(dict.fromkeys( [ x for xs in list_aux for x in xs ] )) #flatt
 
 
 
-@dataclass
-class Weather():
+@runtime_checkable
+class Weather(Protocol):
     """
-    Weather generator. It generates weather data for thermal and PV simulations using one of four options depending on the type of simulation. Depending on this options it requires one or more Parameters.
-    Check the module timeseries.weather for details.
+    Weather generator protocol. Defines the interface for weather data generation
+    for thermal and PV simulations.
+    
+    Required attributes:
+        dataset: Source of weather data (e.g., "meteonorm", "merra2", "nci")
+        location: Location where the simulation is performed (str or Location object)
+        time_params: Time parameters defining the simulation period and timesteps
+    """
+    
+    dataset: str
+    location: str | Location
+    time_params: TimeParams
+    
+    def load_data(self) -> pd.DataFrame:
+        """Load weather data based on the instance's time_params.
+        
+        Returns:
+            A dataframe with the weather timeseries using time_params.idx_pd as index.
+        """
+        ...
 
-    Parameters: 
-        type_sim: Type of simulation. Options are: "tmy" (annual simulation), "mc" (montecarlo), "historical" (historical data files), "constant_day" (environmental variables kept constant)
+
+@dataclass
+class TMY:
+    """
+    TMY (Typical Meteorological Year) weather generator.
+    One year of data, usually with TMY files.
+    
+    Parameters:
         dataset: Source of weather data. Options: "meteonorm", "merra2".
         location: City where the simulation is performed.
-        subset: For mc simulations, the subset to generate data. Options: "annual", "season", "month", "date". Depending on the choice, the "value" parameter is used.
-        random: Whether generates data randomly or periodically. If True, picks randomly days from subset. If False, it repeats subset until the required number of days are met.
-        value: The value used on subset. If "season", options: "summer", "autumn", "winter", spring". If "month", the month as integer. If "date", the specific date.
-        file_path: A string with the weather file location (If "historical" is chosen)
-        list_dates: Used only for "historical" simulations. A set of dates to load.
-
+        time_params: Time parameters defining the simulation period.
     """
-
-    type_sim: str = "tmy"
+    
     dataset: str = "meteonorm"
-    location: str = "Sydney"
+    location: str | Location = field(default_factory=lambda: LocationAU("Sydney"))
+    time_params: TimeParams = field(default_factory=TimeParams)
+    
+    def load_data(self) -> pd.DataFrame:
+        """Load TMY data based on the instance's time_params."""
+        ts_index = self.time_params.idx_pd
+        ts_df = pd.DataFrame(index=ts_index, columns=TS_WEATHER)
+        return _load_tmy(ts_df, dataset=self.dataset, location=self.location, columns=TS_WEATHER)
+
+
+@dataclass
+class WeatherMC:
+    """
+    Monte Carlo weather generator.
+    Random sample of temporal unit (e.g. days) from set (month, week, day).
+    
+    Parameters:
+        dataset: Source of weather data. Options: "meteonorm", "merra2", "nci".
+        location: City where the simulation is performed.
+        time_params: Time parameters defining the simulation period.
+        subset: The subset to generate data. Options: "annual", "season", "month", "date".
+        random: Whether generates data randomly or periodically.
+        value: The value used on subset (season name, month number, or date).
+    """
+    
+    dataset: str = "meteonorm"
+    location: str | Location = field(default_factory=lambda: LocationAU("Sydney"))
+    time_params: TimeParams = field(default_factory=TimeParams)
     subset: str | None = None
     random: bool = False
     value: str | int | None = None
+    
+    def load_data(self) -> pd.DataFrame:
+        """Load Monte Carlo weather data based on the instance's time_params."""
+        ts_index = self.time_params.idx_pd
+        ts_df = pd.DataFrame(index=ts_index, columns=TS_WEATHER)
+        return _load_montecarlo(ts_df, dataset=self.dataset, location=self.location, 
+                                subset=self.subset, value=self.value, columns=TS_WEATHER)
 
+
+@dataclass
+class WeatherHist:
+    """
+    Historical weather generator.
+    Specific dates for a specific location from historical datasets.
+    
+    Parameters:
+        dataset: Source of weather data. Options: "merra2", "nci", "local".
+        location: City where the simulation is performed.
+        time_params: Time parameters defining the simulation period.
+        file_path: Path to the weather file location.
+        list_dates: Set of dates to load.
+    """
+    
+    dataset: str = "merra2"
+    location: str | Location = field(default_factory=lambda: LocationAU("Sydney"))
+    time_params: TimeParams = field(default_factory=TimeParams)
     file_path: str | None = None
     list_dates: pd.DatetimeIndex | pd.Timestamp | None = None
-
-
-    def params(self) -> dict[str, str | int | bool | pd.DatetimeIndex | None]:
-        if self.type_sim == "tmy":
-            params = {
-                "dataset": self.dataset,
-                "location": self.location,
-            }
-        elif self.type_sim == "mc":
-            params = {
-                "dataset": self.dataset,
-                "location": self.location,
-                "subset": self.subset,
-                "random": self.random,
-                "value": self.value,
-            }
-        elif self.type_sim == "historical":
-            params = {
-                "dataset": self.dataset,
-                "location": self.location,
-                "file_path": self.file_path,
-                "list_dates": self.list_dates,
-            },
-        elif self.type_sim == "constant_day":
-            params = {
-                "dataset": self.dataset,
-                "random": self.random,
-                "value": self.value,
-                "subset": self.subset,
-        }
-        else:
-            raise ValueError(f"Type of simulation {self.type_sim} is not valid. Options are: 'tmy', 'mc', 'historical', 'constant_day'.")
-        return params
     
+    def load_data(self) -> pd.DataFrame:
+        """Load historical weather data based on the instance's time_params."""
+        ts_index = self.time_params.idx_pd
+        ts_df = pd.DataFrame(index=ts_index, columns=TS_WEATHER)
+        return _load_historical(ts_df, file_path=self.file_path, columns=TS_WEATHER)
 
-    def load_data(self, ts_index: pd.DatetimeIndex) -> pd.DataFrame:
-        """Load data defined by self.params
 
-        Args:
-            ts_index (pd.DatetimeIndex): The dataframe's index defined by the simulation.
-
-        Returns:
-            pd.DataFrame: A dataframe with the weather timeseries.
-        """
-        params = self.params()
-        ts_wea = _load_weather_data(
-                    ts_index, type_sim = self.type_sim, params = params
-                )
-        return ts_wea
+@dataclass
+class WeatherConstantDay:
+    """
+    Constant day weather generator.
+    Environmental variables kept constant throughout the simulation.
+    
+    Parameters:
+        dataset: Source of weather data (usually empty for constant values).
+        location: City where the simulation is performed.
+        time_params: Time parameters defining the simulation period.
+        random: Whether to generate random values within ranges.
+        value: Specific constant values to use.
+        subset: Additional subset parameter.
+    """
+    
+    dataset: str = ""
+    location: str | Location = field(default_factory=lambda: LocationAU("Sydney"))
+    time_params: TimeParams = field(default_factory=TimeParams)
+    random: bool = False
+    value: str | int | None = None
+    subset: str | None = None
+    
+    def load_data(self) -> pd.DataFrame:
+        """Load constant day weather data based on the instance's time_params."""
+        ts_index = self.time_params.idx_pd
+        ts_df = pd.DataFrame(index=ts_index, columns=TS_WEATHER)
+        return load_day_constant_random(ts_df)
     
 
 
@@ -326,26 +382,23 @@ def from_file(
     
     set_days = pd.read_csv(file_path, index_col=0)
     set_days.index = pd.to_datetime(set_days.index)
-    if subset_random is None:
-        pass
-    elif subset_random == 'annual':
+    if subset_random == 'annual' and isinstance(subset_value, int):
         set_days = set_days[
             set_days.index.year==subset_value
             ]
-    elif subset_random == 'season':
+    elif subset_random == 'season' and isinstance(subset_value, str):
         set_days = set_days[
-            set_days.index.isin(DEFINITION_SEASON[subset_value])
+            set_days.index.isin(DEFINITION_SEASON[str(subset_value)])
             ]
-    elif subset_random == 'month':
+    elif subset_random == 'month' and isinstance(subset_value, int):
         set_days = set_days[
             set_days.index.month==subset_value
-            ]  
-    elif subset_random == 'date':
+            ]
+    elif subset_random == 'date' and isinstance(subset_value, (str, pd.Timestamp)):
         set_days = set_days[
             set_days.index.date==pd.to_datetime(subset_value).date()
             ]  
-    
-    if subset_random is None:
+    elif subset_random is None:
         timeseries = from_tmy(
             timeseries, set_days, columns=columns
             )
@@ -356,28 +409,47 @@ def from_file(
     return timeseries
 
 # -------------
-def load_tmy(
+def _load_tmy(
     ts: pd.DataFrame,
-    params: dict,
+    params: dict | None = None,
+    *,
+    dataset: str | None = None,
+    location: str | Location | None = None,
     columns: list[str] | None = TS_WEATHER,
 ) -> pd.DataFrame:
     
+    # Handle both dict params and keyword arguments
+    if params is not None:
+        # Legacy dict-based interface
+        dataset = params["dataset"]
+        location = params["location"]
+    elif dataset is None or location is None:
+        raise ValueError("Either params dict or dataset+location keywords must be provided")
+    
     YEAR = pd.to_datetime(ts.index).year[0]
-    if type(params["location"]) == str:
-        location = params["location"]
-    else:
-        location = params["location"]
-    dataset = params["dataset"]
+    
+    # At this point, dataset and location are guaranteed to be not None
+    assert dataset is not None and location is not None
+    
+    # Convert Location objects to string for processing
+    location_str = str(location) if not isinstance(location, str) else location
+    
     if dataset == "meteonorm":
-        df_dataset = load_dataset_meteonorm(location, YEAR)
+        df_dataset = _load_dataset_meteonorm(location_str, YEAR)
     elif dataset == "merra2":
-        df_dataset = load_dataset_merra2(ts, location, YEAR)
+        # For MERRA2, convert LocationCL to LocationAU if needed, or pass as is if compatible
+        if isinstance(location, LocationCL):
+            # Convert to string representation for MERRA2
+            location_for_merra2 = str(location)
+        else:
+            location_for_merra2 = location
+        df_dataset = _load_dataset_merra2(ts, location_for_merra2, YEAR)  # type: ignore
     else:
         raise ValueError(f"dataset: {dataset} is not available.")
     return from_tmy( ts, df_dataset, columns=columns )
 
 
-def load_dataset_meteonorm(
+def _load_dataset_meteonorm(
         location: str,
         YEAR: int = 2022,
         START: int = 0,
@@ -403,11 +475,11 @@ def load_dataset_meteonorm(
     df_dataset.index = pd.date_range( start=start_time, periods=PERIODS, freq=f"{STEP}min")
     df_dataset["date"] = df_dataset.index
     df_dataset["date"] = df_dataset["date"].apply(lambda x: x.replace(year=YEAR))
-    df_dataset.index = pd.to_datetime(df_dataset["date"])
+    df_dataset = df_dataset.set_index(pd.to_datetime(df_dataset["date"]))
     return df_dataset
 
 
-def load_dataset_merra2(
+def _load_dataset_merra2(
         ts: pd.DataFrame,
         location: LocationAU | str | tuple | int,
         YEAR: int,
@@ -447,7 +519,7 @@ def load_dataset_merra2(
     
     #########################################
     #Replace later for the closest city
-    df_aux = load_dataset_meteonorm("Sydney", YEAR)
+    df_aux = _load_dataset_meteonorm("Sydney", YEAR)
     df_aux = df_aux.resample(f"{STEP}T").interpolate()       #Getting the data in half hours
     ts["Temp_Mains"] = df_aux["Temp_Mains"]
     #########################################
@@ -455,22 +527,48 @@ def load_dataset_merra2(
     return ts
 
 #----------
-def load_montecarlo(
+def _load_montecarlo(
     ts: pd.DataFrame,
-    params: dict,
+    params: dict | None = None,
+    *,
+    dataset: str | None = None,
+    location: str | Location | None = None,
+    subset: str | None = None,
+    value: str | int | None = None,
     columns: Optional[list[str]] = TS_WEATHER,
 ) -> pd.DataFrame:
     
-    dataset = params["dataset"]
-    location = params["location"]
-    subset = params["subset"]
-    value = params["value"]
+    # Handle both dict params and keyword arguments
+    if params is not None:
+        # Legacy dict-based interface
+        dataset = params["dataset"]
+        location = params["location"]
+        subset = params["subset"]
+        value = params["value"]
+    elif any(x is None for x in [dataset, location, subset]):
+        raise ValueError("Either params dict or dataset+location+subset keywords must be provided")
+    
+    # Convert Location objects to string for processing
+    location_str = str(location) if not isinstance(location, str) else location
+    
     ts_index = pd.to_datetime(ts.index)
 
+    # At this point, required parameters are guaranteed to be not None
+    assert dataset is not None and location is not None and subset is not None
+
     if dataset == "meteonorm":
-        df_dataset = load_dataset_meteonorm(location)
+        df_dataset = _load_dataset_meteonorm(location_str)
     elif dataset == "merra2":
-        df_dataset = load_dataset_merra2(ts, location, ts_index.year[0])
+        # For MERRA2, ensure location is in correct format
+        if isinstance(location, LocationAU):
+            location_for_merra2 = location
+        elif isinstance(location, LocationCL) or hasattr(location, 'value'):
+            # Convert non-AU Location objects to string representation for MERRA2
+            location_for_merra2 = str(location)
+        else:
+            location_for_merra2 = location
+        # Type assertion to help type checker since we've converted to compatible types
+        df_dataset = _load_dataset_merra2(ts, location_for_merra2, ts_index.year[0])  # type: ignore
     else:
         raise ValueError(f"dataset: {dataset} is not available.")
     
@@ -480,16 +578,25 @@ def load_montecarlo(
             df_dataset.index.year==value
             ]
     elif subset == 'season':
+        # value should be a string for season
+        if not isinstance(value, str):
+            raise ValueError(f"For season subset, value must be a string, got {type(value)}")
         df_sample = df_dataset[
             df_dataset.index.isin(DEFINITION_SEASON[value])
             ]
     elif subset == 'month':
+        # value should be an int for month
+        if not isinstance(value, int):
+            raise ValueError(f"For month subset, value must be an int, got {type(value)}")
         df_sample = df_dataset[
             df_dataset.index.month==value
             ]  
     elif subset == 'date':
+        # value should have a date() method (datetime/Timestamp)
+        if not hasattr(value, 'date'):
+            raise ValueError(f"For date subset, value must be a datetime object, got {type(value)}")
         df_sample = df_dataset[
-            df_dataset.index.date==value.date()
+            df_dataset.index.date==value.date()  # type: ignore
             ]
     else:
         raise ValueError(f"subset: {subset} not in available options.")
@@ -497,85 +604,64 @@ def load_montecarlo(
     return df_weather
 
 #----------------
-def load_historical(
+def _load_historical(
     ts: pd.DataFrame,
-    params: dict,
+    params: dict | None = None,
+    *,
+    file_path: str | None = None,
     columns: Optional[list[str]] = TS_WEATHER,
 ) -> pd.DataFrame:
-    file_path = params["file_path"]
+    
+    # Handle both dict params and keyword arguments
+    if params is not None:
+        # Legacy dict-based interface
+        file_path = params["file_path"]
+    elif file_path is None:
+        raise ValueError("Either params dict or file_path keyword must be provided")
+    
+    # At this point, file_path is guaranteed to be not None
+    assert file_path is not None
+    
     ts_ = pd.read_csv(file_path, index_col=0)
     ts_.index = pd.to_datetime(ts.index)
     return ts_
 
-#----------
-def _load_weather_data(
-        ts: pd.DataFrame | pd.DatetimeIndex,
-        type_sim: str,
-        params: dict = {},
-        columns: Optional[list[str]] = TS_WEATHER,
-) -> pd.DataFrame:
-    
-    if isinstance(ts, pd.DatetimeIndex):
-        ts_ = pd.DataFrame(index = ts, columns = columns)
-    else:
-        ts_ = ts.copy()
-
-    if type_sim == "tmy":
-        df_weather = load_tmy(ts_, params, columns)
-    elif type_sim == "mc":
-        df_weather = load_montecarlo(ts_, params, columns)
-    elif type_sim == "historical":
-        df_weather = load_historical(ts_, params, columns)
-    elif type_sim == "constant_day":
-        df_weather = load_day_constant_random(ts_)
-    else:
-        raise ValueError(f"{type_sim} not in {_TYPES_SIMULATION}")
-    
-    return df_weather
-
 def main():
-    from antupy.tsg import TimeParams
-
+    from antupy.tsg.settings import TimeParams
 
     tp = TimeParams(YEAR=Var(2020,"-"), STEP=Var(30,"min"))
-    ts = tp.idx_pd
 
     #----------------
-    type_sim = "tmy"
-    params = {
-        "dataset": "meteonorm",
-        "location": "Sydney"
-    }
-    ts = _load_weather_data(ts, type_sim, params)
-    print(ts[TS_WEATHER])
+    # TMY with Meteonorm
+    tmy_weather = TMY(dataset="meteonorm", location="Sydney", time_params=tp)
+    ts_tmy = tmy_weather.load_data()
+    print("TMY Meteonorm:", ts_tmy[TS_WEATHER])
 
     #----------------
-    type_sim = "tmy"
-    YEAR = Var(2020,"-")
+    # TMY with MERRA2
     location = LocationAU(2035)
-    ts = TimeParams(YEAR=YEAR, STEP=Var(30,"min")).idx_pd
-    params = {
-        "dataset": "merra2",
-        "location": LocationAU(2035)
-    }
-    ts = _load_weather_data(ts, type_sim, params)
-    print(ts[TS_WEATHER])
+    tp2 = TimeParams(YEAR=Var(2020,"-"), STEP=Var(30,"min"))
+    tmy_weather_merra = TMY(dataset="merra2", location=str(location), time_params=tp2)
+    ts_tmy_merra = tmy_weather_merra.load_data()
+    print("TMY MERRA2:", ts_tmy_merra[TS_WEATHER])
 
     #----------------
-    type_sim = "mc"
-    params = {
-        "dataset": "meteonorm",
-        "location": LocationAU(2035),
-        "subset": "month",
-        "value": 5
-    }
-    ts = _load_weather_data(ts, type_sim, params)
-    print(ts[TS_WEATHER])
+    # Monte Carlo
+    mc_weather = WeatherMC(
+        dataset="meteonorm",
+        location=str(LocationAU(2035)),
+        time_params=tp,
+        subset="month",
+        value=5
+    )
+    ts_mc = mc_weather.load_data()
+    print("Monte Carlo:", ts_mc[TS_WEATHER])
 
     #----------------
-    type_sim = "constant_day"
-    ts = _load_weather_data(ts, type_sim)
-    print(ts[TS_WEATHER])
+    # Constant day
+    constant_weather = WeatherConstantDay(time_params=tp)
+    ts_constant = constant_weather.load_data()
+    print("Constant Day:", ts_constant[TS_WEATHER])
 
     return
 
