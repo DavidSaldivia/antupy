@@ -103,11 +103,10 @@ DATASET_ALL = list(dict.fromkeys( [ x for xs in list_aux for x in xs ] )) #flatt
 @runtime_checkable
 class Weather(Protocol):
     """
-    Weather generator protocol. Defines the interface for weather data generation
-    for thermal and PV simulations.
+    Weather generator protocol. Defines the interface for weather data generation for thermal and PV simulations.
     
     Required attributes:
-        dataset: Source of weather data (e.g., "meteonorm", "merra2", "nci")
+        dataset: Source of weather data (e.g., "meteonorm", "merra2")
         location: Location where the simulation is performed (str or Location object)
         time_params: Time parameters defining the simulation period and timesteps
     """
@@ -276,22 +275,23 @@ def random_days_from_dataframe(
 ) -> pd.DataFrame :
     """
     This function randomly assign the weather variables of a set of days
-    to the timeseries DataFrame. It returns timeseries updated
+    to the timeseries DataFrame. It returns timeseries updated.
         
     Parameters
     ----------
     timeseries : pd.DataFrame
-        DESCRIPTION.
-    set_days : pd.DataFrame
-        DESCRIPTION.
+        Target timeseries dataframe to fill with weather data.
+    df_sample : pd.DataFrame
+        Source dataframe containing sample weather data.
+    seed_id : Optional[int], optional
+        Random seed for reproducible results. The default is None.
     columns : Optional[list[str]], optional
-        DESCRIPTION. The default is TS_WEATHER.
-    : TYPE
-        DESCRIPTION.
+        List of weather variable columns to process. The default is TS_WEATHER.
 
     Returns
     -------
-    timeseries.
+    pd.DataFrame
+        Updated timeseries dataframe with randomly sampled weather data.
 
     """
     if seed_id is None:

@@ -27,6 +27,9 @@ It is an object-oriented software, with a unit manager in its core, creating two
    variable_system
    props
    htc
+   tsg_settings
+   location
+   tsg_weather
    api
 
 
