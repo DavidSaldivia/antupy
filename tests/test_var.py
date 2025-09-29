@@ -64,3 +64,16 @@ def test_math_methods():
     assert math.trunc(Var(1.141, "m")) == Var(1, "m")
     assert math.floor(Var(1.141, "m")) == Var(1, "m")
     assert math.ceil(Var(1.141, "m")) == Var(2, "m")
+
+def test_admin_influence():
+    power_0 = Var(10, "MW")
+    eta_1 = Var(0.9, "-")
+    eta_2 = Var(0.8, "-")
+    power_1 = power_0 * eta_1
+    power_2 = power_0 / eta_2
+
+    assert power_1 == Var(9, "MW")
+    assert power_1.gv("kW") == 9000
+    assert power_2 == Var(12.5, "MW")
+    assert power_2.gv("kW") == 12500
+    assert (power_1 / power_2).su("") == Var(0.72, "-")

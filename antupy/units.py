@@ -376,10 +376,18 @@ def _conv_temp(temp: Var|Array, unit: str|None) -> float|np.ndarray:
 def _mul_units(unit1: str|None, unit2: str|None) -> str:
     """ Function to merge two units into a single unit by multiplication.
     """
+    admin_units = ["", "-", "adim"]
     if unit1 is None:
         return unit2 if unit2 is not None else ""
     if unit2 is None:
         return unit1
+    if unit1 in admin_units and unit2 not in admin_units:
+        return unit2
+    if unit2 in admin_units and unit1 not in admin_units:
+        return unit1
+    if unit1 in admin_units and unit2 in admin_units:
+        return "-"
+
     top = []
     bottom = []
     if "/" in unit1:
@@ -409,10 +417,16 @@ def _mul_units(unit1: str|None, unit2: str|None) -> str:
 def _div_units(unit1: str|None, unit2: str|None) -> str:
     """ Function to merge two units into a single unit by division
     """
+    admin_units = ["", "-", "adim"]
     if unit1 is None:
         return unit2 if unit2 is not None else ""
     if unit2 is None:
         return unit1
+    if unit2 in admin_units and unit1 not in admin_units:
+        return unit1
+    if unit1 in admin_units and unit2 in admin_units:
+        return "-"
+
     top = []
     bottom = []
     if "/" in unit1:
