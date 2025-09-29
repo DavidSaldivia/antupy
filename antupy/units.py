@@ -6,7 +6,8 @@ import numpy as np
 from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
-    from antupy.core import Var, Array
+    from antupy.core import Array
+    from antupy.var import Var
 
 BASE_UNITS: dict[str, tuple[float, str,str]] = {
     "-": (1e0, "adimensional", "adim"),
@@ -107,62 +108,20 @@ PREFIXES: dict[str, float] = {
     "Q": 1e30, # "quetta"
 }
 
-class UnitDict(TypedDict, total=False):
-    """
-    TypedDict representing the base unit representation with exponents.
-    
-    A dictionary structure containing the eight base units as keys and their 
-    respective exponents as integer values. This provides the standardized 
-    internal representation for all physical units in the system.
-
-    Attributes
-    ----------
-    s : int
-        Exponent for second (time)
-    m : int  
-        Exponent for meter (length)
-    g : int
-        Exponent for gram (mass)
-    K : int
-        Exponent for kelvin (temperature)
-    A : int
-        Exponent for ampere (current)
-    mol : int
-        Exponent for mole (substance)
-    cd : int
-        Exponent for candela (luminous intensity)
-    USD : int
-        Exponent for US dollar (money)
-
-    Examples
-    --------
-    >>> # Force unit (N = kg⋅m⋅s⁻²)
-    >>> force_dict: UnitDict = {
-    ...     "g": 1,  # kg represented as 10³ g
-    ...     "m": 1,  # meter
-    ...     "s": -2, # per second squared
-    ...     "K": 0, "A": 0, "mol": 0, "cd": 0, "USD": 0
-    ... }
-    
-    Notes
-    -----
-    This TypedDict is used internally by the Unit class to represent any physical quantity. It is not expected to be used directly by users.
-    The base units include an additional unit for money (USD) to facilitate financial calculations alongside physical quantities.
-    The mass unit is represented in grams (g) instead of kilograms (kg) to simplify prefix handling.
-    All exponents are integers.
-
-    See Also
-    --------
-    Unit : Main unit class that uses UnitDict for internal representation
-    """
-    s: int
-    m: int
-    g: int
-    K: int
-    A: int
-    mol: int
-    cd: int
-    USD: int
+UnitDict = TypedDict(
+    "UnitDict",
+    {
+        "s": int,
+        "m": int,
+        "g": int,
+        "K": int,
+        "A": int,
+        "mol": int,
+        "cd": int,
+        "USD": int,
+        "-": int,
+    },
+)
 
 BASE_ADIM: UnitDict = {
     "s": 0,
@@ -173,6 +132,7 @@ BASE_ADIM: UnitDict = {
     "mol": 0,
     "cd": 0,
     "USD": 0,
+    "-": 0,
 }
 
 UnitPool = list[tuple[str, int]]
@@ -372,6 +332,13 @@ def _conv_temp(temp: Var|Array, unit: str|None) -> float|np.ndarray:
     else:
         raise ValueError(f"either {temp.unit.u} and/or {unit} is/are incompatible.")
 
+def _assign_unit(unit: str|Unit|None = None) -> Unit:
+    if isinstance(unit, str):
+        return Unit(unit)
+    elif isinstance(unit, Unit):
+        return unit
+    else:
+        raise TypeError(f"{type(unit)} is not a valid type for unit.")
 
 def _mul_units(unit1: str|None, unit2: str|None) -> str:
     """ Function to merge two units into a single unit by multiplication.

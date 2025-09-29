@@ -65,13 +65,15 @@ def test_math_methods():
     assert math.floor(Var(1.141, "m")) == Var(1, "m")
     assert math.ceil(Var(1.141, "m")) == Var(2, "m")
 
-def test_admin_influence():
+def test_adim_influence():
     power_0 = Var(10, "MW")
     eta_1 = Var(0.9, "-")
     eta_2 = Var(0.8, "-")
     power_1 = power_0 * eta_1
     power_2 = power_0 / eta_2
 
+    assert Var(0.9/0.8, "-") == eta_1 / eta_2
+    assert Var(1,"-") == Var(1, "K/K")
     assert power_1 == Var(9, "MW")
     assert power_1.gv("kW") == 9000
     assert power_2 == Var(12.5, "MW")
