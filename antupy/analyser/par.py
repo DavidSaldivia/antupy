@@ -10,7 +10,7 @@ import os
 import copy
 import itertools
 import pickle
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional
@@ -24,7 +24,6 @@ from antupy.core import Var, Array, Simulation, Plant
 # Type aliases for better readability
 ParameterValue = Array | Iterable[str | int | float]
 SimulationType = Simulation | Plant
-
 
 class Parametric:
     """
@@ -100,10 +99,10 @@ class Parametric:
     """
     
     def __init__(
-        self, 
+        self,
         base_case: SimulationType,
-        params_in: dict[str, ParameterValue],
-        params_out: list[str],
+        params_in: Mapping[str, ParameterValue],
+        params_out: list[str] = [],
         save_results_detailed: bool = False,
         dir_output: Path | str | None = None,
         path_results: Path | str | None = None,
@@ -126,7 +125,7 @@ class Parametric:
 
     def setup_cases(
         self, 
-        params_in: dict[str, ParameterValue]
+        params_in: Mapping[str, ParameterValue]
     ) -> tuple[pd.DataFrame, dict[str, str | None]]:
         """
         Create parametric run matrix from input parameters.
@@ -247,6 +246,14 @@ class Parametric:
                 print(f"Error occurred during simulation {idx + 1}: {e}")
                 continue
             
+            if not self.params_out:
+                params_out = list(sim.out.keys())
+            else:
+                params_out = self.params_out
+                missing = [k for k in params_out if k not in sim.out]
+                if missing:
+                    raise KeyError(f"The following params_out are not in sim.out: {missing}")
+
             # Extract outputs
             try:
                 params_out = self.params_out

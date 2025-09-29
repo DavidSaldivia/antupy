@@ -12,10 +12,10 @@ class TimeParams():
     """Time parameters for simulations. Useful for annual simulations, stochastic simulations, representative days simulations.
 
     Parameters:
-        START (Variable): initial time of the simulation (in 'hr') (first hour of the year for annual simulation)
-        STOP (Variable): final time of the year (in 'hr').
-        STEP (Variable): timestep for the simulation (in 'min')
-        YEAR (Variable): Year of the simulation (useful only for annual simulations)
+        START (Var): initial time of the simulation (in 'hr') (first hour of the year for annual simulation)
+        STOP (Var): final time of the year (in 'hr').
+        STEP (Var): timestep for the simulation (in 'min')
+        YEAR (Var): Year of the simulation (useful only for annual simulations)
 
     """
 
@@ -23,6 +23,7 @@ class TimeParams():
     STOP: Var = Var(8760, "hr")
     STEP: Var = Var(60, "min")
     YEAR: Var = Var(1800, "-")
+    engine: str = "polars"  # 'polars' or 'pandas'
 
     @property
     def DAYS(self) -> Var:
@@ -49,7 +50,22 @@ class TimeParams():
         return Var( int(np.ceil((STOP - START)/STEP_h)), "-")
 
     @property
-    def idx(self) -> pl.Series:
+    def idx(self) -> pl.Series|pd.DatetimeIndex:
+
+        """It is the datetime series for the simulation (Polars or Pandas-based)
+
+        Returns:
+            pl.Series|pd.Series: datetime series used for all the timeseries and simulation results
+        """
+        if self.engine == "polars":
+            return self.idx_pl
+        elif self.engine == "pandas":
+            return self.idx_pd
+        else:
+            raise ValueError("engine must be 'polars' or 'pandas'")
+
+    @property
+    def idx_pl(self) -> pl.Series:
         """It is the datetime series for the simulation (Polars-based)
 
         Returns:
@@ -88,6 +104,7 @@ class TimeParams():
 if __name__ == "__main__":
     tp = TimeParams()
     print(tp.idx)
+    print(tp.idx_pl)
     print(tp.idx_pd)
 
     tp = TimeParams(

@@ -16,14 +16,12 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 from antupy.tsg.weather import (
-    load_day_constant_random,
-    random_days_from_dataframe,
+    _load_day_constant_random,
+    _random_days_from_dataframe,
     from_tmy,
-    from_file,
     _load_dataset_meteonorm,
     TS_WEATHER,
-    _VARIABLE_RANGES,
-    _VARIABLE_DEFAULTS
+    _VARIABLE_RANGES
 )
 from antupy.tsg.settings import TimeParams
 from antupy.loc.loc_au import LocationAU
@@ -42,7 +40,7 @@ class TestLoadDayConstantRandom:
     
     def test_basic_functionality(self):
         """Test basic constant day generation."""
-        result = load_day_constant_random(
+        result = _load_day_constant_random(
             self.timeseries.copy(),
             seed_id=42,
             columns=["GHI", "temp_amb"]
@@ -57,7 +55,7 @@ class TestLoadDayConstantRandom:
     
     def test_default_parameters(self):
         """Test with default parameters."""
-        result = load_day_constant_random(self.timeseries.copy())
+        result = _load_day_constant_random(self.timeseries.copy())
         
         assert isinstance(result, pd.DataFrame)
         assert result.shape == self.timeseries.shape
@@ -67,12 +65,12 @@ class TestLoadDayConstantRandom:
     
     def test_reproducibility_with_seed(self):
         """Test that results are reproducible with same seed."""
-        result1 = load_day_constant_random(
+        result1 = _load_day_constant_random(
             self.timeseries.copy(),
             seed_id=42,
             columns=["GHI"]
         )
-        result2 = load_day_constant_random(
+        result2 = _load_day_constant_random(
             self.timeseries.copy(),
             seed_id=42,
             columns=["GHI"]
@@ -82,12 +80,12 @@ class TestLoadDayConstantRandom:
     
     def test_different_seeds_produce_different_results(self):
         """Test that different seeds produce different results."""
-        result1 = load_day_constant_random(
+        result1 = _load_day_constant_random(
             self.timeseries.copy(),
             seed_id=42,
             columns=["temp_amb"]  # Use temp_amb which has a range, not GHI
         )
-        result2 = load_day_constant_random(
+        result2 = _load_day_constant_random(
             self.timeseries.copy(),
             seed_id=123,
             columns=["temp_amb"]
@@ -113,7 +111,7 @@ class TestRandomDaysFromDataframe:
     
     def test_basic_functionality(self):
         """Test basic random day selection."""
-        result = random_days_from_dataframe(
+        result = _random_days_from_dataframe(
             self.timeseries.copy(),
             self.fixture_data,
             seed_id=42,
@@ -127,13 +125,13 @@ class TestRandomDaysFromDataframe:
     
     def test_reproducibility_with_seed(self):
         """Test reproducible results with same seed."""
-        result1 = random_days_from_dataframe(
+        result1 = _random_days_from_dataframe(
             self.timeseries.copy(),
             self.fixture_data,
             seed_id=42,
             columns=["GHI"]
         )
-        result2 = random_days_from_dataframe(
+        result2 = _random_days_from_dataframe(
             self.timeseries.copy(),
             self.fixture_data,
             seed_id=42,
@@ -144,13 +142,13 @@ class TestRandomDaysFromDataframe:
     
     def test_different_seeds_produce_different_results(self):
         """Test that different seeds produce different results."""
-        result1 = random_days_from_dataframe(
+        result1 = _random_days_from_dataframe(
             self.timeseries.copy(),
             self.fixture_data,
             seed_id=42,
             columns=["GHI"]
         )
-        result2 = random_days_from_dataframe(
+        result2 = _random_days_from_dataframe(
             self.timeseries.copy(),
             self.fixture_data,
             seed_id=123,
@@ -213,73 +211,6 @@ class TestFromTmy:
             assert col in result.columns
 
 
-class TestFromFile:
-    """Test from_file utility function using real fixture data."""
-    
-    def setup_method(self):
-        """Set up test fixtures."""
-        self.timeseries = pd.DataFrame(
-            index=pd.date_range('2023-01-01', periods=48, freq='h'),
-            columns=TS_WEATHER
-        )
-        
-        # Path to our real fixture file
-        self.fixture_path = Path(__file__).parent / "fixtures" / "weather" / "weather" / "sample_week_sydney.csv"
-    
-    def test_basic_file_loading(self):
-        """Test basic file loading functionality with real fixture."""
-        result = from_file(
-            self.timeseries.copy(),
-            file_path=str(self.fixture_path),
-            columns=["GHI", "temp_amb"]
-        )
-        
-        assert isinstance(result, pd.DataFrame)
-        assert result.shape == self.timeseries.shape
-        assert "GHI" in result.columns
-        assert "temp_amb" in result.columns
-        # Check that we have valid data
-        assert len(result) > 0
-    
-    def test_subset_random_month(self):
-        """Test from_file with month subset using real data."""
-        # Use January (month 1) since our fixture data is from January
-        result = from_file(
-            self.timeseries.copy(),
-            file_path=str(self.fixture_path),
-            subset_random="month",
-            subset_value=1,  # January
-            columns=["GHI", "temp_amb"]
-        )
-        
-        assert isinstance(result, pd.DataFrame)
-        assert result.shape == self.timeseries.shape
-        # Check that we have some valid data
-        assert len(result) > 0
-    
-    def test_no_subset_tmy_behavior(self):
-        """Test from_file without subset (TMY behavior)."""
-        result = from_file(
-            self.timeseries.copy(),
-            file_path=str(self.fixture_path),
-            subset_random=None,
-            columns=["GHI", "temp_amb"]
-        )
-        
-        assert isinstance(result, pd.DataFrame)
-        assert result.shape == self.timeseries.shape
-        assert not result["temp_amb"].isna().any()
-    
-    def test_invalid_file_path(self):
-        """Test error handling for invalid file path."""
-        with pytest.raises(FileNotFoundError):
-            from_file(
-                self.timeseries.copy(),
-                file_path="/invalid/path/file.csv",
-                columns=["GHI"]
-            )
-
-
 class TestPrivateHelperFunctions:
     """Test private helper functions using simplified mocking."""
     
@@ -337,7 +268,7 @@ class TestEdgeCasesAndErrorHandling:
         # Test with valid range
         valid_ranges = {"GHI": (100.0, 1000.0)}
         
-        result = load_day_constant_random(
+        result = _load_day_constant_random(
             timeseries,
             ranges=valid_ranges,
             seed_id=42,
@@ -360,7 +291,7 @@ class TestEdgeCasesAndErrorHandling:
         df_sample = pd.read_csv(self.fixture_path, index_col=0, parse_dates=True)
         
         # Test with columns that exist in both
-        result = random_days_from_dataframe(
+        result = _random_days_from_dataframe(
             timeseries,
             df_sample,
             seed_id=42,
@@ -392,23 +323,6 @@ class TestEdgeCasesAndErrorHandling:
         assert result.shape == timeseries.shape
         assert not result["GHI"].isna().all()
     
-    def test_from_file_with_fixture(self):
-        """Test from_file function with our fixture data."""
-        timeseries = pd.DataFrame(
-            index=pd.date_range('2023-01-01', periods=48, freq='h'),
-            columns=["GHI", "temp_amb"]
-        )
-        
-        result = from_file(
-            timeseries,
-            file_path=str(self.fixture_path),
-            columns=["GHI", "temp_amb"]
-        )
-        
-        assert isinstance(result, pd.DataFrame)
-        assert result.shape == timeseries.shape
-        assert "GHI" in result.columns
-        assert "temp_amb" in result.columns
 
 
 if __name__ == "__main__":

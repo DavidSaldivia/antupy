@@ -23,7 +23,6 @@ from typing import Optional, Union, Any, Literal, Protocol, runtime_checkable
 from antupy.ddd_au import (
     DIRECTORY,
     DEFINITIONS,
-    DEFAULTS,
     SIMULATIONS_IO
 )
 from antupy.loc.loc_au import (
@@ -49,16 +48,7 @@ FILES_WEATHER = {
     "MERRA2" : os.path.join(DIR_MERRA2, "merra2_processed_all.nc"),
     "NCI": "",
 }
-_VARIABLES_NAMES = {
-    "GHI": "Irradiance",
-    "temp_amb": "Ambient Temperature",
-    "temp_mains": "Mains Temperature",
-}
-_VARIABLE_DEFAULTS = {
-    "GHI" : 1000.,
-    "temp_amb" : 25.,
-    "temp_mains" : 20.,
-}
+
 _VARIABLE_RANGES = {
     "GHI" : (1000.,1000.),
     "temp_amb" : (10.0,40.0),
@@ -67,36 +57,8 @@ _VARIABLE_RANGES = {
 
 # Type alias for simulation types
 WeatherSimulationType = Literal["tmy", "mc", "historical", "constant_day"]
-
-_SIMS_PARAMS: dict[str, dict[str,Any]] = {
-    "tmy": {
-        "dataset": ['METEONORM',],
-        "location": LOCATIONS_METEONORM,
-    },
-    "mc": {
-        "dataset": ['METEONORM', 'MERRA2', 'NCI'],
-        "location": DEFAULTS.LOCATION,
-        "subset": ['all', 'annual', 'season', 'month', 'date'],
-        "random": [True, False],
-        "value": None,
-    },
-    "historical": {
-        "dataset": ['MERRA2', 'NCI', "local"],
-        "location": str,
-        "file_path": str,
-        "list_dates": [pd.DatetimeIndex, pd.Timestamp],
-    },
-    "constant_day": {
-        "dataset": [],
-        "random": [True, False],
-        "values": _VARIABLE_DEFAULTS,
-        "ranges": _VARIABLE_RANGES,
-    }
-}
-list_aux = list()
-for d in _SIMS_PARAMS.keys():
-    list_aux.append(_SIMS_PARAMS[d]["dataset"])
-DATASET_ALL = list(dict.fromkeys( [ x for xs in list_aux for x in xs ] )) #flatten and delete dupl.
+WeatherDatasetType = Literal["meteonorm", "merra2", "local", ""]
+WeatherSubsetType = Literal["all", "annual", "season", "month", "date", None]
 
 
 
@@ -230,12 +192,12 @@ class WeatherConstantDay:
         """Load constant day weather data based on the instance's time_params."""
         ts_index = self.time_params.idx_pd
         ts_df = pd.DataFrame(index=ts_index, columns=TS_WEATHER)
-        return load_day_constant_random(ts_df)
+        return _load_day_constant_random(ts_df)
     
 
 
 #----------
-def load_day_constant_random(
+def _load_day_constant_random(
     timeseries: pd.DataFrame,
     ranges: dict[str,tuple] = _VARIABLE_RANGES,
     seed_id: Optional[int] = None,
@@ -267,33 +229,12 @@ def load_day_constant_random(
 
 
 #---------------------------------
-def random_days_from_dataframe(
+def _random_days_from_dataframe(
     timeseries: pd.DataFrame,
     df_sample: pd.DataFrame,
     seed_id: Optional[int] = None,
     columns: Optional[list[str]] = TS_WEATHER,
 ) -> pd.DataFrame :
-    """
-    This function randomly assign the weather variables of a set of days
-    to the timeseries DataFrame. It returns timeseries updated.
-        
-    Parameters
-    ----------
-    timeseries : pd.DataFrame
-        Target timeseries dataframe to fill with weather data.
-    df_sample : pd.DataFrame
-        Source dataframe containing sample weather data.
-    seed_id : Optional[int], optional
-        Random seed for reproducible results. The default is None.
-    columns : Optional[list[str]], optional
-        List of weather variable columns to process. The default is TS_WEATHER.
-
-    Returns
-    -------
-    pd.DataFrame
-        Updated timeseries dataframe with randomly sampled weather data.
-
-    """
     if seed_id is None:
         seed = np.random.SeedSequence().entropy
     else:
@@ -336,76 +277,6 @@ def from_tmy(
 
     TMY_final.index = timeseries.index
     timeseries[columns] = TMY_final[columns]
-    return timeseries
-
-#---------------------------------
-def from_file(
-    timeseries: pd.DataFrame,
-    file_path: str = "",
-    columns: list[str] = TS_WEATHER,
-    subset_random: str | None = None,
-    subset_value: str | int | pd.Timestamp | None = None,
-) -> pd.DataFrame :
-    """
-    It returns the dataframe timeseries with the weather loaded from a file.
-    It admits optional parameters subset_random and subset_value to select a subset
-    from the source and select randomly days from that subset.
-    If subset_random is None, load the file as TMY. If the simulation period is longer
-    the file is repeated to match it.
-
-    Parameters
-    ----------
-    timeseries : pd.DataFrame
-        The DataFrame defined by profile_new.
-    file_path : str
-        Path to the file. It is assumed the file is in the correct format.
-    columns : Optional[list[str]], optional
-        DESCRIPTION. The default is TS_WEATHER.
-    subset_random : Optional[str], optional
-                    'all': pick from all the dataset,
-                    'annual': the year is defined as subset value.
-                    'season': the season is defined by subset_value
-                                ('summer', 'autumn', 'winter', 'spring')
-                    'month': the month is defined by the integer subset_value (1-12),
-                    'date': the specific date is defined by a pd.datetime,
-                    None: There is not randomization. subset_value is ignored.
-                    The default is None.
-    subset_value : Optional[str,int], optional. Check previous definition.
-                    The default is None.
-
-    Returns
-    -------
-    timeseries : TYPE
-        Returns timeseries with the environmental variables included.
-
-    """
-    
-    set_days = pd.read_csv(file_path, index_col=0)
-    set_days.index = pd.to_datetime(set_days.index)
-    if subset_random == 'annual' and isinstance(subset_value, int):
-        set_days = set_days[
-            set_days.index.year==subset_value
-            ]
-    elif subset_random == 'season' and isinstance(subset_value, str):
-        set_days = set_days[
-            set_days.index.isin(DEFINITION_SEASON[str(subset_value)])
-            ]
-    elif subset_random == 'month' and isinstance(subset_value, int):
-        set_days = set_days[
-            set_days.index.month==subset_value
-            ]
-    elif subset_random == 'date' and isinstance(subset_value, (str, pd.Timestamp)):
-        set_days = set_days[
-            set_days.index.date==pd.to_datetime(subset_value).date()
-            ]  
-    elif subset_random is None:
-        timeseries = from_tmy(
-            timeseries, set_days, columns=columns
-            )
-    else:
-        timeseries = random_days_from_dataframe(
-            timeseries, set_days, columns=columns
-            )   
     return timeseries
 
 # -------------
@@ -467,9 +338,6 @@ def _load_dataset_meteonorm(
         index_col=0
     )
     PERIODS = len(df_dataset)
-
-    temp_mains = df_dataset["temp_mains"].to_numpy()
-    df_dataset["temp_mains"] = np.concatenate((temp_mains[PERIODS//2:], temp_mains[:PERIODS//2]))
 
     start_time = pd.to_datetime(f"{YEAR}-01-01 00:00:00") + pd.DateOffset(hours=START)
     df_dataset.index = pd.date_range( start=start_time, periods=PERIODS, freq=f"{STEP}min")
@@ -600,7 +468,7 @@ def _load_montecarlo(
             ]
     else:
         raise ValueError(f"subset: {subset} not in available options.")
-    df_weather = random_days_from_dataframe( ts, df_sample, columns=columns )
+    df_weather = _random_days_from_dataframe( ts, df_sample, columns=columns )
     return df_weather
 
 #----------------

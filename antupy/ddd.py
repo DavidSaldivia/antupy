@@ -1,6 +1,7 @@
 import os
 import json
 
+from antupy import Var
 
 class DIRECTORY:
     DIR_MAIN = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -73,9 +74,14 @@ class DEFINITIONS:
 
 
 class DEFAULTS():
+    
+    GHI = Var(1000., "W/m2")
+    temp_amb = Var(25., "degC")
+    temp_mains = Var(20., "degC")
+    
     #pv
-    G_STC = 1000.                   #[W/m2]
-    PV_NOMPOW = 5000.               #[W]
+    G_STC = Var(1000., "W/m2")
+    PV_NOMPOW = Var(5000., "W")
     ADR_PARAMS = {
         'k_a': 0.99924,
         'k_d': -5.49097,

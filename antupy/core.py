@@ -617,11 +617,11 @@ class Simulation():
 
 @dataclass
 class Plant():
-    out: dict = field(default_factory=dict)
+    out: dict[str, Var|Array|float] = field(default_factory=dict)
     
     def __post_init__(self): ...
 
-    def run_simulation(self, verbose: bool = True) -> None: ...
+    def run_simulation(self, verbose: bool = False) -> dict[str, Var|Array|float]: ...
 
 
 class Analyser():

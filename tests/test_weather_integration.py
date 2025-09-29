@@ -120,7 +120,7 @@ class TestWeatherDataLoading:
         # Verify result
         assert isinstance(result, pd.DataFrame)
     
-    @patch('antupy.tsg.weather.load_day_constant_random')
+    @patch('antupy.tsg.weather._load_day_constant_random')
     def test_weatherconstantday_load_data_integration(self, mock_load_constant):
         """Test WeatherConstantDay load_data integration with mock data."""
         mock_load_constant.return_value = self.sample_weather_data
@@ -269,7 +269,7 @@ class TestWeatherEdgeCases:
             YEAR=Var(2023, "-")
         )
     
-    @patch('antupy.tsg.weather.load_day_constant_random')
+    @patch('antupy.tsg.weather._load_day_constant_random')
     def test_single_timestep_constantday(self, mock_load_constant):
         """Test WeatherConstantDay with single timestep."""
         mock_data = pd.DataFrame({

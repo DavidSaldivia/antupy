@@ -2,6 +2,7 @@ import os
 
 import json
 
+from antupy import Var
 from antupy.ddd import DIRECTORY as DIR_BASE
 from antupy.ddd import DEFINITIONS as DEF_BASE
 from antupy.ddd import DEFAULTS as DEFAULT_BASE
