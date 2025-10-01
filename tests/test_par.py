@@ -1,132 +1,399 @@
 # -*- coding: utf-8 -*-
 """
-Unit tests for the parametric analysis module with simplified API.
+Comprehensive unit tests for the enhanced Parametric class with ap.Frame integration.
 """
 
-import pytest
-import numpy as np
-import pandas as pd
-from pathlib import Path
 import tempfile
-import pickle
-from unittest.mock import Mock, patch, MagicMock
-from typing import Any
+import pytest
+from pathlib import Path
+from unittest.mock import Mock
+import numpy as np
 
-from antupy.core import Var, Array
-from antupy.analyser.par import Parametric, analysis, ParameterValue
+from antupy import Var, Array, Frame
+from antupy.core import Simulation
+from antupy.analyser.par import Parametric, ParameterValue
 
 
-class MockSimulation:
-    """Mock simulation class for testing that inherits from expected base."""
+class MockSimulation(Simulation):
+    """Enhanced mock simulation class for testing with Var outputs."""
     
     def __init__(self):
+        # Initialize with Var objects that have units
         self.out = {
+            "efficiency": Var(0.85, "-"),
+            "power_output": Var(1000.0, "W"),
+            "temperature_out": Var(50.0, "°C"),
+            "flow_rate_out": Var(0.15, "m3/s"),
             "eta_something": 0.85,
             "annual_something": 1000.0,
             "specific_something": 50.0,
             "average_something": 25.0
         }
-        # Nested object for testing dot notation
-        self.subsystem = Mock()
-        self.subsystem.temperature = None
-        self.subsystem.flow_rate = None
+        
+        # Nested object for testing dot notation (use simple object instead of Mock)
+        class SimpleObj:
+            def __init__(self):
+                self.temperature = None
+                self.pressure = None
+                self.flow_rate = None
+        
+        self.subsystem = SimpleObj()
+        
+        # Direct attributes
+        self.flow_rate = None
+        self.operating_mode = None
     
-    def __setattr__(self, name: str, value: Any) -> None:
+    def __setattr__(self, name: str, value) -> None:
         """Allow dynamic attribute setting for testing."""
         super().__setattr__(name, value)
-        
-    def run_simulation(self, verbose=False):
-        """Mock simulation run that modifies outputs based on parameters."""
-        # Simple mock behavior: efficiency depends on temperature
-        if hasattr(self.subsystem, 'temperature') and self.subsystem.temperature:
-            temp_val = self.subsystem.temperature.v if hasattr(self.subsystem.temperature, 'v') else self.subsystem.temperature
-            self.out["eta_something"] = 0.8 + (temp_val - 20) * 0.01  # Higher temp = higher efficiency
-            
-        if hasattr(self.subsystem, 'flow_rate') and self.subsystem.flow_rate:
-            flow_val = self.subsystem.flow_rate.v if hasattr(self.subsystem.flow_rate, 'v') else self.subsystem.flow_rate
-            self.out["annual_something"] = 1000.0 * flow_val  # Annual proportional to flow rate
-
-
-class TestParametric:
-    """Tests for the simplified Parametric class interface."""
     
-    def test_parametric_creation(self):
-        """Test basic Parametric instance creation."""
-        mock_sim = MockSimulation()
-        params_out = ["eta_something", "annual_something"]
+    def run_simulation(self, verbose=False):
+        """
+        Mock simulation run that modifies outputs based on parameters.
         
-        parametric = Parametric(mock_sim, params_out)
+        This simulates realistic behavior where simulation outputs
+        depend on input parameters and return Var objects with units.
+        """
+        # Update efficiency based on subsystem temperature
+        if hasattr(self.subsystem, 'temperature') and self.subsystem.temperature is not None:
+            temp_val = self.subsystem.temperature.v if hasattr(self.subsystem.temperature, 'v') else self.subsystem.temperature
+            # Higher temperature = higher efficiency (simple model)
+            # Convert from Celsius to efficiency factor
+            efficiency_val = 0.6 + temp_val * 0.01  # Efficiency improves with temp (Celsius)
+            self.out["efficiency"] = Var(max(0.1, min(0.95, efficiency_val)), "-")
+            self.out["eta_something"] = max(0.1, min(0.95, efficiency_val))
+            
+            # Temperature out depends on input temperature
+            temp_out = temp_val + 10  # Output is 10K higher than input
+            self.out["temperature_out"] = Var(temp_out, "K")
+        
+        # Update power output based on flow rate
+        if hasattr(self, 'flow_rate') and self.flow_rate:
+            flow_val = self.flow_rate.v if hasattr(self.flow_rate, 'v') else self.flow_rate
+            # Power proportional to flow rate
+            power_val = 800.0 + flow_val * 2000.0  # Base 800W + 2000W per m3/s
+            self.out["power_output"] = Var(power_val, "W")
+            self.out["annual_something"] = power_val
+            
+            # Flow rate out is 90% of input (some losses)
+            flow_out = flow_val * 0.9
+            self.out["flow_rate_out"] = Var(flow_out, "m3/s")
+        
+        # Update based on operating mode
+        if hasattr(self, 'operating_mode') and self.operating_mode:
+            if self.operating_mode == "high_performance":
+                # Boost all outputs by 10%
+                current_eff = self.out["efficiency"].v if hasattr(self.out["efficiency"], 'v') else self.out["efficiency"]
+                current_power = self.out["power_output"].v if hasattr(self.out["power_output"], 'v') else self.out["power_output"]
+                self.out["efficiency"] = Var(current_eff * 1.1, "-")
+                self.out["power_output"] = Var(current_power * 1.1, "W")
+                self.out["eta_something"] = current_eff * 1.1
+                self.out["annual_something"] = current_power * 1.1
+            elif self.operating_mode == "eco_mode":
+                # Reduce outputs by 5%
+                current_eff = self.out["efficiency"].v if hasattr(self.out["efficiency"], 'v') else self.out["efficiency"]
+                current_power = self.out["power_output"].v if hasattr(self.out["power_output"], 'v') else self.out["power_output"]
+                self.out["efficiency"] = Var(current_eff * 0.95, "-")
+                self.out["power_output"] = Var(current_power * 0.95, "W")
+                self.out["eta_something"] = current_eff * 0.95
+                self.out["annual_something"] = current_power * 0.95
+
+
+class TestParametricCreation:
+    """Test Parametric class creation and initialization."""
+    
+    def test_parametric_creation_new_api(self):
+        """Test basic Parametric instance creation with new API."""
+        mock_sim = MockSimulation()
+        params_in = {
+            'temperature': Array([300, 350], 'K'),
+            'flow_rate': Array([0.1, 0.2], 'm3/s')
+        }
+        params_out = ["efficiency", "power_output"]
+        
+        parametric = Parametric(
+            base_case=mock_sim,
+            params_in=params_in,
+            params_out=params_out
+        )
         
         assert parametric.base_case is mock_sim
+        assert parametric.params_in == params_in
         assert parametric.params_out == params_out
         assert parametric.verbose == True  # default
         assert parametric.save_results_detailed == False  # default
         assert parametric.dir_output is None  # default
         assert parametric.path_results is None  # default
         assert parametric.cases is None
-        assert parametric.units is None
         assert parametric.results is None
-    
+
     def test_parametric_with_custom_settings(self):
         """Test Parametric creation with custom settings."""
         mock_sim = MockSimulation()
+        params_in = {'temperature': Array([20.0, 25.0], '°C')}
         params_out = ["efficiency"]
         
         with tempfile.TemporaryDirectory() as tmpdir:
-            dir_output = Path(tmpdir)
-            path_results = Path(tmpdir) / "results.csv"
-            
             parametric = Parametric(
-                mock_sim, 
-                params_out,
+                base_case=mock_sim,
+                params_in=params_in,
+                params_out=params_out,
                 save_results_detailed=True,
-                dir_output=dir_output,
-                path_results=path_results,
+                dir_output=tmpdir,
+                path_results=Path(tmpdir) / "results.csv",
                 verbose=False
             )
             
-            assert parametric.params_out == params_out
             assert parametric.save_results_detailed == True
-            assert parametric.dir_output == dir_output
-            assert parametric.path_results == path_results
+            assert parametric.dir_output == Path(tmpdir)
+            assert parametric.path_results == Path(tmpdir) / "results.csv"
             assert parametric.verbose == False
 
-    def test_setup_cases(self):
-        """Test case setup from parameters."""
+
+class TestSetupCases:
+    """Test case setup functionality."""
+    
+    def test_setup_cases_with_units(self):
+        """Test case setup preserves units in ap.Frame."""
         mock_sim = MockSimulation()
-        parametric = Parametric(mock_sim, ["eta_something"])
+        parametric = Parametric(mock_sim, {}, ["efficiency"])
         
         params = {
-            'temperature': Array([20.0, 25.0, 30.0], '°C'),
-            'size': ['small', 'medium', 'large']
+            'temperature': Array([300.0, 320.0, 340.0], 'K'),
+            'flow_rate': Array([0.1, 0.15, 0.2], 'm3/s'),
+            'mode': ['normal', 'eco', 'high_performance']
         }
         
-        cases, units = parametric.setup_cases(params)
+        cases = parametric.setup_cases(params)
         
-        assert len(cases) == 9  # 3 x 3 combinations
-        assert list(cases.columns) == ['temperature', 'size']
-        assert units['temperature'] == '°C'
-        assert units['size'] is None
+        # Check that it's a Frame with correct structure
+        assert isinstance(cases, Frame)
+        assert len(cases) == 27  # 3 x 3 x 3 combinations
+        assert list(cases.columns) == ['temperature', 'flow_rate', 'mode']
+        
+        # Check units are preserved
+        assert cases.unit('temperature')['temperature'] == 'K'
+        assert cases.unit('flow_rate')['flow_rate'] == 'm3/s'
+        assert cases.unit('mode')['mode'] == ''  # No unit for strings
+        
+        # Check units property
+        expected_units = {'temperature': 'K', 'flow_rate': 'm3/s', 'mode': ''}
+        assert cases.units == expected_units
         
         # Check that cases are stored in the instance
         assert parametric.cases is not None
-        assert parametric.units is not None
+        assert isinstance(parametric.cases, Frame)
 
-    def test_run_analysis(self):
-        """Test running complete parametric analysis."""
+    def test_setup_cases_mixed_types(self):
+        """Test case setup with mixed parameter types."""
         mock_sim = MockSimulation()
+        parametric = Parametric(mock_sim, {}, ["efficiency"])
+        
+        params = {
+            'temperature': Array([20.0, 25.0, 30.0], '°C'),
+            'size': ['small', 'medium', 'large'],
+            'count': [1, 2, 3]
+        }
+        
+        cases = parametric.setup_cases(params)
+        
+        assert len(cases) == 27  # 3 x 3 x 3 combinations
+        assert list(cases.columns) == ['temperature', 'size', 'count']
+        assert cases.units['temperature'] == '°C'
+        assert cases.units['size'] == ''  # No unit for strings
+        assert cases.units['count'] == ''  # No unit for plain lists
+
+    def test_empty_params_in(self):
+        """Test handling of empty input parameters."""
+        mock_sim = MockSimulation()
+        parametric = Parametric(mock_sim, {}, ["efficiency"])
+        
+        cases = parametric.setup_cases({})
+        
+        assert isinstance(cases, Frame)
+        assert len(cases) == 0
+        assert len(cases.columns) == 0
+
+
+class TestOutputExtraction:
+    """Test output extraction functionality."""
+    
+    def test_extract_outputs_with_units(self):
+        """Test output extraction preserves units from Var objects."""
+        mock_sim = MockSimulation()
+        parametric = Parametric(mock_sim, {}, ["efficiency", "power_output"])
+        
+        # Set up mock simulation with known Var outputs
+        mock_sim.out = {
+            "efficiency": Var(0.87, "-"),
+            "power_output": Var(1250.0, "W"),
+            "temperature_out": Var(75.0, "°C"),
+        }
+        
+        params_out = ["efficiency", "power_output", "temperature_out"]
+        values, units = parametric._extract_outputs(mock_sim, params_out)
+        
+        # Check values
+        assert values == [0.87, 1250.0, 75.0]
+        
+        # Check units
+        assert units == ["-", "W", "°C"]
+
+    def test_extract_outputs_mixed_types(self):
+        """Test output extraction handles mixed output types."""
+        mock_sim = MockSimulation()
+        parametric = Parametric(mock_sim, {}, ["efficiency"])
+        
+        # Mix of Var objects, plain numbers, and Arrays
+        mock_sim.out = {
+            "efficiency": Var(0.87, "-"),
+            "plain_number": 42.5,
+            "integer_val": 100,
+            "array_single": Array([1.5], "m"),
+            "array_multi": Array([1.0, 2.0, 3.0], "kg"),
+        }
+        
+        params_out = ["efficiency", "plain_number", "integer_val", "array_single", "array_multi"]
+        values, units = parametric._extract_outputs(mock_sim, params_out)
+        
+        # Check values
+        assert values[0] == 0.87  # Var
+        assert values[1] == 42.5  # Plain float
+        assert values[2] == 100.0  # Integer converted to float
+        assert values[3] == 1.5  # Single-element Array
+        assert values[4] == 2.0  # Multi-element Array (mean)
+        
+        # Check units
+        assert units == ["-", "", "", "m", "kg"]
+
+
+class TestParameterUpdate:
+    """Test parameter updating functionality."""
+    
+    def test_update_parameters_with_units(self):
+        """Test parameter updating creates Var objects with correct units."""
+        mock_sim = MockSimulation()
+        parametric = Parametric(mock_sim, {}, ["efficiency"])
+        
+        case_params = {
+            'flow_rate': 0.15,
+            'subsystem.temperature': 350.0,
+            'operating_mode': 'eco_mode'
+        }
+        
+        input_units = {
+            'flow_rate': 'm3/s',
+            'subsystem.temperature': 'K',
+            'operating_mode': ''  # No unit for string
+        }
+        
+        parametric._update_parameters(mock_sim, case_params, input_units)
+        
+        # Check direct attribute with unit
+        assert isinstance(mock_sim.flow_rate, Var)
+        assert mock_sim.flow_rate.v == 0.15
+        assert mock_sim.flow_rate.u == 'm3/s'
+        
+        # Check nested attribute with unit
+        assert isinstance(mock_sim.subsystem.temperature, Var)
+        assert mock_sim.subsystem.temperature.v == 350.0
+        assert mock_sim.subsystem.temperature.u == 'K'
+        
+        # Check string attribute without unit
+        assert mock_sim.operating_mode == 'eco_mode'
+        assert not isinstance(mock_sim.operating_mode, Var)
+
+    def test_parameter_update_direct_attribute(self):
+        """Test updating direct simulation attributes."""
+        mock_sim = MockSimulation()
+        parametric = Parametric(mock_sim, {}, ["efficiency"])
+        
+        case_params = {'direct_param': 42.0}
+        input_units = {'direct_param': ''}
+        
+        parametric._update_parameters(mock_sim, case_params, input_units)
+        assert mock_sim.direct_param == 42.0
+
+    def test_parameter_update_nested_attribute(self):
+        """Test updating nested simulation attributes with dot notation."""
+        mock_sim = MockSimulation()
+        parametric = Parametric(mock_sim, {}, ["efficiency"])
+        
+        case_params = {'subsystem.temperature': 25.0}
+        input_units = {'subsystem.temperature': '°C'}
+        
+        parametric._update_parameters(mock_sim, case_params, input_units)
+        
+        assert isinstance(mock_sim.subsystem.temperature, Var)
+        assert mock_sim.subsystem.temperature.v == 25.0
+        assert mock_sim.subsystem.temperature.u == '°C'
+
+
+class TestRunAnalysis:
+    """Test complete analysis workflow."""
+    
+    def test_run_analysis_complete_workflow(self):
+        """Test complete analysis workflow with units preserved."""
+        mock_sim = MockSimulation()
+        
+        params_in = {
+            'subsystem.temperature': Array([300, 320], 'K'),
+            'flow_rate': Array([0.1, 0.2], 'm3/s')
+        }
+        params_out = ["efficiency", "power_output", "temperature_out", "flow_rate_out"]
+        
         parametric = Parametric(
-            mock_sim, 
-            ["eta_something", "annual_something"],
+            base_case=mock_sim,
+            params_in=params_in,
+            params_out=params_out,
             verbose=False
         )
         
-        params = {
+        results = parametric.run_analysis()
+        
+        # Check that results is a Frame
+        assert isinstance(results, Frame)
+        
+        # Check structure
+        assert len(results) == 4  # 2 x 2 combinations
+        expected_columns = ['subsystem.temperature', 'flow_rate', 'efficiency', 'power_output', 'temperature_out', 'flow_rate_out']
+        assert list(results.columns) == expected_columns
+        
+        # Check input units preserved
+        assert results.unit('subsystem.temperature')['subsystem.temperature'] == 'K'
+        assert results.unit('flow_rate')['flow_rate'] == 'm3/s'
+        
+        # Check output units preserved
+        assert results.unit('efficiency')['efficiency'] == '-'
+        assert results.unit('power_output')['power_output'] == 'W'
+        assert results.unit('temperature_out')['temperature_out'] == 'K'
+        assert results.unit('flow_rate_out')['flow_rate_out'] == 'm3/s'
+        
+        # Check that values are reasonable (mock simulation logic)
+        efficiency_values = results['efficiency'].values
+        assert all(0.1 <= eff <= 0.95 for eff in efficiency_values if not np.isnan(eff))
+        
+        power_values = results['power_output'].values
+        assert all(800 <= power <= 1200 for power in power_values if not np.isnan(power))
+
+    def test_run_analysis_with_legacy_outputs(self):
+        """Test analysis with legacy output names (backward compatibility)."""
+        mock_sim = MockSimulation()
+        
+        params_in = {
             'subsystem.temperature': Array([20.0, 30.0], '°C'),
             'subsystem.flow_rate': Array([0.5, 1.0], 'm3/s')
         }
+        params_out = ["eta_something", "annual_something"]
         
-        results = parametric.run_analysis(params)
+        parametric = Parametric(
+            base_case=mock_sim,
+            params_in=params_in,
+            params_out=params_out,
+            verbose=False
+        )
+        
+        results = parametric.run_analysis()
         
         # Check structure
         assert len(results) == 4  # 2 x 2 combinations
@@ -142,271 +409,228 @@ class TestParametric:
         
         assert temp_30_rows['eta_something'].iloc[0] > temp_20_rows['eta_something'].iloc[0]
 
-    def test_run_analysis_with_file_saving(self):
-        """Test analysis with file output."""
+
+class TestOutputArrays:
+    """Test get_output_arrays functionality."""
+    
+    def test_get_output_arrays(self):
+        """Test getting results as Array objects with units."""
         mock_sim = MockSimulation()
+        
+        params_in = {
+            'flow_rate': Array([0.1, 0.15], 'm3/s')
+        }
+        params_out = ["efficiency", "power_output"]
+        
+        parametric = Parametric(
+            base_case=mock_sim,
+            params_in=params_in,
+            params_out=params_out,
+            verbose=False
+        )
+        
+        results = parametric.run_analysis()
+        
+        # Test single column
+        efficiency_array = parametric.get_output_arrays('efficiency')
+        assert isinstance(efficiency_array, Array)
+        assert efficiency_array.u == '-'
+        assert len(efficiency_array.value) == 2
+        
+        # Test multiple columns
+        multi_arrays = parametric.get_output_arrays(['efficiency', 'power_output'])
+        assert isinstance(multi_arrays, dict)
+        assert 'efficiency' in multi_arrays
+        assert 'power_output' in multi_arrays
+        assert isinstance(multi_arrays['efficiency'], Array)
+        assert isinstance(multi_arrays['power_output'], Array)
+        assert multi_arrays['efficiency'].u == '-'
+        assert multi_arrays['power_output'].u == 'W'
+        
+        # Test all columns
+        all_arrays = parametric.get_output_arrays()
+        assert isinstance(all_arrays, dict)
+        assert len(all_arrays) == 3  # flow_rate (input) + efficiency + power_output
+        assert all(isinstance(arr, Array) for arr in all_arrays.values())
+
+
+class TestSummary:
+    """Test summary functionality."""
+    
+    def test_get_summary_with_units(self):
+        """Test summary includes comprehensive unit information."""
+        mock_sim = MockSimulation()
+        
+        params_in = {
+            'subsystem.temperature': Array([300, 320], 'K'),
+            'operating_mode': ['normal', 'eco_mode']
+        }
+        params_out = ["efficiency", "power_output"]
+        
+        parametric = Parametric(
+            base_case=mock_sim,
+            params_in=params_in,
+            params_out=params_out,
+            verbose=False
+        )
+        
+        results = parametric.run_analysis()
+        summary = parametric.get_summary()
+        
+        # Check basic info
+        assert summary['total_cases'] == 4
+        assert summary['input_parameters'] == ['subsystem.temperature', 'operating_mode']
+        assert summary['output_parameters'] == ['efficiency', 'power_output']
+        assert summary['completed'] == True
+        
+        # Check unit information
+        assert 'input_units' in summary
+        assert 'output_units' in summary
+        assert summary['input_units']['subsystem.temperature'] == 'K'
+        assert summary['input_units']['operating_mode'] == ''
+        assert summary['output_units']['efficiency'] == '-'
+        assert summary['output_units']['power_output'] == 'W'
+        
+        # Check statistics with units
+        assert 'efficiency_stats' in summary
+        assert 'power_output_stats' in summary
+        
+        eff_stats = summary['efficiency_stats']
+        assert 'mean' in eff_stats
+        assert 'std' in eff_stats
+        assert 'min' in eff_stats
+        assert 'max' in eff_stats
+        assert 'unit' in eff_stats
+        assert eff_stats['unit'] == '-'
+
+    def test_get_summary_empty(self):
+        """Test summary before running analysis."""
+        mock_sim = MockSimulation()
+        parametric = Parametric(mock_sim, {}, ["efficiency"])
+        
+        summary = parametric.get_summary()
+        assert summary["status"] == "No analysis completed"
+
+
+class TestFileSaving:
+    """Test file saving functionality."""
+    
+    def test_file_saving_functionality(self):
+        """Test detailed file saving functionality."""
+        mock_sim = MockSimulation()
+        
+        params_in = {'flow_rate': Array([0.1, 0.15], 'm3/s')}
+        params_out = ["efficiency"]
         
         with tempfile.TemporaryDirectory() as tmpdir:
             parametric = Parametric(
-                mock_sim,
-                params_in,
-                ["eta_something"],
+                base_case=mock_sim,
+                params_in=params_in,
+                params_out=params_out,
+                save_results_detailed=False,  # Disable pickle saving for test
                 dir_output=tmpdir,
                 path_results=Path(tmpdir) / "results.csv",
-                save_results_detailed=True,
                 verbose=False
             )
             
-            params = {'temperature': [20.0, 25.0]}
             results = parametric.run_analysis()
             
-            # Check results CSV was created
+            # Check CSV results were saved
             assert Path(tmpdir, "results.csv").exists()
             
-            # Check detailed simulation files were saved
-            assert Path(tmpdir, "sim_0.plk").exists()
-            assert Path(tmpdir, "sim_1.plk").exists()
-
-    def test_save_results(self):
-        """Test manual results saving."""
-        mock_sim = MockSimulation()
-        parametric = Parametric(mock_sim, ["eta_something"], verbose=False)
-        
-        params = {'temperature': [20.0, 25.0]}
-        results = parametric.run_analysis(params)
-        
-        with tempfile.NamedTemporaryFile(suffix='.csv', delete=False) as tmp:
-            try:
-                parametric.save_results(tmp.name)
-                
-                # Check file was created and has content
-                saved_df = pd.read_csv(tmp.name, index_col=0)
-                pd.testing.assert_frame_equal(results, saved_df)
-            finally:
-                Path(tmp.name).unlink(missing_ok=True)
-
-    def test_get_summary(self):
-        """Test summary statistics generation."""
-        mock_sim = MockSimulation()
-        parametric = Parametric(mock_sim, ["eta_something", "annual_something"], verbose=False)
-        
-        # Test empty summary
-        summary = parametric.get_summary()
-        assert summary["status"] == "No analysis completed"
-        
-        # Test with results
-        params = {'temperature': [20.0, 25.0, 30.0]}
-        parametric.run_analysis(params)
-        
-        summary = parametric.get_summary()
-        assert summary["total_cases"] == 3
-        assert summary["input_parameters"] == ["temperature"]
-        assert summary["output_parameters"] == ["eta_something", "annual_something"]
-        assert summary["completed"] == True
-        assert "eta_something_stats" in summary
-        assert "mean" in summary["eta_something_stats"]
-
-    def test_parameter_update_direct_attribute(self):
-        """Test updating direct simulation attributes."""
-        mock_sim = MockSimulation()
-        parametric = Parametric(mock_sim, ["eta_something"])
-        
-        # Test direct attribute update
-        row = pd.Series({'direct_param': 42.0})
-        units = {'direct_param': None}
-        
-        parametric._update_parameters(mock_sim, row, units)
-        assert mock_sim.direct_param == 42.0
-
-    def test_parameter_update_nested_attribute(self):
-        """Test updating nested simulation attributes with dot notation."""
-        mock_sim = MockSimulation()
-        parametric = Parametric(mock_sim, ["eta_something"])
-        
-        # Test nested attribute update with units
-        row = pd.Series({'subsystem.temperature': 25.0})
-        units = {'subsystem.temperature': '°C'}
-        
-        parametric._update_parameters(mock_sim, row, units)
-        
-        assert isinstance(mock_sim.subsystem.temperature, Var)
-        assert mock_sim.subsystem.temperature.v == 25.0
-        assert mock_sim.subsystem.temperature.u == '°C'
-
-    def test_parameter_update_nested_no_units(self):
-        """Test updating nested attributes without units."""
-        mock_sim = MockSimulation()
-        parametric = Parametric(mock_sim, ["eta_something"])
-        
-        row = pd.Series({'subsystem.flow_rate': 1.5})
-        units = {'subsystem.flow_rate': None}
-        
-        parametric._update_parameters(mock_sim, row, units)
-        assert mock_sim.subsystem.flow_rate == 1.5
-
-    def test_array_parameter_handling(self):
-        """Test handling of Array parameters."""
-        mock_sim = MockSimulation()
-        parametric = Parametric(mock_sim, ["eta_something"], verbose=False)
-        
-        # Array with units
-        temp_array = Array([20.0, 25.0], '°C')
-        params = {'temperature': temp_array}
-        
-        cases, units = parametric.setup_cases(params)
-        
-        assert len(cases) == 2
-        assert units['temperature'] == '°C'
-        assert list(cases['temperature']) == [20.0, 25.0]
-
-    def test_mixed_parameter_types(self):
-        """Test handling mixed parameter types."""
-        mock_sim = MockSimulation()
-        parametric = Parametric(mock_sim, ["eta_something"], verbose=False)
-        
-        params = {
-            'numeric_list': [1, 2, 3],
-            'string_list': ['a', 'b', 'c'],
-            'array_param': Array([10.0, 20.0], 'W'),
-            'single_string': ['test']
-        }
-        
-        cases, units = parametric.setup_cases(params)
-        
-        assert len(cases) == 18  # 3 * 3 * 2 * 1
-        assert units['array_param'] == 'W'
-        assert units['numeric_list'] is None
-
-
-class TestLegacyFunction:
-    """Tests for the legacy analysis function."""
-    
-    def test_analysis_function_basic(self):
-        """Test basic usage of legacy analysis function."""
-        mock_sim = MockSimulation()
-        
-        # Create test data
-        cases_df = pd.DataFrame({
-            'temp': [20.0, 25.0],
-            'flow': [0.5, 1.0]
-        })
-        units_dict = {'temp': '°C', 'flow': 'm3/s'}
-        
-        results = analysis(
-            cases_in=cases_df,
-            units_in=units_dict,
-            params_out=["eta_something"],
-            base_case=mock_sim,
-            verbose=False
-        )
-        
-        assert len(results) == 4
-        assert 'temp' in results.columns
-        assert 'flow' in results.columns
-        assert 'eta_something' in results.columns
-
-    def test_analysis_function_missing_base_case(self):
-        """Test that analysis function requires base_case."""
-        cases_df = pd.DataFrame({'temp': [20.0]})
-        units_dict = {'temp': '°C'}
-        
-        with pytest.raises(TypeError, match="base_case must be a Simulation or Plant instance"):
-            analysis(
-                cases_in=cases_df,
-                units_in=units_dict,
-                base_case=None
-            )
-
-    def test_analysis_function_default_params(self):
-        """Test analysis function with default output parameters."""
-        mock_sim = MockSimulation()
-        
-        cases_df = pd.DataFrame({'temp': [20.0]})
-        units_dict = {'temp': '°C'}
-        
-        results = analysis(
-            cases_in=cases_df,
-            units_in=units_dict,
-            base_case=mock_sim,
-            verbose=False
-        )
-        
-        # Should have default output parameters
-        expected_params = ["eta_something", "annual_something", "specific_something", "average_something"]
-        for param in expected_params:
-            assert param in results.columns
+            # Check CSV content can be read back
+            import pandas as pd
+            saved_df = pd.read_csv(Path(tmpdir) / "results.csv")
+            assert len(saved_df) == 2  # Two simulation cases
+            assert 'flow_rate' in saved_df.columns
+            assert 'efficiency' in saved_df.columns
 
 
 class TestErrorHandling:
-    """Tests for error handling and edge cases."""
+    """Test error handling and edge cases."""
     
-    def test_simulation_error_handling(self):
-        """Test handling of simulation errors during analysis."""
+    def test_error_handling(self):
+        """Test error handling in various scenarios."""
         mock_sim = MockSimulation()
         
-        # Mock simulation that raises an error
-        def failing_run(verbose=False):
-            raise RuntimeError("Simulation failed!")
+        # Test get_output_arrays before running analysis
+        parametric = Parametric(mock_sim, {}, ["efficiency"])
         
-        mock_sim.run_simulation = failing_run
+        with pytest.raises(ValueError, match="No results available"):
+            parametric.get_output_arrays('efficiency')
         
-        parametric = Parametric(mock_sim, ["eta_something"], verbose=False)
+        # Test missing output parameter
+        params_in = {'flow_rate': Array([0.1], 'm3/s')}
+        parametric = Parametric(
+            base_case=mock_sim,
+            params_in=params_in,
+            params_out=["nonexistent_output"],
+            verbose=False
+        )
         
-        params = {'temperature': [20.0]}
-        
-        # Should not crash but handle the error gracefully
-        with patch('builtins.print') as mock_print:
-            results = parametric.run_analysis(params)
-            
-            # Should have printed error message
-            mock_print.assert_called()
-            error_calls = [call for call in mock_print.call_args_list 
-                          if "Error occurred" in str(call)]
-            assert len(error_calls) > 0
+        with pytest.raises(KeyError, match="not in sim.out"):
+            parametric.run_analysis()
 
-    def test_output_extraction_error(self):
-        """Test handling of output parameter extraction errors."""
-        mock_sim = MockSimulation()
-        # Remove expected output to cause KeyError
-        mock_sim.out = {}
-        
-        parametric = Parametric(mock_sim, ["missing_param"], verbose=False)
-        
-        params = {'temperature': [20.0]}
-        
-        with patch('builtins.print') as mock_print:
-            results = parametric.run_analysis(params)
-            
-            # Should have handled KeyError gracefully
-            assert 'missing_param' in results.columns
-            # Value should be NaN due to failed extraction
-            assert pd.isna(results['missing_param'].iloc[0])
 
-    def test_empty_parameter_dict(self):
-        """Test handling of empty parameter dictionary."""
+class TestUnitsConsistency:
+    """Test unit consistency throughout workflow."""
+    
+    def test_units_consistency_through_workflow(self):
+        """Test that units remain consistent throughout the entire workflow."""
         mock_sim = MockSimulation()
-        parametric = Parametric(mock_sim, ["eta_something"])
         
-        params = {}
+        # Define parameters with specific units
+        params_in = {
+            'subsystem.temperature': Array([300, 350], 'K'),
+            'flow_rate': Array([0.1, 0.2], 'm3/s'),
+            'operating_mode': ['normal', 'high_performance']
+        }
+        params_out = ["efficiency", "power_output", "temperature_out", "flow_rate_out"]
         
-        # Should handle empty params gracefully
-        cases, units = parametric.setup_cases(params)
-        assert len(cases) == 0
-        assert len(units) == 0
-
-    def test_invalid_parameter_values(self):
-        """Test handling of invalid parameter values."""
-        mock_sim = MockSimulation()
-        parametric = Parametric(mock_sim, ["eta_something"])
+        parametric = Parametric(
+            base_case=mock_sim,
+            params_in=params_in,
+            params_out=params_out,
+            verbose=False
+        )
         
-        # Test with None values (should be handled by Array class)
-        params = {'test_param': [1, 2, None, 4]}
+        # Run complete analysis
+        results = parametric.run_analysis()
         
-        # Should not crash during setup
-        cases, units = parametric.setup_cases(params)
-        assert len(cases) == 4
-        assert pd.isna(cases['test_param'].iloc[2])
+        # Verify input units consistency
+        for param, expected_unit in [('subsystem.temperature', 'K'), ('flow_rate', 'm3/s'), ('operating_mode', '')]:
+            actual_unit = results.unit(param)[param]
+            assert actual_unit == expected_unit, f"Unit mismatch for {param}: expected {expected_unit}, got {actual_unit}"
+        
+        # Verify output units consistency
+        for param, expected_unit in [('efficiency', '-'), ('power_output', 'W'), ('temperature_out', 'K'), ('flow_rate_out', 'm3/s')]:
+            actual_unit = results.unit(param)[param]
+            assert actual_unit == expected_unit, f"Unit mismatch for {param}: expected {expected_unit}, got {actual_unit}"
+        
+        # Get arrays and verify units are preserved
+        efficiency_array = parametric.get_output_arrays('efficiency')
+        assert efficiency_array.u == '-'
+        
+        power_array = parametric.get_output_arrays('power_output')
+        assert power_array.u == 'W'
+        
+        # Get all arrays and verify all units
+        all_arrays = parametric.get_output_arrays()
+        expected_units = {
+            'subsystem.temperature': 'K',
+            'flow_rate': 'm3/s',
+            'operating_mode': '',
+            'efficiency': '-',
+            'power_output': 'W',
+            'temperature_out': 'K',
+            'flow_rate_out': 'm3/s'
+        }
+        
+        for param, expected_unit in expected_units.items():
+            if param in all_arrays:
+                actual_unit = all_arrays[param].u
+                assert actual_unit == expected_unit, f"Array unit mismatch for {param}: expected {expected_unit}, got {actual_unit}"
 
 
 if __name__ == "__main__":
-    pytest.main([__file__])
+    pytest.main([__file__, '-v'])

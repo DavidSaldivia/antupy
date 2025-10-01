@@ -1,5 +1,5 @@
 import numpy as np
-from antupy.core import Array, Var, CF
+from antupy import Array, Var, CF
 
 def test_array_creation():
     data1 = [i for i in range(10)]

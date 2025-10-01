@@ -5,8 +5,7 @@ from typing import Self, TYPE_CHECKING
 import numpy as np
 from antupy.units import Unit, _conv_temp, _mul_units, _div_units, _assign_unit
 
-if TYPE_CHECKING:
-    from antupy.var import Var, CF
+from antupy.var import CF, Var
 
 @dataclass(frozen=True)
 class Array():

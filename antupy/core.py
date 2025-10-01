@@ -4,14 +4,11 @@ module with the core classes for AntuPy
 from __future__ import annotations
 from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Self, TypedDict, TYPE_CHECKING
+from typing import TypedDict, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from antupy.var import Var
     from antupy.array import Array
-
-class Frame:
-    pass
 
 class Output(TypedDict):
     pass

@@ -1,6 +1,5 @@
 import math
-
-from antupy.core import Var, CF
+from antupy.var import Var, CF
 
 def test_CF():
     assert CF("m", "km").v == 0.001

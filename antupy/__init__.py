@@ -1,7 +1,11 @@
 from antupy.units import Unit
-from antupy.core import Frame, Simulation, Plant
 from antupy.var import Var, CF
 from antupy.array import Array
-from antupy.dataframe import DataFrame
+from antupy.frame import Frame
+from antupy.core import Simulation, Plant
 
-__all__ = ["Unit", "Var", "CF", "Array", "Frame", "Simulation", "Plant", "DataFrame"]
+__all__ = [
+    "Unit",
+    "Var", "CF", "Array", "Frame",
+    "Simulation", "Plant"
+]
