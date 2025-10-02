@@ -323,6 +323,79 @@ class Var():
     def __repr__(self) -> str:
         return f"{self.value:} [{self.unit.u}]"
 
+    def __format__(self, format_spec: str) -> str:
+        """
+        Format the Var object for use in f-strings and format() calls.
+        
+        Supports various format specifications:
+        - Precision: .2f, .3e, etc. (applies to value only)
+        - Width/alignment: >15, <10, ^20 (applies to entire string)
+        - Combined: >15.2f (width applies to entire string, precision to value)
+        
+        Parameters
+        ----------
+        format_spec : str
+            Format specification string
+            
+        Returns
+        -------
+        str
+            Formatted string representation of the Var
+            
+        Examples
+        --------
+        >>> var = Var(3.14159, "m")
+        >>> f"{var:.2f}"
+        '3.14 [m]'
+        >>> f"{var:>15}"
+        '    3.14159 [m]'
+        >>> f"{var:>15.2f}"
+        '       3.14 [m]'
+        """
+        if self.value is None:
+            base_str = f"None [{self.unit.u}]"
+            if format_spec:
+                # Extract width/alignment only for None values
+                import re
+                width_match = re.match(r'([<>=^]?)(\d+)', format_spec)
+                if width_match:
+                    align, width = width_match.groups()
+                    return format(base_str, f"{align}{width}")
+            return base_str
+        
+        # Parse format specification to separate width/alignment from precision/type
+        import re
+        
+        # Match format patterns like: [fill][align][width][.precision][type]
+        match = re.match(r'([<>=^]?)(\d*)(?:\.(\d+))?([a-zA-Z%]?)', format_spec)
+        if match:
+            align, width, precision, type_spec = match.groups()
+            
+            # Build format for the numeric value
+            value_format = ""
+            if precision:
+                value_format += f".{precision}"
+            if type_spec:
+                value_format += type_spec
+            
+            # Format the value
+            if value_format:
+                formatted_value = format(self.value, value_format)
+            else:
+                formatted_value = str(self.value)
+            
+            # Create the full string
+            base_str = f"{formatted_value} [{self.unit.u}]"
+            
+            # Apply width/alignment to the full string
+            if width:
+                return format(base_str, f"{align}{width}")
+            else:
+                return base_str
+        else:
+            # Fallback for unrecognized format specs
+            return f"{self.value} [{self.unit.u}]"
+
     def get_value(self, unit: str | None = None) -> float:
         """ Method to obtain the value of the variable in the requested unit.
         If the unit is not compatible with the variable unit, an error is raised.

@@ -78,3 +78,35 @@ def test_adim_influence():
     assert power_2 == Var(12.5, "MW")
     assert power_2.gv("kW") == 12500
     assert (power_1 / power_2).su("") == Var(0.72, "-")
+
+
+def test_var_formatting():
+    """Test the __format__ method for f-strings and format() calls."""
+    # Basic formatting
+    var = Var(3.14159, "m")
+    assert f"{var}" == "3.14159 [m]"
+    assert f"{var:.2f}" == "3.14 [m]"
+    assert f"{var:.3e}" == "3.142e+00 [m]"
+    
+    # None value formatting
+    var_none = Var(None, "kg")
+    assert f"{var_none}" == "None [kg]"
+    assert f"{var_none:.2f}" == "None [kg]"  # Format spec ignored for None
+    
+    # Zero value formatting
+    var_zero = Var(0, "W")
+    assert f"{var_zero:.1f}" == "0.0 [W]"
+    
+    # Large number formatting
+    var_large = Var(1234567.89, "J")
+    assert f"{var_large:.2e}" == "1.23e+06 [J]"
+    
+    # Temperature formatting
+    var_temp = Var(25.5, "°C")
+    assert f"{var_temp:.1f}" == "25.5 [°C]"
+    
+    # Width formatting (applies to entire string)
+    var_small = Var(3.1, "m")
+    formatted = f"{var_small:>15}"
+    assert "3.1 [m]" in formatted
+    assert len(formatted) == 15

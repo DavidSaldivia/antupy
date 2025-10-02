@@ -632,5 +632,91 @@ class TestUnitsConsistency:
                 assert actual_unit == expected_unit, f"Array unit mismatch for {param}: expected {expected_unit}, got {actual_unit}"
 
 
+class TestGitignoreFeature:
+    """Test .gitignore creation functionality."""
+    
+    def test_gitignore_creation(self, tmp_path):
+        """Test that .gitignore is created when include_gitignore=True."""
+        mock_sim = MockSimulation()
+        output_dir = tmp_path / "test_output"
+        
+        params_in = {'temperature': Array([20, 25], '°C')}
+        parametric = Parametric(
+            base_case=mock_sim,
+            params_in=params_in,
+            params_out=["efficiency"],
+            save_results_detailed=False,  # Disable pickle to avoid serialization issues
+            dir_output=output_dir,
+            include_gitignore=True,
+            verbose=False
+        )
+        
+        # Run analysis to trigger directory creation
+        results = parametric.run_analysis()
+        
+        # Check if .gitignore was created
+        gitignore_path = output_dir / '.gitignore'
+        assert gitignore_path.exists()
+        
+        # Check content
+        content = gitignore_path.read_text(encoding='utf-8')
+        assert "*.plk" in content
+        assert "*.pkl" in content
+        assert "*.pickle" in content
+        assert "# Ignore pickle files" in content
+    
+    def test_no_gitignore_when_disabled(self, tmp_path):
+        """Test that .gitignore is NOT created when include_gitignore=False."""
+        mock_sim = MockSimulation()
+        output_dir = tmp_path / "test_output"
+        
+        params_in = {'temperature': Array([20, 25], '°C')}
+        parametric = Parametric(
+            base_case=mock_sim,
+            params_in=params_in,
+            params_out=["efficiency"],
+            save_results_detailed=False,
+            dir_output=output_dir,
+            include_gitignore=False,  # Default behavior
+            verbose=False
+        )
+        
+        # Run analysis
+        results = parametric.run_analysis()
+        
+        # Check if .gitignore was NOT created
+        gitignore_path = output_dir / '.gitignore'
+        assert not gitignore_path.exists()
+    
+    def test_gitignore_not_overwritten(self, tmp_path):
+        """Test that existing .gitignore is not overwritten."""
+        mock_sim = MockSimulation()
+        output_dir = tmp_path / "test_output"
+        output_dir.mkdir(parents=True)
+        
+        # Create existing .gitignore
+        existing_gitignore = output_dir / '.gitignore'
+        existing_content = "# Existing content\n*.log\n"
+        existing_gitignore.write_text(existing_content, encoding='utf-8')
+        
+        params_in = {'temperature': Array([20, 25], '°C')}
+        parametric = Parametric(
+            base_case=mock_sim,
+            params_in=params_in,
+            params_out=["efficiency"],
+            save_results_detailed=False,
+            dir_output=output_dir,
+            include_gitignore=True,
+            verbose=False
+        )
+        
+        # Run analysis
+        results = parametric.run_analysis()
+        
+        # Check that existing content is preserved
+        content = existing_gitignore.read_text(encoding='utf-8')
+        assert content == existing_content
+
+
 if __name__ == "__main__":
     pytest.main([__file__, '-v'])

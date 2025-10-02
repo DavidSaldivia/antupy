@@ -25,10 +25,10 @@ class Simulation():
 @dataclass
 class Plant():
     out: dict[str, Var|Array|float] = field(default_factory=dict)
+    constraints: list[tuple[str, ...]] = field(default_factory=list)
     
-    def __post_init__(self): ...
-
-    def run_simulation(self, verbose: bool = False) -> dict[str, Var|Array|float]: ...
+    def run_simulation(self, verbose: bool = False) -> dict[str, Var|Array|float]:
+        ...
 
 
 class Analyser():

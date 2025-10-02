@@ -11,7 +11,6 @@ import copy
 import itertools
 import pickle
 from collections.abc import Iterable, Mapping
-from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, overload
 
@@ -58,9 +57,6 @@ class Parametric:
     path_results : Path, str, or None, optional
         File path for saving summary results CSV after each simulation.
         Enables incremental saving for long-running studies. Default is None.
-    include_gitignore : bool, optional
-        Whether to create a .gitignore file in dir_output to ignore .plk files.
-        Default is False. Only applies when dir_output is specified.
     verbose : bool, optional
         Whether to print progress information during analysis.
         Default is True.
@@ -122,14 +118,12 @@ class Parametric:
         save_results_detailed: bool = False,
         dir_output: Path | str | None = None,
         path_results: Path | str | None = None,
-        include_gitignore: bool = False,
         verbose: bool = True
     ):
         self.base_case = base_case
         self.params_in = params_in
         self.params_out = params_out
         self.save_results_detailed = save_results_detailed
-        self.include_gitignore = include_gitignore
         self.verbose = verbose
         
         # Convert paths to Path objects
@@ -266,17 +260,9 @@ class Parametric:
                 else:
                     values.append(float(np.mean(output.value)))
                 units.append(output.u)
-            elif isinstance(output, str):
-                # Handle string values (like status)
-                values.append(output)
-                units.append("")  # No unit for strings
             else:
                 # Handle plain numbers (int, float)
-                try:
-                    values.append(float(output))
-                except (ValueError, TypeError):
-                    # If can't convert to float, store as string
-                    values.append(str(output))
+                values.append(float(output))
                 units.append("")  # No unit for plain numbers
         
         return values, units
@@ -358,19 +344,6 @@ class Parametric:
         # Create output directory if needed
         if self.dir_output is not None:
             self.dir_output.mkdir(parents=True, exist_ok=True)
-            
-            # Create .gitignore file if requested
-            if self.include_gitignore:
-                gitignore_path = self.dir_output / '.gitignore'
-                if not gitignore_path.exists():
-                    gitignore_content = (
-                        "# Ignore pickle files (simulation results)\n"
-                        "*.plk\n"
-                        "*.pkl\n"
-                        "*.pickle\n"
-                    )
-                    with open(gitignore_path, 'w', encoding='utf-8') as f:
-                        f.write(gitignore_content)
 
         # Run simulations
         for index in range(len(cases_in)):
@@ -418,16 +391,21 @@ class Parametric:
                     raise KeyError(f"The following params_out are not in sim.out: {missing}")
 
             # Extract outputs with units
-            values_out, units_out = self._extract_outputs(sim, params_out)
+            try:
+                values_out, units_out = self._extract_outputs(sim, params_out)
 
-            # Store values in results
-            for param, value in zip(params_out, values_out):
-                results.loc[index, param] = value
+                # Store values in results
+                for param, value in zip(params_out, values_out):
+                    results.loc[index, param] = value
 
-            # Update output units tracking (first time we see each output)
-            for param, unit in zip(params_out, units_out):
-                if param not in output_units:
-                    output_units[param] = unit
+                # Update output units tracking (first time we see each output)
+                for param, unit in zip(params_out, units_out):
+                    if param not in output_units:
+                        output_units[param] = unit
+
+            except Exception as e:
+                print(f"Error extracting outputs from simulation {index + 1}: {e}")
+                continue
 
             # Save detailed results if requested
             if self.save_results_detailed and self.dir_output:
