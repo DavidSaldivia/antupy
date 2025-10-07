@@ -11,13 +11,13 @@ import copy
 import itertools
 import pickle
 from collections.abc import Iterable, Mapping
-from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, overload
 
 import numpy as np
 
-from antupy.core import Simulation, Plant
+from antupy.core import Simulation
+from antupy.plant import Plant
 from antupy.var import Var
 from antupy.array import Array
 from antupy.frame import Frame
@@ -61,6 +61,13 @@ class Parametric:
     include_gitignore : bool, optional
         Whether to create a .gitignore file in dir_output to ignore .plk files.
         Default is False. Only applies when dir_output is specified.
+    isolation_mode : str, optional
+        Simulation isolation mode. Options:
+        - 'reuse' (default): Reuses the same base_case instance across simulations.
+          Much faster, especially with SmartPlant. Works well for pure simulations.
+        - 'deepcopy': Each simulation uses a deep copy of base_case.
+          Guarantees complete isolation but slower performance.
+          Use if run_simulation() has side effects or modifies internal state.
     verbose : bool, optional
         Whether to print progress information during analysis.
         Default is True.
@@ -123,6 +130,7 @@ class Parametric:
         dir_output: Path | str | None = None,
         path_results: Path | str | None = None,
         include_gitignore: bool = False,
+        isolation_mode: str = 'reuse',
         verbose: bool = True
     ):
         self.base_case = base_case
@@ -130,8 +138,13 @@ class Parametric:
         self.params_out = params_out
         self.save_results_detailed = save_results_detailed
         self.include_gitignore = include_gitignore
+        self.isolation_mode = isolation_mode
         self.verbose = verbose
         
+        # Validate isolation_mode
+        if isolation_mode not in ['deepcopy', 'reuse']:
+            raise ValueError(f"isolation_mode must be 'deepcopy' or 'reuse', got '{isolation_mode}'")
+                
         # Convert paths to Path objects
         self.dir_output = Path(dir_output) if dir_output is not None else None
         self.path_results = Path(path_results) if path_results is not None else None
@@ -197,19 +210,14 @@ class Parametric:
                 # Handle iterable (list, tuple, etc.)
                 params_values.append(list(values))
                 params_units.append("")  # No unit for plain iterables
-
-        # Create all combinations
-        combinations = list(itertools.product(*params_values))
         
         # Create Frame with units
-        cases = Frame(
-            combinations,
+        self.cases = Frame(
+            list(itertools.product(*params_values)),
             columns=cols_in,
             units=params_units
         )
-        
-        self.cases = cases
-        return cases
+        return self.cases
 
     def _extract_outputs(
         self, 
@@ -383,7 +391,11 @@ class Parametric:
                 case_params[col] = cases_in.iloc[index][col]
 
             # Create simulation copy and update parameters
-            sim = copy.deepcopy(self.base_case)
+            if self.isolation_mode == 'deepcopy':
+                sim = copy.deepcopy(self.base_case)
+            else:  # 'reuse' mode
+                sim = self.base_case
+                
             self._update_parameters(sim, case_params, cases_in.units)
 
             # Run simulation
@@ -480,7 +492,8 @@ class Parametric:
         Update simulation object parameters with values from a case.
         
         Supports both direct attributes and nested attributes using dot notation.
-        Creates Var objects for parameters with units.
+        Creates Var objects for parameters with units. For SmartPlant instances,
+        uses intelligent component invalidation instead of full recreation.
         
         Parameters
         ----------
@@ -501,9 +514,30 @@ class Parametric:
         >>> # sim.temperature becomes Var(25.0, '°C')
         >>> # sim.subsystem.pressure becomes Var(2.0, 'bar')
         """
+        changed_params = set()
+        
+        # Track which parameters actually changed for smart component invalidation
         for param_name, value in case_params.items():
             unit = input_units.get(param_name, "")
             
+            # Get old value for change detection
+            if '.' in param_name:
+                # Handle nested attribute
+                parts = param_name.split('.')
+                obj = simulation
+                # Navigate to the parent object
+                for part in parts[:-1]:
+                    if not hasattr(obj, part):
+                        obj = None
+                        break
+                    obj = getattr(obj, part)
+                
+                old_value = getattr(obj, parts[-1], None) if obj else None
+            else:
+                # Handle direct attribute
+                old_value = getattr(simulation, param_name, None)
+            
+            # Set the new value
             if '.' in param_name:
                 # Handle nested attribute with dot notation
                 parts = param_name.split('.')
@@ -519,15 +553,60 @@ class Parametric:
                 # Set the final attribute
                 final_attr = parts[-1]
                 if unit:  # Create Var object if unit is specified
-                    setattr(obj, final_attr, Var(value, unit))
+                    new_value = Var(value, unit)
+                    setattr(obj, final_attr, new_value)
                 else:  # Set plain value if no unit
                     setattr(obj, final_attr, value)
+                    new_value = value
             else:
                 # Handle direct attribute
                 if unit:  # Create Var object if unit is specified
-                    setattr(simulation, param_name, Var(value, unit))
+                    new_value = Var(value, unit)
+                    setattr(simulation, param_name, new_value)
                 else:  # Set plain value if no unit
                     setattr(simulation, param_name, value)
+                    new_value = value
+            
+            # Check if value actually changed for smart component tracking
+            if self._param_values_different(old_value, new_value):
+                changed_params.add(param_name)
+        
+        # Use smart component invalidation if available
+        if hasattr(simulation, '_component_cache') and hasattr(simulation, '_param_hash_cache'):
+            if changed_params:
+                # For enhanced Plant, clear component cache to force recreation
+                if hasattr(simulation, '_component_cache'):
+                    simulation._component_cache.clear()
+                if hasattr(simulation, '_param_hash_cache'):
+                    simulation._param_hash_cache.clear()
+                
+                # Still call __post_init__ for any plant-level derived parameter calculations
+                if hasattr(simulation, '__post_init__'):
+                    simulation.__post_init__()
+            # If no parameters changed, skip both invalidation and __post_init__
+        elif hasattr(simulation, '__post_init__'):
+            # Fallback for non-smart plants
+            simulation.__post_init__()
+
+    def _param_values_different(self, old_value, new_value) -> bool:
+        """Check if parameter values are actually different."""
+        # Handle Var objects
+        if hasattr(old_value, 'gv') and hasattr(new_value, 'gv'):
+            return (old_value.gv() != new_value.gv() or 
+                    old_value.unit != new_value.unit)
+        
+        # Handle case where one is Var and other is not
+        if hasattr(old_value, 'gv') and not hasattr(new_value, 'gv'):
+            return True
+        if not hasattr(old_value, 'gv') and hasattr(new_value, 'gv'):
+            return True
+        
+        # Handle regular values
+        try:
+            return old_value != new_value
+        except:
+            # Fallback for complex objects
+            return str(old_value) != str(new_value)
 
     @overload
     def get_output_arrays(self, cols: str) -> Array: ...

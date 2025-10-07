@@ -4,11 +4,7 @@ module with the core classes for AntuPy
 from __future__ import annotations
 from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import TypedDict, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from antupy.var import Var
-    from antupy.array import Array
+from typing import TypedDict
 
 class Output(TypedDict):
     pass
@@ -20,15 +16,6 @@ class Simulation():
     def __post_init__(self): ...
 
     def run_simulation(self, verbose: bool = True) -> None: ...
-
-
-@dataclass
-class Plant():
-    out: dict[str, Var|Array|float] = field(default_factory=dict)
-    constraints: list[tuple[str, ...]] = field(default_factory=list)
-    
-    def run_simulation(self, verbose: bool = False) -> dict[str, Var|Array|float]:
-        ...
 
 
 class Analyser():
