@@ -5,7 +5,7 @@ Custom DataFrame with unit tracking functionality.
 import numpy as np
 import pandas as pd
 from typing import Dict, List, Any, overload
-from antupy.array import Array
+from antupy.core.array import Array
 
 
 class Frame(pd.DataFrame):

@@ -13,7 +13,7 @@ It is also possible to use any of the 22 SI prefixes to represent multiples or s
 
 .. code-block:: python
 
-    from antupy import units
+    import antupy.core.units as units
     print(units.BASE_UNITS)     # Output a dict with the definitions of base units
     print(units.DERIVED_UNITS)  # Output a dict with the definitions of derived units and its conversion to base units
     print(units.RELATED_UNITS)  # Output a dict with the definitions of related units
@@ -33,7 +33,7 @@ Examples of valid and invalid unit strings:
 
 .. code-block:: python
 
-   from antupy.units import Unit
+   from antupy import Unit
    # Valid unit strings
    Unit("m")
    Unit("m-s")
@@ -56,7 +56,7 @@ The base representation of a unit is a tuple containing a conversion factor (a f
 
 .. code-block:: python
 
-    >>> from antupy.units import Unit
+    >>> from antupy import Unit
     >>> u = Unit("m/s2")
     >>> u.base_factor
     1.0
@@ -67,7 +67,7 @@ Finally, you can show the SI representation by using the ``si`` property.
 
 .. code-block:: python
     
-    >>> from antupy.units import Unit
+    >>> from antupy import Unit
     >>> u = Unit("kJ")
     >>> u.label_unit
     'kJ'
@@ -78,8 +78,8 @@ Finally, you can show the SI representation by using the ``si`` property.
 The ``units`` classes
 ------------------------
 
-.. autoclass:: antupy.units.Unit
+.. autoclass:: antupy.Unit
     :members:
 
-.. autoclass:: antupy.units.UnitDict
+.. autoclass:: antupy.core.units.UnitDict
     :members:

@@ -1,11 +1,11 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Self, TYPE_CHECKING
+from typing import Self
 
 import numpy as np
-from antupy.units import Unit, _conv_temp, _mul_units, _div_units, _assign_unit
+from antupy.core.units import Unit, _conv_temp, _mul_units, _div_units, _assign_unit
 
-from antupy.var import CF, Var
+from antupy.core.var import CF, Var
 
 @dataclass(frozen=True)
 class Array():

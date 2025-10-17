@@ -1,7 +1,7 @@
-﻿antupy.core.Var
-===============
+﻿antupy.Var
+==========
 
-.. currentmodule:: antupy.core
+.. currentmodule:: antupy
 
 .. autoclass:: Var
 

@@ -150,10 +150,10 @@ Utility Functions
 
 The module provides several utility functions for weather data manipulation:
 
-load_day_constant_random
+_load_day_constant_random
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: antupy.tsg.weather.load_day_constant_random
+.. autofunction:: antupy.tsg.weather._load_day_constant_random
    :no-index:
 
 Generates random daily weather patterns within specified ranges:
@@ -161,7 +161,7 @@ Generates random daily weather patterns within specified ranges:
 .. code-block:: python
 
    import pandas as pd
-   from antupy.tsg.weather import load_day_constant_random
+   from antupy.tsg.weather import _load_day_constant_random
    
    # Create empty timeseries
    ts = pd.DataFrame(
@@ -170,7 +170,7 @@ Generates random daily weather patterns within specified ranges:
    )
    
    # Fill with random daily values
-   df_weather = load_day_constant_random(
+   df_weather = _load_day_constant_random(
        ts,
        ranges={
            "GHI": (800, 1200),
@@ -183,17 +183,17 @@ Generates random daily weather patterns within specified ranges:
 random_days_from_dataframe
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: antupy.tsg.weather.random_days_from_dataframe
+.. autofunction:: antupy.tsg.weather._random_days_from_dataframe
    :no-index:
 
 Randomly samples days from an existing weather dataset:
 
 .. code-block:: python
 
-   from antupy.tsg.weather import random_days_from_dataframe
+   from antupy.tsg.weather import _random_days_from_dataframe
    
    # Sample random days from historical data
-   df_sampled = random_days_from_dataframe(
+   df_sampled = _random_days_from_dataframe(
        timeseries=ts,
        df_sample=historical_weather,
        seed_id=123,

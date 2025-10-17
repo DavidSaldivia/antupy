@@ -6,8 +6,7 @@ import numpy as np
 from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
-    from antupy.core import Array
-    from antupy.var import Var
+    from antupy import Array, Var
 
 BASE_UNITS: dict[str, tuple[float, str,str]] = {
     "-": (1e0, "adimensional", "adim"),

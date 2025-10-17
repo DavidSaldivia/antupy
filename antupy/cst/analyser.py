@@ -8,11 +8,7 @@ import sys
 
 from dataclasses import dataclass
 from typing import Any
-from antupy.units import (
-    Variable, 
-    Array, 
-    conversion_factor as CF
-)
+from antupy import Var, Array, CF
 
 from antupy.cst.simulator import CSTSimulator
 
@@ -21,7 +17,7 @@ DIR_MAIN = os.path.dirname(DIR_FILE)
 
 @dataclass
 class ParametricAnalyser():
-    params_in: dict[str, list[str|Variable|Array]]
+    params_in: dict[str, list[str|Var|Array]]
     sim_base: Any
     dir_data: str | None = None
     dir_results: str | None = None

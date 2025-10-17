@@ -13,8 +13,7 @@ import hashlib
 
 # Import only what we need to avoid circular imports
 if TYPE_CHECKING:
-    from antupy import Var
-    from antupy import Array
+    from antupy import Var, Array
 
 # Type variable for component decorator
 T = TypeVar('T')

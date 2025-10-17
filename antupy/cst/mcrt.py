@@ -11,7 +11,7 @@ import pickle
 from pvlib.location import Location
 
 from antupy.protocols import Model
-from antupy.units import Variable
+from antupy import Var
 
 #%% ############## HYPERBOLOID SUBROUTINES #########################
 @dataclass
@@ -254,13 +254,13 @@ class TertiaryOpticalDevice(Model):
 
     geometry = "PB"
     array = "N"
-    radious_ap = Variable(1.0,"m")
-    radious_out = Variable(0.5,"m")
-    height = Variable(1.0,"m")
-    Cg = Variable(2.0,"m2")
-    xrc = Variable(0.0, "m")
-    yrc = Variable(0.0, "m")
-    zrc = Variable(0.0, "m")
+    radious_ap = Var(1.0,"m")
+    radious_out = Var(0.5,"m")
+    height = Var(1.0,"m")
+    Cg = Var(2.0,"m2")
+    xrc = Var(0.0, "m")
+    yrc = Var(0.0, "m")
+    zrc = Var(0.0, "m")
     
     @property
     def number_tods(self) -> int:       #N_TOD
@@ -566,18 +566,18 @@ class TertiaryOpticalDevice(Model):
         A_TOD = V * rA**2 * np.tan(phi/2) * N
         A_rcv = V * rO**2 * np.tan(phi/2) * N
 
-        TOD.radious_ap = Variable(rA,"m")
-        TOD.radious_out = Variable(rO,"m")
-        TOD.height = Variable(H,"m")
-        TOD.Cg = Variable(Cg,"-")
-        TOD.surface_area = Variable(S_TOD,"-")
-        TOD.aperture_area = Variable(A_TOD,"-")
-        TOD.receiver_area = Variable(A_rcv,"-")
-        TOD.theta = Variable(theta,"deg")
-        TOD._tht = Variable(theta,"rad")
-        TOD.focal_length = Variable(fl,"m")
-        TOD._zmin = Variable(zmin,"m")
-        TOD._zmax = Variable(zmax,"m")
+        TOD.radious_ap = Var(rA,"m")
+        TOD.radious_out = Var(rO,"m")
+        TOD.height = Var(H,"m")
+        TOD.Cg = Var(Cg,"-")
+        TOD.surface_area = Var(S_TOD,"-")
+        TOD.aperture_area = Var(A_TOD,"-")
+        TOD.receiver_area = Var(A_rcv,"-")
+        TOD.theta = Var(theta,"deg")
+        TOD._tht = Var(theta,"rad")
+        TOD.focal_length = Var(fl,"m")
+        TOD._zmin = Var(zmin,"m")
+        TOD._zmax = Var(zmax,"m")
         return TOD
 
 
@@ -882,7 +882,7 @@ class TertiaryOpticalDevice(Model):
             self,
             R1: pd.DataFrame,
             # CST: dict,
-            zmin: Variable | None = None,
+            zmin: Var | None = None,
             refl_error: bool = True
         ) -> pd.DataFrame:
         """Solver for both CPC and Paraboloid.
@@ -890,7 +890,7 @@ class TertiaryOpticalDevice(Model):
 
         Args:
             R1 (pd.DataFrame): Dataframe with rays coming from HB
-            zmin (Variable): minimum height for TOD
+            zmin (Var): minimum height for TOD
             refl_error (bool, optional): Whether to include reflection errors. Defaults to True.
 
         Returns:
@@ -908,7 +908,7 @@ class TertiaryOpticalDevice(Model):
         rA = self.radious_ap.get_value("m")
         rO = self.radious_out.get_value("m")
         (x0,y0) = self.array_centers
-        z_min = zmin.get_value("m") if isinstance(zmin,Variable) else 0.
+        z_min = zmin.get_value("m") if isinstance(zmin,Var) else 0.
         Cg = self.Cg.get_value("-")
 
         def PB_Fk(ki,R2,V):

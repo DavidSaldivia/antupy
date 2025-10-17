@@ -1,7 +1,7 @@
 Location System (loc)
 ======================
 
-The ``antupy.loc`` module provides a comprehensive location management system for geographical positioning in thermal and photovoltaic simulations. It implements a Protocol-based architecture supporting multiple location specification methods with particular strength in Australian geographical data.
+The ``antupy.loc`` module provides a location management system for geographical positioning in engineering simulations. It implements a Protocol-based architecture supporting multiple location specification methods with particular strength in Australian geographical data.
 
 Overview
 --------

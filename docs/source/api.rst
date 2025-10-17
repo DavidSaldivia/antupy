@@ -4,11 +4,11 @@ API
 .. autosummary::
    :toctree: generated
 
-   antupy.core.Var
-   antupy.core.Array
-   antupy.core.CF
-   antupy.units.Unit
-   antupy.units.UnitDict
+   antupy.Var
+   antupy.Array
+   antupy.CF
+   antupy.Unit
+   antupy.core.units.UnitDict
    antupy.tsg.settings.TimeParams
    antupy.loc.loc.Location
    antupy.loc.loc_au.LocationAU

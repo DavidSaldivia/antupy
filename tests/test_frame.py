@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np
 import antupy as ap
 
-from antupy.frame import dataframe_with_units
+from antupy.core.frame import dataframe_with_units
 
 
 class TestDataFrameBasics:

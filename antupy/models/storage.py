@@ -5,7 +5,7 @@ import pandas as pd
 
 from antupy.protocols import Model
 from antupy.props import ConstantWater
-from antupy.units import (
+from antupy.core.units import (
     Variable,
     Array,
     conversion_factor as CF

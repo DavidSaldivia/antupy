@@ -1,12 +1,12 @@
 The ``Var`` class is a simple representation of a variable with a value and a unit. It allows for basic arithmetic operations, unit conversions, and comparisons. The class ensures that operations between variables are consistent in terms of units, providing a robust framework for handling physical quantities.
 
-``antupy`` works in its core with a Unit management module ``units``, which include the class ``Unit`` mostly compatible with the SI unit system. From this, two classes are built. The ``Var`` class to manage single variables in the form of ``(value:float, unit:str)`` structure. The ``Array`` class for structures in the form of ``(array:np.ndarray, unit:str)``.
+``antupy`` works in its core with a Unit management module ``units``, which include the class ``Unit`` mostly compatible with the SI unit system. From this, three classes are built. The ``Var`` class to manage single variables in the form of ``(value:float, unit:str)`` structure. The ``Array`` class for structures in the form of ``(array:np.ndarray, unit:str)``. And the ``Frame`` class to manage dataframes with multiple columns, each with its own unit, in the form of ``(dataframe:pd.DataFrame, units:dict)``.
 
 The ``Var`` class is used to represent scalar values, while the ``Array`` class is used for vectors or time series data. Both classes are designed to handle units and conversions seamlessly, allowing for easy manipulation of physical quantities in simulations.
 
 The ``Var`` class
 -------------------
-The :py:class:`~antupy.core.Var` class is a simple representation of a variable with a value and a unit. It allows for basic arithmetic operations, unit conversions, and comparisons. The class ensures that operations between variables are consistent in terms of units, providing a robust framework for handling physical quantities.
+The :py:class:`~antupy.Var` class is a simple representation of a variable with a value and a unit. It allows for basic arithmetic operations, unit conversions, and comparisons. The class ensures that operations between variables are consistent in terms of units, providing a robust framework for handling physical quantities.
 
 .. autoclass:: antupy.Var
     :members:
@@ -17,7 +17,7 @@ To create a variable, you can instantiate the ``Var`` class with a value and a u
 
 .. code-block:: python
 
-    from antupy.core import Var
+    from antupy import Var
     mass = Var(5.0, "kg")
     pressure = Var(101325, "Pa")
 
@@ -47,30 +47,43 @@ You can multiply and divide variables with different units, and the resulting un
     print(energy.gv("kW-hr")) # Outputs:  2400.0
     print(energy.gv("kWh")) # Outputs: 2400.0
     print(energy.gv("kJ")) # Outputs 8640000.0
+
+
+.. note::
+    Be careful while converting between temperature units. You can convert between Celsius and Kelvin when using ``get_value``. However, you cannot add or substract between them. As a recommendation, use always Kelvin, as this is the absolute temperature scale. Farenheit (``°F``) is not supported.
+
+
+Additionally, the Var class provides a convenient way to set the unit of the output using the ``set_units`` or ``su`` method. This is a useful feature when you want to express the result in a specific unit. Both methods return a new instance of the same variable and is a useful way to detect wrong unit handling and possible errors.
+Note in the following example, how the expected quantity can be set with "kWh" but will throw an error when trying to convert to a non-compatible unit like "m" (meters).
+
+.. code-block:: python
+    
+    time_sim = Var(1, "day")
+    nom_power = Var(100, "kW")
+    energy = nom_power * time_sim
     print((8*energy/2 - energy*2)) # Outputs: 200 ["kW-day"]
     print((8*energy/2 - energy*2).su("kWh")) # Outputs: 4800 ["kWh"]
     print((8*energy/2 - energy*2).su("m"))  # Outputs: Traceback (most recent call last): ...
 
-Be careful while converting between temperature units. You can convert between Celsius and Kelvin when using ``get_value``. However, you cannot add or substract between them.  ``°F`` is not supported.
 
 The ``CF`` function
 ---------------------
 
-The module also provides a ``CF`` function, to provide useful conversion factors for common units. The function accepts two strings, and return a ``Var`` object with the corresponding conversion factor. For example, to convert from meters to kilometers:
+The module also provides a ``CF`` function, to provide useful conversion factors between units. The function accepts two strings, and returns a ``Var`` object with the corresponding conversion factor. For example, to convert from meters to kilometers:
 
 .. code-block:: python
 
-    from antupy.core import CF
+    from antupy import CF
     distance = Var(1500, "m")
     distance_km = distance * CF("m", "km")   # Applies the conversion factor
     print(distance_km)  # Outputs: 1.5 [km]
 
-.. autofunction:: antupy.core.CF
+.. autofunction:: antupy.CF
 
 
 The ``Array`` class
 -------------------
 The ``Array`` class extends the functionality of the ``Var`` class to handle arrays of values, which can represent time series data or vectors. It supports operations such as element-wise arithmetic, unit conversions, and statistical analysis. The class is designed to work seamlessly with NumPy arrays, leveraging its powerful capabilities for numerical computations.
 
-.. autoclass:: antupy.core.Array
+.. autoclass:: antupy.Array
     :members:

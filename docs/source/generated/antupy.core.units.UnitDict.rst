@@ -1,7 +1,7 @@
-﻿antupy.units.UnitDict
-=====================
+﻿antupy.core.units.UnitDict
+==========================
 
-.. currentmodule:: antupy.units
+.. currentmodule:: antupy.core.units
 
 .. autoclass:: UnitDict
 
@@ -42,5 +42,6 @@
       ~UnitDict.mol
       ~UnitDict.cd
       ~UnitDict.USD
+      ~UnitDict.-
    
    

@@ -5,7 +5,7 @@ from typing import Self
 import math
 
 import numpy as np
-from antupy.units import Unit, _assign_unit, _conv_temp, _mul_units, _div_units
+from antupy.core.units import Unit, _assign_unit, _conv_temp, _mul_units, _div_units
 
 
 def CF(unit1: str|Unit, unit2: str|Unit) -> Var:

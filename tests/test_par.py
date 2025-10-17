@@ -9,9 +9,7 @@ from pathlib import Path
 from unittest.mock import Mock
 import numpy as np
 
-from antupy import Var, Array, Frame
-from antupy.core import Simulation
-from antupy.analyser.par import Parametric, ParameterValue
+from antupy import Var, Array, Frame, Simulation, Parametric
 
 
 class MockSimulation(Simulation):

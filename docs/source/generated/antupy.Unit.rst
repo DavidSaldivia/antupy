@@ -1,7 +1,7 @@
-﻿antupy.units.Unit
-=================
+﻿antupy.Unit
+===========
 
-.. currentmodule:: antupy.units
+.. currentmodule:: antupy
 
 .. autoclass:: Unit
 

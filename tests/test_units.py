@@ -1,5 +1,5 @@
-from antupy.units import Unit
-from antupy.units import BASE_UNITS, DERIVED_UNITS, RELATED_UNITS, PREFIXES
+from antupy import Unit
+from antupy.core.units import BASE_UNITS, DERIVED_UNITS, RELATED_UNITS, PREFIXES
 
 def test_unit_uniqueness():
     UNITS_NOPREFIX = list((BASE_UNITS|DERIVED_UNITS|RELATED_UNITS).keys())

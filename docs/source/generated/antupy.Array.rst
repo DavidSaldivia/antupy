@@ -1,7 +1,7 @@
-﻿antupy.core.Array
-=================
+﻿antupy.Array
+============
 
-.. currentmodule:: antupy.core
+.. currentmodule:: antupy
 
 .. autoclass:: Array
 

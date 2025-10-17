@@ -1,7 +1,7 @@
 Simulation Settings (tsg.settings)
 ====================================
 
-The ``antupy.tsg.settings`` module provides time control and simulation parameter management for thermal and photovoltaic system simulations. The core component is the ``TimeParams`` class, which defines temporal boundaries and timestep parameters for all simulation scenarios.
+The ``antupy.tsg.settings`` module provides time control and simulation parameter management for engineering system simulations. The core component is the ``TimeParams`` class, which defines temporal boundaries and timestep parameters for all simulation scenarios.
 
 Overview
 --------
@@ -49,28 +49,28 @@ Parameters
 
 The TimeParams class accepts four key parameters:
 
-**START** (Variable)
+**START** (Var)
    Initial time of the simulation in hours from the beginning of the year.
    
    - Default: ``Var(0, "hr")`` (beginning of year)
    - Annual simulations: typically 0
    - Representative day simulations: can be any hour of the year
 
-**STOP** (Variable)
+**STOP** (Var)
    Final time of the simulation in hours from the beginning of the year.
    
    - Default: ``Var(8760, "hr")`` (end of year for annual simulation)
    - Must be greater than START
    - For multi-day simulations: START + (days × 24)
 
-**STEP** (Variable)
+**STEP** (Var)
    Timestep interval for the simulation in minutes.
    
    - Default: ``Var(60, "min")`` (hourly timesteps)
    - Common values: 15, 30, 60 minutes
    - Higher resolution: shorter timesteps for detailed analysis
 
-**YEAR** (Variable)
+**YEAR** (Var)
    Reference year for the simulation (dimensionless).
    
    - Default: ``Var(1800, "-")`` (placeholder year)
@@ -408,6 +408,6 @@ See Also
 --------
 
 - :doc:`tsg_weather`: Weather generation system that uses TimeParams
-- :doc:`variable_system`: Understanding the Variable (Var) system used for parameters
+- :doc:`variable_system`: Understanding the variable system (Var and Array) used for parameters
 - :doc:`units`: Unit management and conversions
 - ``antupy.core``: Core Variable and Array classes

@@ -17,10 +17,10 @@ from typing import Any, overload
 import numpy as np
 
 from antupy.core import Simulation
-from antupy.plant import Plant
-from antupy.var import Var
-from antupy.array import Array
-from antupy.frame import Frame
+from antupy.core.plant import Plant
+from antupy.core.var import Var
+from antupy.core.array import Array
+from antupy.core.frame import Frame
 
 
 # Type aliases for better readability
@@ -343,7 +343,7 @@ class Parametric:
         output_units = {}
         
         # For auto-detection case, we'll determine the structure dynamically
-        results = None
+        results = Frame()
         detected_params_out = None
 
         # If we have explicit params_out, initialize results Frame now
@@ -574,10 +574,10 @@ class Parametric:
         # Use smart component invalidation if available
         if hasattr(simulation, '_component_cache') and hasattr(simulation, '_param_hash_cache'):
             if changed_params:
-                # For enhanced Plant, clear component cache to force recreation
-                if hasattr(simulation, '_component_cache'):
+                # For Plant, clear component cache to force recreation
+                if isinstance(simulation, Plant):
                     simulation._component_cache.clear()
-                if hasattr(simulation, '_param_hash_cache'):
+                if isinstance(simulation, Plant):
                     simulation._param_hash_cache.clear()
                 
                 # Still call __post_init__ for any plant-level derived parameter calculations
@@ -644,7 +644,7 @@ class Parametric:
 
     def get_summary(self) -> dict[str, Any]:
         """
-        Generate comprehensive summary of parametric analysis results.
+        Generate summary of parametric analysis results.
         
         Returns
         -------
@@ -664,6 +664,9 @@ class Parametric:
         """
         if self.results is None:
             return {"status": "No analysis completed"}
+        
+        if self.cases is None or len(self.cases) == 0:
+            return {"status": "No cases defined"}
         
         # Basic information
         summary = {

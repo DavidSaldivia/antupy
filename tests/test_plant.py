@@ -12,9 +12,8 @@ This test suite verifies the core functionality of plant.py including:
 import pytest
 import time
 from dataclasses import dataclass
-from typing import Any, Dict
 from antupy import Var
-from antupy.plant import Plant, component, constraint, derived
+from antupy import Plant, component, constraint, derived
 
 
 # Test Components
