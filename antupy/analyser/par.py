@@ -343,7 +343,7 @@ class Parametric:
         output_units = {}
         
         # For auto-detection case, we'll determine the structure dynamically
-        results = Frame()
+        results = results_data
         detected_params_out = None
 
         # If we have explicit params_out, initialize results Frame now

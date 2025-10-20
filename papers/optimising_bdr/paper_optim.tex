@@ -1,0 +1,167 @@
+% Template for manual conversion from DOCX to LaTeX
+% Project: Beam-Down Receiver (BDR) optimisation paper
+% Notes:
+% - Use this as a clean starting point; copy/paste text from Word and then
+%   convert formatting to LaTeX commands.
+% - Keep labels consistent and use \ref, \eqref, and \cite throughout.
+
+\documentclass[11pt,a4paper]{article}
+
+% Encoding, fonts, language
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{csquotes}
+
+% Math & symbols
+\usepackage{amsmath, amssymb}
+\usepackage{siunitx}
+\sisetup{detect-all}
+
+% Graphics & floats
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{float}
+
+% Links
+\usepackage[hidelinks]{hyperref}
+
+% Misc utilities
+\usepackage{xcolor}
+\usepackage{soul} % \hl{} temporary highlighting during conversion
+
+% Metadata
+\title{Optimizing a Modular Beam-Down Concentrated Solar Power Concept}
+\author{David Saldivia \and Jose Bilbao \and Anna Bruce \and Robert A. Taylor}
+\date{Draft: \today}
+
+% Helper macros
+\newcommand{\bdtp}{BD-TPR}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+% Paste abstract from Word and tidy up markup. Keep plain text first; then add math/refs.
+This template provides a clean starting point to convert a DOCX document into LaTeX for the \bdtp{} optimisation study. Replace this text with your abstract.
+\end{abstract}
+
+\tableofcontents
+\clearpage
+
+% -------------------- INTRO --------------------
+\section{Introduction}\label{sec:intro}
+% Paste text; replace manual formatting with LaTeX commands.
+% Use \textbf{}, \textit{}, and LaTeX lists instead of Word formatting.
+Motivation and context. Transition to high shares of renewable energy and the role of thermal storage. Prior BDR and particle receiver work. Contributions of this paper.
+
+% Example citation: \cite{saldivia2021optical}
+
+% -------------------- METHODS --------------------
+\section{Methods}\label{sec:methods}
+
+\subsection{Optimisation Framework}\label{sec:opt-framework}
+Brief overview of the optimisation loop and modules (optics, receiver, costing).
+
+\begin{figure}[H]
+  \centering
+  % Replace with your image path
+  % \includegraphics[width=0.9\linewidth]{media/flow.png}
+  \fbox{\rule{0pt}{2in}\rule{0.9\linewidth}{0pt}}% placeholder box
+  \caption{Optimisation algorithm flowchart.}
+  \label{fig:flow}
+\end{figure}
+
+\subsection{Cost Model}\label{sec:cost-model}
+We compute the Levelized Cost of Heat ($LCOH$) using:
+\begin{equation}
+  \label{eq:lcoh}
+  LCOH = \frac{C_{C}\,\bigl(1 + C_{O\&M}\,TPF\bigr)}{TPF\, P_{\mathrm{yr}}}
+\end{equation}
+with the total payment factor (TPF):
+\begin{equation}
+  \label{eq:tpf}
+  TPF = \frac{1}{DR}\left(1 - \frac{1}{(1+DR)^N}\right).
+\end{equation}
+Define all symbols after the equations.
+
+\subsection{Optical and Thermal Models}\label{sec:models}
+High-level description; refer to previous validated modules.
+
+% -------------------- RESULTS --------------------
+\section{Results}\label{sec:results}
+
+\subsection{LCOH Minimisation}\label{sec:lcoh-min}
+Key plots and summary of trends.
+
+\begin{figure}[H]
+  \centering
+  % \includegraphics[width=0.49\linewidth]{media/plot_a.png}\hfill
+  % \includegraphics[width=0.49\linewidth]{media/plot_b.png}
+  \fbox{\rule{0pt}{1.6in}\rule{0.49\linewidth}{0pt}}\hfill
+  \fbox{\rule{0pt}{1.6in}\rule{0.49\linewidth}{0pt}}
+  \caption{LCOH minimisation across receiver power, tower height, and flux levels.}
+  \label{fig:lcoh-min}
+\end{figure}
+
+% Example labeled equations derived from fits
+\begin{align}
+  \label{eq:prcv}
+  P_{\mathrm{rcv}} &= 4.0\, e^{0.029\, z_{f}},\\
+  \label{eq:qavg}
+  Q_{\mathrm{avg}} &= 1.54 - 1.93\, e^{-0.047\, z_{f}},\\
+  \label{eq:fzv}
+  f_{zv} &= 0.78 + 0.24\, e^{-0.040\, z_{f}},\\
+  \label{eq:lcoh-vs-zf}
+  LCOH &= 22.0 + 32.6\, e^{-0.079\, z_{f}}.
+\end{align}
+
+\subsection{Technical Parameters}\label{sec:technical}
+Describe final selected case and include panel of figures if available.
+
+\begin{table}[H]
+  \centering
+  \caption{Summary of key technical parameters for the selected design.}
+  \label{tab:tech-summary}
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    Parameter & Value \\
+    \midrule
+    Tower height, $z_f$ & \SI{50}{m} \\
+    Receiver power, $P_{rcv}$ & \SI{19}{MW_{th}} \\
+    Mean radiation flux, $Q_{avg}$ & \SI{1.25}{MW.m^{-2}} \\
+    Vertex ratio, $f_{zv}$ & 0.818 \\
+    Receiver efficiency & \SI{83.1}{\percent} \\
+    Solar field efficiency & \SI{63.4}{\percent} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Cost Distribution and Sensitivity}\label{sec:cost-sens}
+Pie/bar charts for costs; tornado plots for sensitivities.
+
+\subsection{Annual Performance}\label{sec:annual}
+Monthly energy flows and efficiencies; capacity factor.
+
+% -------------------- CONCLUSION --------------------
+\section{Conclusion}\label{sec:conclusion}
+Main findings and recommendations. Future work.
+
+% -------------------- ACKS & DATA --------------------
+\section*{Acknowledgements}
+% Optional
+
+\section*{Data and Code Availability}
+% Optional
+
+% -------------------- REFERENCES --------------------
+\bibliographystyle{ieeetr}
+\bibliography{../dwh/solarshift}
+
+\end{document}

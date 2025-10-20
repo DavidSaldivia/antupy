@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "antupy"
 version = "0.1.0"
-description = "Energy system analyser"
+description = "Toolkit for energy engineering"
 authors = ["David Saldivia <david.saldivia.s@gmail.com>"]
 readme = "README.md"
 

@@ -100,7 +100,7 @@ class MockSimulation(Simulation):
 class TestParametricCreation:
     """Test Parametric class creation and initialization."""
     
-    def test_parametric_creation_new_api(self):
+    def test_parametric_creation(self):
         """Test basic Parametric instance creation with new API."""
         mock_sim = MockSimulation()
         params_in = {

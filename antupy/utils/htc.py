@@ -1,7 +1,7 @@
 import numpy as np
 
 from antupy import Var
-from antupy.props import Fluid, Air, Water
+from antupy.utils.props import Fluid, Air, Water
 
 SIGMA_CONSTANT = 5.67e-8
 
@@ -109,13 +109,13 @@ def h_ext_flat_plate(
 
 
 def h_ext_flat_plane_constant_flux() -> Var:
-    pass
+    return Var(None, "W/m2-K")
 
 def h_ext_cylinder() -> Var:
     # See page 614 from Nellis&Klein
-    pass
+    return Var(None, "W/m2-K")
 
 def h_ext_sphere() -> Var:
     # See page 619 from Nellis&Klein 
-    pass
+    return Var(None, "W/m2-K")
 

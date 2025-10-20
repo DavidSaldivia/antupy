@@ -19,12 +19,12 @@ class TestDataFrameBasics:
     def test_dataframe_creation_with_list_units(self):
         """Test creating DataFrame with list units."""
         df = ap.Frame({
-            'temperature': [20, 25, 30],
-            'pressure': [1013, 1015, 1010]
-        }, units=['°C', 'hPa'])
+            'temperature': [300, 400, 500],
+            'pressure': [101.3, 101.5, 101.0]
+        }, units=['K', 'kPa'])
         
         assert isinstance(df, ap.Frame)
-        assert df.units == {'temperature': '°C', 'pressure': 'hPa'}
+        assert df.units == {'temperature': 'K', 'pressure': 'kPa'}
         assert len(df.units) == len(df.columns)
     
     def test_dataframe_creation_with_dict_units(self):
@@ -101,36 +101,37 @@ class TestUnitMethod:
     def test_unit_method_all_units(self):
         """Test unit() with no arguments returns all units."""
         df = ap.Frame({
-            'temp': [20, 25],
-            'pressure': [1013, 1015],
-            'humidity': [60, 65]
-        }, units=['°C', 'hPa', '%'])
+            'temp': [300, 400],
+            'pressure': [101.3, 101.5],
+            'humidity': [0.6, 0.65]
+        }, units=['K', 'kPa', '-'])
         
         result = df.unit()
-        expected = {'temp': '°C', 'pressure': 'hPa', 'humidity': '%'}
+        expected = {'temp': 'K', 'pressure': 'kPa', 'humidity': '-'}
         assert result == expected
     
     def test_unit_method_single_column_string(self):
         """Test unit() with single column name as string."""
-        df = ap.Frame({'temp': [20], 'pressure': [1013]}, units=['°C', 'hPa'])
+        df = ap.Frame({'temp': [300], 'pressure': [1013]}, units=['K', 'hPa'])
         
-        assert df.unit('temp') == {'temp': '°C'}
-        assert df.unit('pressure') == {'pressure': 'hPa'}
+        assert df.unit('temp') == {'temp': 'K'}
+        assert df.unit('pressure') == {'pressure': 'kPa'}
     
     def test_unit_method_single_column_list(self):
         """Test unit() with single column name as list."""
-        df = ap.Frame({'temp': [20], 'pressure': [1013]}, units=['°C', 'hPa'])
-        
-        assert df.unit(['temp']) == {'temp': '°C'}
-    
+        df = ap.Frame({'temp': [300], 'pressure': [1013]}, units=['K', 'hPa'])
+
+        assert df.unit(['temp']) == {'temp': 'K'}
+        assert df.unit(['pressure']) == {'pressure': 'kPa'}
+
     def test_unit_method_multiple_columns(self):
         """Test unit() with multiple column names."""
         df = ap.Frame({
-            'temp': [20], 'pressure': [1013], 'humidity': [60]
-        }, units=['°C', 'hPa', '%'])
+            'temp': [300], 'pressure': [1013], 'humidity': [0.6]
+        }, units=['K', 'kPa', '-'])
         
         result = df.unit(['temp', 'humidity'])
-        expected = {'temp': '°C', 'humidity': '%'}
+        expected = {'temp': 'K', 'humidity': '-'}
         assert result == expected
     
     def test_unit_method_invalid_column(self):
@@ -148,7 +149,7 @@ class TestUnitMethod:
         df = ap.Frame({'A': [1]}, units=['m'])
         
         with pytest.raises(TypeError, match="cols must be a string, list of strings, or None"):
-            df.unit(123)
+            df.unit(123) # type: ignore
 
 
 class TestGetValuesMethod:
@@ -157,42 +158,42 @@ class TestGetValuesMethod:
     def test_get_values_all_columns(self):
         """Test get_values() with no arguments returns all columns as Arrays."""
         df = ap.Frame({
-            'temp': [20, 25],
+            'temp': [300, 400],
             'pressure': [101.3, 101.5]
-        }, units=['°C', 'kPa'])
+        }, units=['K', 'kPa'])
         
         result = df.get_values()
         assert isinstance(result, dict)
         assert 'temp' in result and 'pressure' in result
         assert isinstance(result['temp'], ap.Array)
         assert isinstance(result['pressure'], ap.Array)
-        assert result['temp'].u == '°C'
+        assert result['temp'].u == 'K'
         assert result['pressure'].u == 'kPa'
     
     def test_get_values_single_column_string(self):
         """Test get_values() with single column name as string."""
-        df = ap.Frame({'temp': [20, 25]}, units=['°C'])
+        df = ap.Frame({'temp': [300, 400]}, units=['K'])
         
         result = df.get_values('temp')
         assert isinstance(result, ap.Array)
-        assert result.u == '°C'
-        assert list(result.v) == [20, 25]
+        assert result.u == 'K'
+        assert list(result.v) == [300, 400]
     
     def test_get_values_multiple_columns_list(self):
         """Test get_values() with multiple column names as list."""
         df = ap.Frame({
-            'temp': [20], 'pressure': [101.3], 'humidity': [0.6]
-        }, units=['°C', 'kPa', '-'])
+            'temp': [300], 'pressure': [101.3], 'humidity': [0.6]
+        }, units=['K', 'kPa', '-'])
         
         result = df.get_values(['temp', 'humidity'])
         assert isinstance(result, dict)
         assert len(result) == 2
-        assert result['temp'].u == '°C'
+        assert result['temp'].u == 'K'
         assert result['humidity'].u == '-'
     
     def test_gv_alias(self):
         """Test that gv() is an alias for get_values()."""
-        df = ap.Frame({'temp': [20]}, units=['°C'])
+        df = ap.Frame({'temp': [300]}, units=['K'])
         
         result1 = df.get_values('temp')
         result2 = df.gv('temp')
@@ -237,7 +238,7 @@ class TestSetUnitsMethod:
         df = ap.Frame({'A': [1]})
         
         with pytest.raises(TypeError, match="units must be a dict or list"):
-            df.set_units('invalid')
+            df.set_units('invalid') # type: ignore
     
     def test_su_alias(self):
         """Test that su() is an alias for set_units()."""
@@ -258,7 +259,7 @@ class TestDataFrameInitialization:
     def test_init_units_invalid_type(self):
         """Test initialization with invalid units type raises error."""
         with pytest.raises(TypeError, match="units must be a list, dict, or None"):
-            ap.Frame({'A': [1]}, units='invalid')
+            ap.Frame({'A': [1]}, units='invalid') # type: ignore
     
     def test_init_empty_dataframe(self):
         """Test initialization of empty DataFrame."""
@@ -278,10 +279,10 @@ class TestPandasCompatibility:
             warnings.simplefilter("always")
             
             df = ap.Frame({
-                'temperature': [20, 25, 30],
+                'temperature': [300, 400, 500],
                 'pressure': [101.3, 101.5, 101.0]
-            }, units=['°C', 'kPa'])
-            
+            }, units=['K', 'kPa'])
+
             # Perform basic operations
             _ = df.units
             _ = df.unit()
@@ -395,7 +396,7 @@ class TestRealWorldScenarios:
         
         # Update units to include new column - use dict approach
         current_units = df.units.copy()
-        current_units['area'] = 'm²'
+        current_units['area'] = 'm2'
         df.units = current_units
         
         assert len(df.units) == 3

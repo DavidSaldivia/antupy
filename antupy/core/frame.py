@@ -39,9 +39,6 @@ class Frame(pd.DataFrame):
         This method handles the actual object creation and ensures
         compatibility with pandas DataFrame creation patterns.
         """
-        # Extract units from kwargs if it's there
-        if 'units' in kwargs:
-            units = kwargs.pop('units')
         
         # Create the pandas DataFrame using the parent's __new__
         # Pass only the arguments that pandas DataFrame.__new__ expects

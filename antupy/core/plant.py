@@ -6,14 +6,18 @@ enabling automatic caching and selective invalidation of components based
 on parameter dependencies.
 """
 
-from typing import Any, Set, get_type_hints, TypeVar, Callable, TYPE_CHECKING, Generic, Type
+from __future__ import annotations
+
+from typing import Any, TypeVar, Callable, TYPE_CHECKING
 from dataclasses import dataclass, field
 import inspect
 import hashlib
 
+from antupy import Var
+
 # Import only what we need to avoid circular imports
 if TYPE_CHECKING:
-    from antupy import Var, Array
+    from antupy import Var, SimulationOutput
 
 # Type variable for component decorator
 T = TypeVar('T')
@@ -52,7 +56,7 @@ class Plant():
     """
     
     # Base Plant attributes (preserved for Protocol compatibility)
-    out: dict[str, 'Var|Array|float'] = field(default_factory=dict)
+    out: SimulationOutput = field(default_factory=dict)
     constraints: list[tuple[str, ...]] = field(default_factory=list)
     
     # Component registry: maps component names to their classes and dependencies
@@ -76,10 +80,10 @@ class Plant():
     def __post_init__(self):
         # Initialize Plant-specific attributes (preserved for Protocol compatibility)
         if not hasattr(self, 'out'):
-            self.out = {}
+            self.out: SimulationOutput = {}
         # Note: dependency discovery will happen lazily when first component is accessed
-    
-    def run_simulation(self, verbose: bool = False) -> dict[str, 'Var|Array|float']:
+
+    def run_simulation(self, verbose: bool = False) -> SimulationOutput:
         """Run simulation method (preserved for Protocol compatibility)."""
         # This method should be implemented by subclasses
         # Default implementation returns current out dict
@@ -157,14 +161,15 @@ class Plant():
         for param_name in sorted(param_names):  # Sort for consistent hashing
             if hasattr(self, param_name):
                 value = getattr(self, param_name)
-                if hasattr(value, 'gv'):  # Var object
+                if isinstance(value, Var):  # Var object
                     param_values.append(f"{param_name}={value.gv()}|{value.unit}")
-                else:
+                elif isinstance(value, str):
                     param_values.append(f"{param_name}={value}")
+                else:
+                    raise TypeError(f"Unsupported parameter type for hashing: {type(value)}")
         
         param_string = "|".join(param_values)
-        hash_val = hashlib.md5(param_string.encode()).hexdigest()
-        return hash_val
+        return hashlib.md5(param_string.encode()).hexdigest()
     
     def _invalidate_affected_components(self, changed_params: set[str]):
         """
@@ -300,111 +305,8 @@ def component(instance: T, component_name: str | None = None) -> T:
     return instance
 
 # ============================================================================
-# CONSTRAINT AND DERIVED FUNCTIONS FOR @component DECORATOR
+# constraint AND derived FUNCTIONS FOR component function
 # ============================================================================
-
-# Thread-local storage for tracking current component context
-from threading import local
-_component_context = local()
-
-def _get_current_component_context() -> tuple[object, str] | None:
-    """Get the current component being built (plant instance, component name)."""
-    
-    # Then try to get from calling frame (for component() function)
-    try:
-        frame = inspect.currentframe()
-        # Walk up the call stack to find the property access
-        current_frame = frame
-        for i in range(5):  # Limit search depth
-            if current_frame is None:
-                break
-            
-            frame_locals = current_frame.f_locals
-            if 'self' in frame_locals:
-                plant_instance = frame_locals['self']
-                if hasattr(plant_instance, '_current_property_context'):
-                    component_name = getattr(plant_instance, '_current_property_context', None)
-                    if component_name:
-                        return (plant_instance, component_name)
-            
-            current_frame = current_frame.f_back
-            
-    except Exception:
-        pass  # Fallback gracefully if frame inspection fails
-    
-    return None
-
-def _should_use_cached_component(plant_instance, component_name: str) -> bool:
-    """Check if cached component is still valid."""
-    if not hasattr(plant_instance, '_component_cache'):
-        return False
-        
-    if component_name not in plant_instance._component_cache:
-        return False
-    
-    # Check if dependencies changed (using existing hash system)
-    if hasattr(plant_instance, '_component_dependencies'):
-        dependencies = plant_instance._component_dependencies.get(component_name, set())
-        if dependencies:
-            current_hash = plant_instance._compute_params_hash(dependencies)
-            cached_hash = plant_instance._param_hash_cache.get(component_name)
-            return current_hash == cached_hash
-    
-    # If no dependencies tracked yet, assume valid (will be tracked on first access)
-    return True
-
-def _get_cached_component(plant_instance, component_name: str):
-    """Get cached component if available."""
-    if hasattr(plant_instance, '_component_cache'):
-        return plant_instance._component_cache.get(component_name)
-    return None
-
-def _cache_component(plant_instance, component_name: str, instance):
-    """Cache a component instance."""
-    if not hasattr(plant_instance, '_component_cache'):
-        plant_instance._component_cache = {}
-    if not hasattr(plant_instance, '_param_hash_cache'):
-        plant_instance._param_hash_cache = {}
-    
-    plant_instance._component_cache[component_name] = instance
-    
-    # Update hash if dependencies are known
-    if hasattr(plant_instance, '_component_dependencies'):
-        dependencies = plant_instance._component_dependencies.get(component_name, set())
-        if dependencies:
-            current_hash = plant_instance._compute_params_hash(dependencies)
-            plant_instance._param_hash_cache[component_name] = current_hash
-
-def _set_component_context(plant_instance: object, component_name: str):
-    """Set the current component context for dependency tracking."""
-    _component_context.current = (plant_instance, component_name)
-
-def _clear_component_context():
-    """Clear the current component context."""
-    _component_context.current = None
-
-def _register_dependency(param_name: str):
-    """Register a dependency for the current component being built."""
-    context = _get_current_component_context()
-    
-    if context is None:
-        # If no component context, this is being called outside component creation
-        # This is OK - dependency tracking is optional
-        return
-    
-    plant_instance, component_name = context
-    
-    # Initialize dependencies if not present
-    if not hasattr(plant_instance, '_component_dependencies'):
-        setattr(plant_instance, '_component_dependencies', {})
-    
-    dependencies = getattr(plant_instance, '_component_dependencies')
-    if component_name not in dependencies:
-        dependencies[component_name] = set()
-    
-    # Add this parameter as a dependency
-    dependencies[component_name].add(param_name)
-
 def constraint(value: T, param_name: str | None = None) -> T:
     """
     Mark a parameter as a direct dependency and return it unchanged.
@@ -551,3 +453,107 @@ def derived(callable_func: Callable, *tracked_vars: Any, param_name: str | None 
         return callable_func(*tracked_vars)
     except Exception as e:
         raise ValueError(f"Error executing derived parameter calculation: {e}")
+
+# Thread-local storage for tracking current component context
+from threading import local
+_component_context = local()
+
+def _get_current_component_context() -> tuple[object, str] | None:
+    """Get the current component being built (plant instance, component name)."""
+    
+    # Then try to get from calling frame (for component() function)
+    try:
+        frame = inspect.currentframe()
+        # Walk up the call stack to find the property access
+        current_frame = frame
+        for i in range(5):  # Limit search depth
+            if current_frame is None:
+                break
+            
+            frame_locals = current_frame.f_locals
+            if 'self' in frame_locals:
+                plant_instance = frame_locals['self']
+                if hasattr(plant_instance, '_current_property_context'):
+                    component_name = getattr(plant_instance, '_current_property_context', None)
+                    if component_name:
+                        return (plant_instance, component_name)
+            
+            current_frame = current_frame.f_back
+            
+    except Exception:
+        pass  # Fallback gracefully if frame inspection fails
+    
+    return None
+
+def _should_use_cached_component(plant_instance, component_name: str) -> bool:
+    """Check if cached component is still valid."""
+    if not hasattr(plant_instance, '_component_cache'):
+        return False
+        
+    if component_name not in plant_instance._component_cache:
+        return False
+    
+    # Check if dependencies changed (using existing hash system)
+    if hasattr(plant_instance, '_component_dependencies'):
+        dependencies = plant_instance._component_dependencies.get(component_name, set())
+        if dependencies:
+            current_hash = plant_instance._compute_params_hash(dependencies)
+            cached_hash = plant_instance._param_hash_cache.get(component_name)
+            return current_hash == cached_hash
+    
+    # If no dependencies tracked yet, assume valid (will be tracked on first access)
+    return True
+
+def _get_cached_component(plant_instance, component_name: str):
+    """Get cached component if available."""
+    if hasattr(plant_instance, '_component_cache'):
+        return plant_instance._component_cache.get(component_name)
+    return None
+
+def _cache_component(plant_instance, component_name: str, instance):
+    """Cache a component instance."""
+    if not hasattr(plant_instance, '_component_cache'):
+        plant_instance._component_cache = {}
+    if not hasattr(plant_instance, '_param_hash_cache'):
+        plant_instance._param_hash_cache = {}
+    
+    plant_instance._component_cache[component_name] = instance
+    
+    # Update hash if dependencies are known
+    if hasattr(plant_instance, '_component_dependencies'):
+        dependencies = plant_instance._component_dependencies.get(component_name, set())
+        if dependencies:
+            current_hash = plant_instance._compute_params_hash(dependencies)
+            plant_instance._param_hash_cache[component_name] = current_hash
+
+def _set_component_context(plant_instance: object, component_name: str):
+    """Set the current component context for dependency tracking."""
+    _component_context.current = (plant_instance, component_name)
+
+def _clear_component_context():
+    """Clear the current component context."""
+    _component_context.current = None
+
+def _register_dependency(param_name: str) -> None:
+    """Register a dependency for the current component being built."""
+    context = _get_current_component_context()
+    
+    if context is None:
+        # If no component context, this is being called outside component creation
+        # This is OK - dependency tracking is optional
+        return
+    
+    plant_instance, component_name = context
+    
+    # Initialize dependencies if not present
+    if not hasattr(plant_instance, '_component_dependencies'):
+        setattr(plant_instance, '_component_dependencies', {})
+    
+    dependencies = getattr(plant_instance, '_component_dependencies')
+    if component_name not in dependencies:
+        dependencies[component_name] = set()
+    
+    # Add this parameter as a dependency
+    dependencies[component_name].add(param_name)
+
+    return

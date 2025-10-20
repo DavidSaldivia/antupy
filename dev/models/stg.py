@@ -4,65 +4,62 @@ import numpy as np
 import pandas as pd
 
 from antupy.protocols import Model
-from antupy.props import ConstantWater
-from antupy.core.units import (
-    Variable,
+from antupy.utils.props import Water
+from antupy import (
+    Var,
     Array,
-    conversion_factor as CF
+    CF
 )
 
 @dataclass
 class ThermalStorageTank():
     name = "Cilyndrical Thermal Storage Tank"
     geometry = "cylinder"
-    fluid = ConstantWater()
+    fluid = Water()
     model = "0D"
 
     # tank geometry and losses
-    vol = Variable(0.315,"m3")
-    height = Variable(1.45, "m")
+    vol = Var(0.315,"m3")
+    height = Var(1.45, "m")
     height_inlets = Array([0.113], "m")
     height_outlets = Array([1.317], "m")
     height_heaters = Array([0.103], "m")
     height_thermostats = Array([0.103], "m")
-    U = Variable(0.9, "W/m2-K")
+    U = Var(0.9, "W/m2-K")
 
     #numerical simulation
     nodes = 10
     temps_ini = Array(45.0*np.ones(nodes), "degC")
 
     # control
-    temp_max = Variable(65.0, "degC")
-    temp_deadband = Variable(10.0, "degC")
-    temp_min = Variable(45.0, "degC")
-    temp_consump = Variable(45.0, "degC")
+    temp_max = Var(65.0, "degC")
+    temp_deadband = Var(10.0, "degC")
+    temp_min = Var(45.0, "degC")
+    temp_consump = Var(45.0, "degC")
 
     def __post_init__(self):
         temps = self.temps_ini
 
     @property
-    def thermal_cap(self) -> Variable:
-        vol = self.vol.get_value("m3")
-        rho = self.fluid.rho.get_value("kg/m3")
-        cp = self.fluid.cp.get_value("J/kg-K")
-        temp_max = self.temp_max.get_value("degC")
-        temp_min = self.temp_min.get_value("degC")
-        thermal_cap = vol * (rho * cp) * (temp_max - temp_min) * CF("J","kWh")
-        return Variable( thermal_cap, "kWh")
+    def thermal_cap(self) -> Var:
+        rho = self.fluid.rho()
+        cp = self.fluid.cp()
+        thermal_cap = self.vol * (rho * cp) * (self.temp_max - self.temp_min)
+        return thermal_cap.su("kWh")
 
     @property
-    def diam(self) -> Variable:
-        vol = self.vol.get_value("m3")
-        height = self.height.get_value("m")
-        diam = (4 * vol / np.pi / height) ** 0.5
-        return Variable( diam , "m" )
-    
+    def diam(self) -> Var:
+        vol = self.vol
+        height = self.height
+        diam = (4 * self.vol / np.pi / self.height).gv("m2") ** 0.5
+        return Var( diam , "m" )
+
     @property
-    def area_loss(self) -> Variable:
-        diam = self.diam.get_value("m")
-        height = self.height.get_value("m")
+    def area_loss(self) -> Var:
+        diam = self.diam
+        height = self.height
         area_loss = np.pi * diam * (diam / 2 + height)
-        return Variable( area_loss, "m2" ) 
+        return area_loss.su("m2")
 
     def run_model(self, ts: pd.DataFrame):
         match self.model:
@@ -76,13 +73,13 @@ class ThermalStorageTank():
 
 def _storage_tank_0D(tank: ThermalStorageTank, data: pd.DataFrame):
 
-    cp = tank.fluid.cp.get_value("J/kg-K")
-    rho = tank.fluid.rho.get_value("kg/m3")
-    k = tank.fluid.k.get_value("W/m-K")
+    cp = tank.fluid.cp().get_value("J/kg-K")
+    rho = tank.fluid.rho().get_value("kg/m3")
+    k = tank.fluid.k().get_value("W/m-K")
     vol = tank.vol.get_value("m3")
     U = tank.U.get_value("W/m2-K")
     area_loss = tank.area_loss.get_value("m2")
-    temp_tank = np.mean(tank.temps.get_values("degC"))
+    temp_tank = np.mean(tank.temps_ini.gv("degC"))
     nodes = tank.nodes
 
     dt = data["dt"]

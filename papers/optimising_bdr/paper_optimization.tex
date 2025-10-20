@@ -1,0 +1,1034 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{soul} % for \hl{}
+\usepackage{hyperref}
+
+\title{Optimizing a Modular Beam-Down Concentrated Solar Power Concept}
+\author{David Saldivia \and Jose Bilbao \and Anna Bruce \and Robert A. Taylor}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\clearpage
+
+\section{Introduction}\label{introduction}
+
+What should go here?
+
+\begin{itemize}
+\item
+  Something about transition to 100\% renewable and the need for
+  storage.
+\item
+  CSP and modular designs.
+\item
+  What have been done with BDR, solid particles.
+\item
+  Something about markets, storage value and the kind.
+\end{itemize}
+
+\section{Methods}\label{methods}
+
+\subsection{Introduction}\label{introduction-1}
+
+\subsection{Optimization Tool}\label{optimization-tool}
+
+\subsection{Optical and Thermal
+models}\label{optical-and-thermal-models}
+
+The present paper is a final report xxxxxxxxx
+
+\begin{figure}
+\centering
+\includegraphics[width=6.14488in,height=2.65893in]{media/image1.png}
+\caption{Optimisation algorithm flow-chart. In blue the
+components developed specifically for the opimisation. In yellow the
+functions from the optical simulation and in green the functions from
+the receiver simulation.}
+\label{fig:optimisation-flow}
+\end{figure}
+
+\hl{Write three paragraphs:}
+
+\begin{equation}\label{eq:prcv}
+P_{rcv} = 4.0\, e^{0.029\, z_{f}}
+\end{equation}
+
+\begin{equation}\label{eq:qavg}
+Q_{avg} = 1.54 - 1.93\, e^{- 0.047\, z_{f}}
+\end{equation}
+
+\begin{equation}\label{eq:fzv}
+f_{zv} = 0.78 + 0.24\, e^{- 0.040\, z_{f}}
+\end{equation}
+
+\begin{equation}\label{eq:lcoh_vs_zf}
+LCOH = 22.0 + 32.6\, e^{- 0.079\, z_{f}}
+\end{equation}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \hl{One about the different modules that were written. Refer the
+  reader to the Appendix.}
+\item
+  \hl{One about the independent variables. Refer the reader to the
+  Appendix.}
+\item
+  \hl{One about the detailed discussion of the optimization. Refer the
+  redear to the Appendix.}
+\end{enumerate}
+
+\subsection{Power Block and Dispatch
+Model}\label{power-block-and-dispatch-model}
+
+\subsection{Costings}\label{costings}
+
+The costing module was built using project assessment metrics and a
+combination of conventional values frequently used in CSP financial
+assessments in combination with specific cost estimations for BDRs and
+particle-based systems. The Levelized Cost of Heat was calculated using
+the well-known formula for future constant payments:
+
+\begin{equation}
+\label{eq:lcoh}
+LCOH = \frac{C_{C}\left( 1 + C_{O\& M}\, TPF \right)}{TPF\, P_{yr}}
+\end{equation}
+
+\begin{equation}
+\label{eq:tpf}
+TPF = \frac{1}{DR}\left( 1 - \frac{1}{(1 + DR)^{N}} \right)
+\end{equation}
+
+Where \(C_{C}\) is the capital cost, including land, heliostat, BDR
+mirrors, tower, receiver, storage, engineering, and contingency costs.
+\(C_{O\& M}\) is the annual operation and maintenance costs. \(P_{yr}\)
+is the annual heat generation and \(TPF\) is the total payment factor
+for a given discount rate (\(DR\)), and plant lifespan (\(N\)).
+
+The capital costs are divided into two categories: conventional and
+specific parameters. The conventional parameters are those that are
+independent of the type of CSP plant, and therefore, common values in
+the literature are used. The specific parameters are those specific to
+solid particle-based systems with beam-down optics. For some of these,
+literature values were available, while for others some estimations were
+made.
+
+\hl{Write one or two paragraphs to refer the reader to the Supplementary
+Documents}
+
+\hl{Present a Summary Table}
+
+\subsection{Market Data}\label{market-data}
+
+\section{Results}\label{results}
+
+The results are divided into two sections. First, the main results from
+the optimisation are presented. For this, the LCOH minimisation follows
+an iterative process, obtaining a range of design parameter at the end.
+Then, for a selected case, additional detailed results are presented,
+which exemplify the extension of detailed analysis that is possible to
+carry on with the modules developed through this Thesis. This includes
+technical and economic results. Finally, a sensitivity analysis and
+annual performance for the selected case are presented.
+
+\subsection{Minimisation of LCOH}\label{minimisation-of-lcoh}
+
+The results for the solar thermal subsystem optimisation are shown in
+Figure 6.10, with Figure 6.10 a) presenting the LCOH as a function of
+the receiver power for different tower heights (20 m to 75 m). The
+minimum value for each tower height is presented as a blue line. The
+same min LCOH line is shown in Figure 6.10 b) plus the corresponding
+receiver power (red squares). In these two subplots, an average
+radiation flux of 1.0 MW\textsubscript{th}/m\textsuperscript{2} was
+used. The results for 0.5 MW\textsubscript{th}/m\textsuperscript{2} and
+1.5 MW\textsubscript{th}/m\textsuperscript{2} are presented in subplots
+c) and d), respectively. In both cases, it was observed that a minimum
+LCOH lower than 24 USD/MW\textsubscript{th} was obtained for a tower
+height above 35 m. This indicates that initially, there are benefits to
+increasing tower height; however, the benefits diminish until a
+plateaued zone (above 65 m), where there are practically no benefits to
+increase tower height. The main reasons for this are the increased tower
+costs and lower BDR optical efficiency for taller towers.
+
+On the other hand, the average radiation flux has a limited influence
+over the LCOH. For example, for a 50 m tower, increasing the radiation
+flux from 0.5 to 1.5 MW\textsubscript{th}/m\textsuperscript{2} reduces
+the LCOH from 26~USD/MWh to 23 MW/m\textsuperscript{2}. However, the
+average radiation flux affects the optimal receiver power. For the same
+height, the optimal power increases from \textasciitilde12
+MW\textsubscript{th} to \textasciitilde18 MW\textsubscript{th} if the
+radiation flux increases from 0.5 to 1.5
+MW\textsubscript{th}/m\textsuperscript{2}. Therefore, the influence of
+average radiation flux is analysed in more detail.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5031}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.4969}}@{}}
+\caption{Result of LCOH minimisation for different receiver
+power, tower height, and radiation fluxes.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\includegraphics[width=3.21334in,height=1.81278in]{media/image2.png}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\includegraphics[width=3.14219in,height=1.87864in]{media/image3.png}
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\includegraphics[width=3.21334in,height=1.81278in]{media/image2.png}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\includegraphics[width=3.14219in,height=1.87864in]{media/image3.png}
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\begin{minipage}[t]{\linewidth}\raggedright
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\item
+  Results for different receiver powers and tower heights
+  (Q\textsubscript{avg}=1MW/m\textsuperscript{2})
+\end{enumerate}
+\end{minipage} & \begin{minipage}[t]{\linewidth}\raggedright
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{1}
+\item
+  LCOH curve with selected conditions from a).
+\end{enumerate}
+\end{minipage} \\
+\includegraphics[width=3.10531in,height=1.85659in]{media/image4.png} &
+\includegraphics[width=3.17175in,height=1.86744in]{media/image5.png} \\
+\begin{minipage}[t]{\linewidth}\raggedright
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{2}
+\item
+  LCOH curve for Q\textsubscript{avg}=0.5MW/m\textsuperscript{2}
+\end{enumerate}
+\end{minipage} & \begin{minipage}[t]{\linewidth}\raggedright
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{3}
+\item
+  LCOH curve for Q\textsubscript{avg}=1.5MW/m\textsuperscript{2}
+\end{enumerate}
+\end{minipage} \\
+\end{longtable}
+
+For each tower height, the same procedure is repeated for different
+average radiation flux values ranging from 0.5 to 2.0
+MW\textsubscript{th}/m\textsuperscript{2}. The result from this process
+is presented in Figure 6.11 for four different heights: a) 30 m, b) 40
+m, c) 50 m, and d) 60 m. In each case, a minimum exists for a
+combination of radiation flux and receiver power, which is indicated
+with a red star in each subplot. Both, the optimal receiver power, and
+the radiation flux increase with tower height. For a 30 m tower it is
+around 9 MWth and 1.0 MW\textsubscript{th}/m\textsuperscript{2}, while
+for a 60 m tower it is around 26 MW\textsubscript{th} and 1.5
+MW\textsubscript{th}/m\textsuperscript{2}. The radiation flux is optimal
+for all the tower heights in the range of 1.0 to 1.5
+MW\textsubscript{th}/m\textsuperscript{2}. For short towers there is a
+single optimal point, but for towers above 50 m, the bottom part of the
+`U-shaped' curve is relatively flat, so there is a wide range of
+possible combinations. For example, in a 50 m tower, receiver power
+between 12 and 25 MW\textsubscript{th} with radiation fluxes between
+1.25 and 1.5 MW\textsubscript{th}/m\textsuperscript{2} have a similar
+LCOH of \textasciitilde23 USD/MW\textsubscript{th.}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4163}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1726}}@{}}
+\caption{LCOH as a function of receiver power for different
+radiation fluxes and tower heights. In each case the minimum optimal
+value is presented with a red star.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=2.84493in,height=1.94404in]{media/image6.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\item
+  \(z_{f} = 30m\)
+\end{enumerate}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=2.83696in,height=1.94484in]{media/image7.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{1}
+\item
+  \(z_{f} = 40m\)
+\end{enumerate}
+\end{minipage} &
+\multirow{2}{=}{\begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=1.10717in,height=1.58944in]{media/image8.png}
+\end{minipage}} \\
+\begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=2.86543in,height=1.93426in]{media/image9.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{2}
+\item
+  \(z_{f} = 50m\)
+\end{enumerate}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=2.76477in,height=1.88753in]{media/image10.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{3}
+\item
+  \(z_{f} = 60m\)
+\end{enumerate}
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=2.84493in,height=1.94404in]{media/image6.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\item
+  \(z_{f} = 30m\)
+\end{enumerate}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=2.83696in,height=1.94484in]{media/image7.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{1}
+\item
+  \(z_{f} = 40m\)
+\end{enumerate}
+\end{minipage} &
+\multirow{2}{=}{\begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=1.10717in,height=1.58944in]{media/image8.png}
+\end{minipage}} \\
+\begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=2.86543in,height=1.93426in]{media/image9.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{2}
+\item
+  \(z_{f} = 50m\)
+\end{enumerate}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=2.76477in,height=1.88753in]{media/image10.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{3}
+\item
+  \(z_{f} = 60m\)
+\end{enumerate}
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\end{longtable}
+
+If the minimum LCOH points for different towers are presented together,
+then a design curve for Beam-Down Tilted-Particle Receivers (BD-TPR) is
+generated. Figure 6.12 a) presents these results for towers between 20 m
+and 75 m. This final curve presents the results once the four
+independent variables are optimised. For a given tower height, the
+optimal receiver power is shown in red squares and the minimum expected
+LCOH (in USD/MW\textsubscript{th}) is presented in blue circles. The
+optimal \(Q_{avg}\) and \(f_{zv}\) as function of tower height are also
+presented in Figure 6.12 b) and c), respectively.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.6634}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.3366}}@{}}
+\caption{Final function for minimum LCOH as function of
+tower height. a) minimum LCOH and optimal receiver power, b) optimal
+average radiation flux, c) optimal vertex ratio.}\tabularnewline
+\toprule\noalign{}
+\multirow{2}{=}{\begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=4.10471in,height=2.71492in]{media/image11.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\item
+  \(LCOH\) and \(P_{rcv}\)
+\end{enumerate}
+\end{minipage}} & \begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=1.9929in,height=1.33019in]{media/image12.png}
+
+\begin{quote}
+b) \(Q_{avg}\)
+\end{quote}
+\end{minipage} \\
+& \begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=2.00732in,height=1.32085in]{media/image13.png}
+
+c) \(f_{zv}\)
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\multirow{2}{=}{\begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=4.10471in,height=2.71492in]{media/image11.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\item
+  \(LCOH\) and \(P_{rcv}\)
+\end{enumerate}
+\end{minipage}} & \begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=1.9929in,height=1.33019in]{media/image12.png}
+
+\begin{quote}
+b) \(Q_{avg}\)
+\end{quote}
+\end{minipage} \\
+& \begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=2.00732in,height=1.32085in]{media/image13.png}
+
+c) \(f_{zv}\)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\end{longtable}
+
+Curve fittings were performed over these relationships, which
+constitutes correlations to design a BD-TPR plant. For a given tower
+height, the optimal receiver power (Equation(\emph{6}.\emph{26})),
+radiation flux (Equation (\emph{6}.\emph{27})), vertex ratio (Equation
+(\emph{6}.\emph{28})) and an expected LCOH (Equation
+(\emph{6}.\emph{29})) can be calculated.
+\[P_{rcv} = 4.0e^{0.029\ z_{f}}\]
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+(6.26)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(Q_{avg} = 1.54 - 1.93e^{- 0.047\ z_{f}}\) & (6.27) \\
+\(f_{zv} = 0.78 + 0.24e^{- 0.040\ z_{f}}\) & (6.28) \\
+\(LCOH = 22.0 + 32.6e^{- 0.079\ z_{f}}\) & (6.29) \\
+\end{longtable}
+}
+
+Considering that this design is intended for power generation, where
+larger power blocks are significantly more cost-effective, a minimum
+receiver power of 10 MW\textsubscript{th} was considered. On other hand,
+although the results presented are considering towers up to 75 m, taller
+towers pose additional issues. For example, large hyperboloid mirrors
+(e.g., 20 m radius) could start facing wind and structural issues. For
+taller towers, the alignment errors become more important and,
+therefore, the optical efficiencies probably will be lower than the one
+presented here. For these reasons, the recommended design range for
+BD-TPR presented here is for towers between 35 m to 50 m, with receiver
+capacities of 10 MW\textsubscript{th} and 20 MW\textsubscript{th},
+respectively. In summary, a tower height of
+\(\mathbf{z}_{\mathbf{f}}\mathbf{= 50\ m}\), with a receiver power of
+\(\mathbf{P}_{\mathbf{rcv}}\mathbf{= 19\ M}\mathbf{W}_{\mathbf{th}}\)
+and a radiation flux of
+\(\mathbf{Q}_{\mathbf{avg}}\mathbf{= 1.25}\frac{\mathbf{M}\mathbf{W}_{\mathbf{th}}}{\mathbf{m}^{\mathbf{2}}}\)
+was found to obtain a
+\(\mathbf{\min}\left( \mathbf{LCOH} \right)\mathbf{= 23.01\ USD/MWh}\).
+Now that the overall efficiency is presented and the main relationships
+between the independent variables and the LCOH were stated, a detailed
+analysis for the selected design parameters is presented in the next
+subsection.
+
+\subsubsection{Technical parameters}\label{technical-parameters}
+
+Detailed results for the final selected case are presented in this
+Subsection to illustrate the capabilities of the module developed so
+far. As this is the final selected case and one of the main
+recommendations from this thesis, the main components of the whole plant
+are presented, covering results from most of the previous Chapters.
+Figure 6.13 shows the final results for the most important components in
+a BD-TPR design. Figure 6.13 a) presents the final heliostat field of
+4570 heliostats with a design point optical efficiency of 64.1\%. Due to
+the latitude (-25°) the solar field has a slightly polar configuration,
+which highlights one of the advantages of BDR optics. That is, it can
+utilise a compact surround tower with a solar field extended angle of
+360°, even for a cavity receiver. The heliostats range up to 150 m north
+of the receiver location and 300 m south of it. The solar field is
+symmetrical in its E-W axis, with 300 m extent in each direction. Figure
+6.13 b) shows the hyperboloid radiation flux. A maximum value of around
+60 kW/m\textsuperscript{2} is found. The inner and outer radii are 5.1 m
+and 20.3 m, with a total 1316 m\textsuperscript{2}. The vertex ratio is
+0.8181, and the hyperboloid mirror ranges between 43 m and 50 m heights.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5235}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.4765}}@{}}
+\caption{Detailed results for the selected design. a)
+heliostat field, b) radiation flux over hyperboloid mirror, c) radiation
+flux profile on receiver aperture, d) radiation flux on the tilted
+surface of the receiver (only one of three receivers showed here), e)
+specific efficiency on receiver surface, f) particle temperature
+distribution on receiver surface, g) particle temperature distribution
+on receiver outlet, h) outlet temperature by percentile.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=3.12791in,height=2.1108in]{media/image14.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\item
+  Heliostat field
+\end{enumerate}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=2.44186in,height=1.8832in]{media/image15.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{1}
+\item
+  Radiation flux in hyperboloid mirror
+\end{enumerate}
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=3.12791in,height=2.1108in]{media/image14.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\item
+  Heliostat field
+\end{enumerate}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=2.44186in,height=1.8832in]{media/image15.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{1}
+\item
+  Radiation flux in hyperboloid mirror
+\end{enumerate}
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\begin{minipage}[t]{\linewidth}\centering
+\includegraphics[width=2.69758in,height=1.99955in]{media/image16.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{2}
+\item
+  Radiation flux on receiver aperture
+\end{enumerate}
+\end{minipage} & \begin{minipage}[t]{\linewidth}\raggedright
+\includegraphics[width=2.38372in,height=2.1978in]{media/image17.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{3}
+\item
+  Radiation flux on tilted surface
+\end{enumerate}
+\end{minipage} \\
+\begin{minipage}[t]{\linewidth}\centering
+\includegraphics[width=2.18605in,height=1.98837in]{media/image18.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{4}
+\item
+  Specific efficiency
+\end{enumerate}
+\end{minipage} & \begin{minipage}[t]{\linewidth}\centering
+\includegraphics[width=2.11682in,height=1.89583in]{media/image19.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{5}
+\item
+  Particles temperature
+\end{enumerate}
+\end{minipage} \\
+\begin{minipage}[t]{\linewidth}\centering
+\includegraphics[width=2.35679in,height=1.54438in]{media/image20.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{6}
+\item
+  Outlet particles temperature profile
+\end{enumerate}
+\end{minipage} & \begin{minipage}[t]{\linewidth}\centering
+\includegraphics[width=2.28342in,height=1.4963in]{media/image21.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{7}
+\item
+  Outlet temperature distribution
+\end{enumerate}
+\end{minipage} \\
+\end{longtable}
+
+Figure 6.13 c) shows the radiation flux in the receiver aperture for the
+selected TOD mirror consisting of 3-hexagonal paraboloid mirror with a
+concentration ratio of 2.0. The TOD height is 1.73 m, with a mirror
+surface area of 60.79 m\textsuperscript{2}. The maximum radiation flux
+is up to 3 MW\textsubscript{th}/m\textsuperscript{2}; however, it hits
+the virtual aperture surface defined by the outlet of the TOD. The
+radiation flux is spread inside the receiver's cavity and is
+redistributed. Figure 6.13 d) shows the radiation flux in the final
+tilted particle receiver (only one of the three receivers is shown, and
+the tilted plane is presented). The maximum radiation flux is 2.55
+MW\textsubscript{th}/m\textsuperscript{2}, which is still within the
+maximum radiation flux acceptable for ceramics
+(\textasciitilde3MW\textsubscript{th}/m\textsuperscript{2}). Figure 6.13
+e) and f) show the specific efficiency and particle temperature map on
+the tilted surface. An overall 83.3\% efficiency is found, which is in
+the range of expected values for particle receivers (50-90\%) {[}20{]}.
+Finally, Figure 6.13 g) and h) show the final distribution at the outlet
+of the receiver. Subplot g) shows the temperature distribution at a
+cross-section in the receiver\textquotesingle s outlet. In contrast,
+subplot h) shows the same information in increasing order, showing a
+relatively linear distribution of temperature among the particles. The
+particle distribution ranges between 1039 K to 1285 K, which is
+explained by the uneven radiation flux on the receiver (as shown in
+Figure 6.13 d). This undesired result could be improved with a heliostat
+control strategy to obtain more homogeneous radiation flux, as was
+discussed in Chapter 5. Finally, Table 6.5 presents additional detailed
+information for the selected case.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2989}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1733}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2836}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2364}}@{}}
+\caption{Table 6.5. Detailed results for the optimised BD-TPR design.
+Bold values are the independent variables that were
+optimised.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Parameter
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Value
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Parameter
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Value
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Parameter
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Value
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Parameter
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Value
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Tower height,} \(\mathbf{z}_{\mathbf{f}}\) & \(\mathbf{50\ m}\)
+& Receiver efficiency & \(83.1\%\) \\
+\textbf{Receiver thermal power,} \(\mathbf{P}_{\mathbf{rcv}}\) &
+\(\mathbf{19\ M}\mathbf{W}_{\mathbf{th}}\) & Solar field efficiency &
+\(63.4\%\) \\
+\textbf{Receiver mean radiation flux,} \(\mathbf{Q}_{\mathbf{avg}}\) &
+\(\mathbf{1.25\ MW/}\mathbf{m}^{\mathbf{2}}\) & Geometric concentration
+ratio & \(2105( - )\) \\
+\textbf{Vertex ratio,} \(\mathbf{f}_{\mathbf{zv}}\) &
+\(\mathbf{0.818( - )}\) & Receiver max radiation flux &
+\(2.56\ MW/m^{2}\) \\
+Receiver area & \(18.06\ m^{2}\) & Particle temp. range &
+\(1039 - 1285\ K\) \\
+Number of heliostats & \(4456( - )\) & Mass flow rate &
+\(59.32\ kg/s\) \\
+HB mirror radius & \(20.13\ m\) & Mean residence time & \(27.69\ s\) \\
+HB mirror surface & \(1316.5\ m^{2}\) & Storage volume &
+\(471.8m^{3}\) \\
+SF mirror surface & \(38010.6\ m^{2}\) & Capacity Factor &
+\(23.13\%\) \\
+TOD mirror surface & \(60.79\ m^{2}\) & Land productivity &
+\(0.98\ MW_{th}/ha\) \\
+TOD height & \(1.73\ m\) & LCOH & \(23.01\ USD/MW_{th}\) \\
+Total mirror surface & \(39387.9\ m^{2}\) & LCOH (AUD) &
+\(32.21\ AUD/MW_{th}\) \\
+\end{longtable}
+
+\subsubsection{Cost distribution}\label{cost-distribution}
+
+For the selected case, the capital cost distribution is presented in
+Figure 6.14 a). To put this number in context, a conventional case is
+also presented using the default conditions given by SolarPILOT for a
+large plant (195 m tower and 670 MW\textsubscript{th} for solar field).
+The comparison is done with a conventional plant with large capacity,
+because the default costs for tower and receiver would have generated
+unrealistic high values for short towers/small receivers. The only
+component that SolarPILOT does not calculate is the storage cost, so the
+same BD plant cost estimation was used (see Section 6.3.3). Finally, the
+heliostat cost is set at 100 USD/m\textsuperscript{2}, instead of the
+default 140 USD/m\textsuperscript{2}, to reflect the expected cost
+reductions discussed in Section 6.3.2. Financial parameters (discount
+rate, lifetime, EPC costs, etc) are kept the same in both cases.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5174}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.4826}}@{}}
+\caption{Capital Costs Distributions. a) BD-TPR plant, b)
+conventional plant.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\includegraphics[width=2.97638in,height=2.40157in]{media/image22.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\item
+  BD-TPR plant (LCOH=23.01 USD/MWh)
+\end{enumerate}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\includegraphics[width=2.87008in,height=2.40157in]{media/image23.png}
+
+b) conventional (LCOH=26.53 USD/MWh)
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\includegraphics[width=2.97638in,height=2.40157in]{media/image22.png}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\item
+  BD-TPR plant (LCOH=23.01 USD/MWh)
+\end{enumerate}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\includegraphics[width=2.87008in,height=2.40157in]{media/image23.png}
+
+b) conventional (LCOH=26.53 USD/MWh)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\end{longtable}
+
+The heliostat field corresponds to around 36.5\% of the total cost and
+for more than half of the equipment costs (this is, excluding land and
+EPC costs), which is higher share than the conventional case (29.5\%).
+Engineering and contingency (EPC) costs represent 23\%, and the storage
+cost is around 19\%. The receiver cost (6.9\% for BDR, 20.1\% for
+conventional) is the main difference between both cases, which is
+actually one of the main uncertainties in the BDR cost estimation,
+because the estimation for a free-falling design was used. A detailed
+design and cost estimation for tilted-particle Receiver (BD-TPR) is then
+a question that this research has open. The land is the 11.8\%
+remaining, which means that the costs associated with the solar field
+are roughly half of the total installing cost. The tower and BDR mirrors
+have a minimal impact on the total cost (\textasciitilde2.8\% combined),
+reflecting the benefits of the BDR concept, simplifying the tower
+structure and costs. Finally, the novel design shows a 13\% reduction in
+resulting LCOH (23.01 USD/MWh) compared with the conventional base case
+(26.53 USD/MWh) which suggest that the proposed design offer
+improvements in deployment costs.
+
+These results have to be taken carefully and further refinement in these
+calculations are required. Some factors can modify positively or
+negatively these results. A factor not considered here is the financial
+costs. No loans, debts, incentives, and taxes are included in either
+case. In addition, the risk (represented by the discount rate) is kept
+the same in both cases (5\%). Thus, the positive associated aspects of a
+modular design are not reflected in the models. For example, the
+expected reduction in construction times is not included. On other hand,
+the proposed design is only \textasciitilde20 MW\textsubscript{th},
+which is small for competitive power generation, due to the economy of
+scale in power blocks. Several towers would be required to drive one
+single power block, and the integration costs associated are also not
+included. However, a multi-tower configuration would bring other
+benefits, as it is the partial operation during the construction
+process, like it has been reported in the commercial Chinese plant
+reported in the Literature Review (Section \hl{2.3.4}) that started its
+operation with only three of the 15 tower built {[}21{]}.
+
+\subsubsection{Sensitivity analysis}\label{sensitivity-analysis}
+
+An additional sensitivity analysis is performed over the main economic
+parameters to analyse how they might change under different assumptions
+or cost trends. The parameters are split in two groups, those
+specifically related to the BD-TPR design (HB cost, TOD cost, receiver
+cost, storage cost, tower cost, solar multiple, and storage capacity),
+and those that are general for any CSP (heliostat costs, land costs,
+O\&M costs, discount rate, lifetime, and EPC costs). Each of these
+parameters is changed between an expected range and the impact over the
+base LCOH is calculated. The main results are shown in \hl{}Figure 6.15.
+
+It is observed that among those parameters specific of BD-TPR (Figure
+6.15 a), the solar multiple is the factor that affects the most the
+LCOH, followed by the storage capacity. A reduction of 50\% in solar
+multiple increases the LCOH by 20\%, while duplicating the storage
+capacity has also a 20\% impact in the final LCOH. The storage and
+receiver costs have a similar impact over the LCOH. Doubling the cost
+increases the LCOH around 10\%. The tower and BDR mirror (HB and TOD)
+have almost no influence on the final cost, because they represent a
+small fraction in the cost distribution, as it was discussed in the
+previous section.
+
+Among the general costs (Figure 6.15 b), the capacity factor (solar
+field) (\(CF_{sf}\)) has the highest impact over the LCOH. The
+relationship is inversely proportional: doubling the capacity factor
+reduces the LCOH by half. The main factor that affects the capacity
+factor is the solar resource, which explains why CSP feasibility depends
+so much on the specific plant location. The engineering and contingency
+costs is the second most influential parameter, which depends directly
+on the maturity of the technology, as it was discussed in \hl{Section
+(2.1.2)}. Solar tower's EPC costs are higher than PTC's as the
+deployment knowledge is still progressing. It is expected that a
+technology like BD-TPR would have a similar trend, with high initial EPC
+costs, that should reduce once more plants are installed. The heliostat
+cost and the discount rate are the next most influential factors. A
+reduction in 50\% of heliostat field costs would mean a 15\% reduction
+in LCOH. Plant lifetime and operation \& maintenance costs have a
+significant influence too. It is clear from the comparison between both
+plots in Figure 6.15 that the BDR-specific costs are less influential
+than the general CSP costs, therefore, general trends observed in solar
+tower technologies, should apply to BD-TPR plants too.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 0\tabcolsep) * \real{0.9989}}@{}}
+\caption{Sensitivity Analysis results. a) BD-TPR specific
+parameters, b) General parameters.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=5.17539in,height=2.11303in]{media/image24.png}
+
+a) BD-TPR parameters
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+\includegraphics[width=5.17539in,height=2.11303in]{media/image24.png}
+
+a) BD-TPR parameters
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\includegraphics[width=5.34958in,height=2.18415in]{media/image25.png}
+
+b) General CSP parameters \\
+\end{longtable}
+
+A probabilistic analysis was performed with these 14 parameters using a
+Monte Carlo simulation with a total of 10\textsuperscript{6} runs. In
+each run, each variable was assigned a random value between 0x and 2x
+the default value, which corresponds with the range presented in Figure
+6.15. A uniform distribution was chosen for each variable (all values in
+the range are equally probable). It is important to note that, due to
+computational time limitations, these runs were performed only on the
+costing module (and not in the whole optimisation loop) using the
+selected case shown in \hl{Section 6.4.2} as baseline. A LCOH
+probabilistic distribution is obtained from this dataset and is
+presented in \hl{}Figure 6.16.
+
+The blue line corresponds to the probabilistic of non-exceedance, which
+shows the probability to not exceed a given value of LCOH (X-axis). The
+base case value is shown in grey, while P50 and P90 are shown in red.
+P50 means that there is 50\% of probability that the LCOH would be
+equals or lower than 22.7 USD/MWh, while the P90 line indicates that
+there is a 90\% of probability that the LCOH would be equal or lower
+than 49.9 USD/MWh. These results are useful inputs for decision makers
+in order to improve the risk analysis of the technology.
+
+\begin{figure}
+\centering
+\includegraphics[width=5.69756in,height=2.91991in]{media/image26.png}
+\caption{Probability of non-exceedance for LCOH.
+Probability curve in blue, baseline in grey, P50 and P90 in red.}
+\end{figure}
+
+\subsubsection{Annual performance}\label{annual-performance}
+
+The expected performance through the year is explored in this section.
+The overall efficiency considers the contribution of both the solar
+field and receiver. The solar field optical efficiency depends mostly on
+the sun position, which is usually represented by two main angles:
+altitude (\(\alpha\), also known as elevation) and azimuth (\(z\)). A
+set of datasets for different elevation and azimuth is generated and the
+selected design is simulated with these sets.
+
+\hl{(Write something about optical and thermal efficiencies through the
+year)}
+
+Using these two results for optical efficiency and receiver efficiency,
+it is possible to analyse the performance of the system through the year
+using the TMY file for the selected location (Alice Springs, Australia).
+Figure 6. shows the annual performance grouped by month. The whole bar
+indicates the total incident energy in the system, blue are the losses
+in heliostat field, orange are the losses in the BDR, and green the
+losses in the receiver. The stored useful energy is shown in red.
+Subplot a) shows the absolute values for the 19MW\textsubscript{th}
+plant, while the subplot b) shows the relative values, representing then
+the component efficiencies. It can be seen that the overall efficiency
+is relatively constant through the year with an average of 47\%. The
+total annual generation is 44243 MWh, which corresponds to a 26.6\% of
+capacity factor. The monthly average generation is 3686.9 MWh/month with
+a variation in the range of \(( - 17.5\%,9.97\%)\).
+
+\begin{figure}
+\centering
+\includegraphics[width=6.40952in,height=3.05208in]{media/image27.png}
+\caption{Annual performance of the selected BD-TPR plant in
+Alice Spring, Australia. Useful stored energy (red), heliostat losses
+(blue), BDR losses (orange), and receiver losses (green). a) Absolute
+energy, b) relative fraction (efficiencies).}
+\label{fig:annual-performance}
+\end{figure}
+
+\hl{}Table 6.6 shows the annual performance values and are compared with
+the conventional plant and the BD-TPR plant values in the design point.
+In the case of the design point values, the annual production and
+capacity factor are calculated assuming the overall efficiency is
+constant through the year. It is observed a reduction of around
+\textasciitilde10\% in annual production (and therefore capacity factor)
+due to variations in different efficiencies. This justifies the factor
+of 0.9 applied in the capacity factor, explained in Subsection 6.3.7,
+therefore, the final LCOH is not affected. It has to be noted that most
+of the change in efficiencies is due to heliostat efficiency (68.5\%
+annual versus 74.2\% design point). The overall efficiency of a
+conventional plant is higher than the BD-TPR by more than 10\%. However,
+most of this difference is due to the receiver efficiency, that is
+around 90\% for the conventional plant. If only the optic efficiencies
+are considered, the difference is around 5\% (62.22\% for conventional
+plant versus 68.5\% x 82.7\% = 56.6\%).
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2499}}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\caption{Table 6.6. Results from annual performance compared with design
+point average and conventional plant.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+BD-TPR annual
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+BD-TPR design point
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Conventional plant
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+BD-TPR annual
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+BD-TPR design point
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Conventional plant
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Nominal Capacity & 19 MW\textsubscript{th} & 19 MW\textsubscript{th} &
+670 MW\textsubscript{th} \\
+Annual Production & 44243 MWh & 49484 MWh & 12668 GWh \\
+Capacity Factor & 26.5\% & 29.7\% & 21.6\% \\
+Heliostats Efficiency & 68.5\% & 74.2\% & 62.2\% \\
+BDR efficiency & 82.7\% & 85.4\% & - \\
+Receiver Efficiency & 83.1\% & 83.1\% & 90.0\% \\
+Overall Efficiency & 47.07\% & 52.65\% & 58.5\% \\
+\end{longtable}
+
+\subsection{Conclusion}\label{conclusion}
+
+An optimisation tool is presented to find optimal parameters for a
+BD-TPR plant. The optimisation tool put together the BDR optical
+analysis developed in Chapter 3, the TPR thermal analysis developed in
+Chapter 5, and the detailed costing estimations specifically for BDR
+plants described here. All these separate modules are combined with an
+in-house optimisation tool, which allows working with different
+objective functions, including the minimisation of LCOH, which was used
+here. This novel innovative tool together with the BD-TPR costing
+calculations cover one of the research gaps found in the literature,
+regarding the lack of knowledge about BDR economics and an
+economic-based design for this technology.
+
+The results show that for a given tower height, it is possible to find
+optimal values of vertex ratio, receiver power, and average radiation
+flux to minimise the LCOH. It was found that for a tower height range
+between 35-50m, it is possible to obtain LCOH of \textasciitilde24
+USD/MW\textsubscript{th} for receiver powers between 10 - 20
+MW\textsubscript{th}. Specifically, for a 50 m tower, it was found that
+a range of possible configurations generates a similar LOCH. In
+particular, a 19 MW\textsubscript{th} with 1.25
+MW\textsubscript{th}/m\textsuperscript{2} was selected. These results
+are compared with a base case from the literature (LCOH = 26
+USD/MW\textsubscript{th}) and a 13\% reduction in the LCOH was found. A
+correlation for the expected LCOH for a given tower height was
+presented, as well as the expected receiver power.
+
+The detailed analysis on the selected design shows that it meets most of
+the additional constraints of these plants, such as, limited size of
+hyperboloid and TOD mirrors, adequate cooling requirement for BDR
+mirrors, maximum radiation flux incident on the particles, reasonable
+temperature distribution of the particles in the receiver outlet and
+expected solar field and receiver efficiencies. The cost distribution
+confirms the advantages of a beam-down configuration, reducing the
+tower- and receiver-associated costs significantly, from
+\textasciitilde27\% in the conventional case to \textasciitilde10\% of
+the total capital cost. On other hand, this increases the share of the
+heliostat field, which by itself is more than half of the total
+component costs. A sensitivity analysis over the main economic
+parameters shows that the capacity factor, solar multiple, and heliostat
+costs are the most sensible parameter, together with the plant lifetime
+and the EPC costs. A probability distribution using Monte Carlo
+simulation was also presented. A P90 value of 49.9 USD/MWh and a P50
+value of 23.0 USD/MWh were obtained.
+
+The annual performance was also explored and compared with a
+conventional case. A chart for the optical efficiency as function of the
+sun position was developed with values between 50\% and 64\% (from a
+design point efficiency of 63\%). The sun's position has higher
+influence over the heliostats than the BDR mirror, mostly due to cosine
+efficiency. The receiver efficiency is almost not affected by the sun's
+position because the radiation flux remains relatively the same
+regardless the elevation and azimuth. These different factors affect the
+annual performance, with an 8\% reduction compared with the design point
+case. The overall efficiency of a BD-TPR is lower than the conventional
+one (47\% vs. 58\%), then the reduction in LCOH comes from higher
+capacity factor (27\% vs. 22\%) and lower specific costs.
+
+These findings suggest that BDRs coupled with solid particles as heat
+transfer medium could be a viable alternative for modular CST plants to
+drive small power generation plants or industrial heat applications. The
+The performance of such system in real conditions is the next step in the
+analysis, to be covered in Chapter \hl{7}.
+
+\bibliographystyle{ieeetr}
+\bibliography{../dwh/solarshift}
+
+\end{document}
