@@ -24,7 +24,7 @@ from antupy.tsg.weather import (
     _VARIABLE_RANGES
 )
 from antupy.tsg.settings import TimeParams
-from antupy.loc.loc_au import LocationAU
+from antupy.utils.loc.loc_au import LocationAU
 from antupy import Var
 
 

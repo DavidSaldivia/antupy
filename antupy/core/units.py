@@ -61,7 +61,7 @@ RELATED_UNITS: dict[str, tuple[float,str,str,str]] = {
     "mi": (1e0/1609.34,"m", "mile", "length"),
     "ft": (3.28084,"m", "foot", "length"),
     "'": (39.3701,"m", "inch", "length"),
-    "ton": (1e-3,"kg", "tonne", "mass"),
+    "ton": (1e3,"kg", "tonne", "mass"),
     "lb": (2.20462,"kg", "pound", "mass"),
     "oz": (35.274,"kg", "ounce", "mass"),
     "lm": (1.0, "cd-sr", "lumens", "luminous_flux"),
@@ -453,9 +453,8 @@ USEFUL_QUANTITIES = {
     }
 }
 
-#---------------------
-def main():
 
+def main():
     return
 
 if __name__=="__main__":

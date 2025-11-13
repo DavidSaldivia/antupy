@@ -9,8 +9,13 @@ import numpy as np
 
 # Calendar constants
 MONTHS_DAYS   = [0,31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-MONTHS_ACCDAYS   = [ sum(MONTHS_DAYS[:x]) for x in range(len(MONTHS_DAYS))]
-MONTHS_NAMES_SHORT = ['','Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+MONTHS_ACCDAYS   = [sum(MONTHS_DAYS[:x]) for x in range(len(MONTHS_DAYS))]
+MONTHS_NAMES_SHORT = [
+    '','Jan', 'Feb', 'Mar',
+    'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep',
+    'Oct', 'Nov', 'Dec'
+]
 MONTHS_NAMES_LONG  = [
     '','January', 'February', 'March',
     'April', 'May', 'June',

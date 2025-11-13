@@ -26,7 +26,7 @@ T = TypeVar('T')
 @dataclass
 class Plant():
     """
-    Enhanced Plant base class with intelligent component management.
+    Plant base class with component management.
     
     Features:
     - Automatic component recreation on parameter changes

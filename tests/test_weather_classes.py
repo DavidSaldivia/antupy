@@ -14,7 +14,7 @@ import pandas as pd
 
 from antupy.tsg.weather import TMY, WeatherMC, WeatherHist, WeatherConstantDay
 from antupy.tsg.settings import TimeParams
-from antupy.loc.loc_au import LocationAU
+from antupy.utils.loc.loc_au import LocationAU
 from antupy import Var
 from antupy.ddd_au import DEFINITIONS
 

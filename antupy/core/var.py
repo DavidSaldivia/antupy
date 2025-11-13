@@ -169,8 +169,18 @@ class Var():
     value: float|None = None
     _unit: str|Unit|None = None
     unit: Unit = field(init=False)
+
     def __post_init__(self):
-        object.__setattr__(self, "unit", _assign_unit(self._unit))
+        if isinstance(self.value, Var) and self._unit is None:
+            object.__setattr__(self, "value", self.value.v)
+            object.__setattr__(self, "unit", self.value.u)
+        if isinstance(self.value, Var) and self._unit is not None:
+            unit_ = _assign_unit(self._unit)
+            object.__setattr__(self, "value", self.value.gv(unit_.label_unit))
+            object.__setattr__(self, "_unit", unit_)
+        else:
+            object.__setattr__(self, "unit", _assign_unit(self._unit))
+
 
     def __add__(self, other: Self):
         """ Overloading the addition operator. """

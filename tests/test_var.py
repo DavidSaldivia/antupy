@@ -10,6 +10,19 @@ def test_CF():
     assert CF("m3/s", "L/min") == Var(60000., "L-s/min-m3")
 
 
+# def test_init_var():
+#     var1 = Var(1.0, "m")
+#     var2 = Var(var1, "m")
+#     var3 = Var(var1, "km")
+
+#     assert isinstance(var2, Var)
+#     assert isinstance(var3, Var)
+#     assert var2.v == 1.0
+#     assert var2.u == "m"
+#     assert var3.v == 0.001
+#     assert var3.u == "km"
+
+
 def test_conversion_time():
     time_sim = Var(365, "day")
     assert time_sim.gv('day') == 365

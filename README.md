@@ -1,21 +1,21 @@
 # antupy
-`antupy` (from the *mapuzugun* word "antü" (sun)[^1]) is an open-source python library to analyse (solar thermal) energy systems. It is a toolkit of classes and methods to help simulate energy conversion and energy storage systems, under uncertain timeseries constraints (weather, market, human behaviour, etc.).
+`antupy` (from the *mapuzugun* word "antü" (sun)[^1]) is an open-source python library to support the development of (solar thermal) energy research projects. It is a toolkit of classes and methods to help simulate energy conversion and energy storage systems, under uncertain timeseries constraints (weather, market, human behaviour, etc.).
 
-It is an object-oriented software, structured in three main interdependent modules:
+An object-oriented software, it is structured in three main interdependent modules:
  - A **unit manager** to store and represent physical quantities. It offers three classes to represent data structures. `Var`, for scalar or 0D data; `Array`, for 1D-vectors (or timeseries), and `Frame` for 2D-dataframe-style data.
  - To help **simulate** real world systems, it provides classes to represent `Model`s and `Plant`s, that can be used with different analysers, such as, the `Parametric` class. To help these simulations, a couple of Timeseries Generators (`TSG`s) are presented, such as `Weather`, `Market`, and Hot Water Draw (`HWD`) data generators. 
  - A set of **utility** modules based on the unit manager system. `props`: a thermophysical properties library; `htc`: a heat transfer coefficient library; `solar`: a module with solar-related functions; `loc`: a location manager.
 
-Due to the wide range of possibilities and variety of these systems, the development has been focused on the developers' research. Therefore, at the moment, the only simulations implemented so far are domestic hot water heaters (DEWH) and concentrated solar thermal systems (CST).
+Due to the wide range of possibilities and variety of these systems, the development has been focused on the developers' research. Therefore, at the moment, the only simulations implemented so far are domestic water heating (`dwh`), and concentrated solar thermal (`cst`) systems.
 
 ## Documentation
 Check the documentation, cloning the repository and run 'docs/make.bat html' in your python environment. The docs has not yet been published.
 
 ## The `antupy` variable system
 `antupy` works in its core with a unit management module `units`, which include the class `Unit` to represent units that are compatible with the SI unit system. From this, three type of variables are introduced.
- 1. The `Var` class to manage single variables in the form of `(value:float, unit:str)` structure.
- 2. The `Array` class for structures in the form of `(array:np.ndarray, unit:str)`.
- 3. The `Frame` class for structures in the form of `(frame:pd.DataFrame|pl.DataFrame, unit:str)`.
+ 1. The `Var` class to manage single variables, with the structure `(value:float, unit:str)`.
+ 2. The `Array` class for 1D data structures in the form of `(array:np.ndarray, unit:str)`.
+ 3. The `Frame` class for 2D data structures in the form of `(frame:pd.DataFrame|pl.DataFrame, unit:list[str])`.
 
 ## Methodology
 `antupy` methodology divides the analysis in three sections: problem definition (pre-processing), simulations, and the analysis itself (post-processing).
@@ -57,4 +57,4 @@ See the `examples` folder.
 ## Data
 
 
-[^1]: *mapudungún* is the language of the Mapuche people, the main indigineous group in Chile. _antü_ means sun, but it also represents one of the main _pilláns_ (spirits) in the Mapuche mythology. Here the word is used in its first literal meaning. The name was chosen because the first version of this software was written in Temuco, a Chilean city located at the historic Mapuche heartland.
+[^1]: *mapuzugun* is the language of the Mapuche people, the main indigineous group in Chile. _antu_ (_antv_) means sun, but it also represents one of the main _pijan_ (spirits) in the Mapuche mythology. Here the word is used in its first literal meaning. The name was chosen because the first version of this software was written in Temuco, a Chilean city located at the historic Mapuche heartland.

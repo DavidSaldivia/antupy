@@ -9,7 +9,7 @@ from typing import TypedDict, TypeAlias, TYPE_CHECKING
 if TYPE_CHECKING:
     from antupy import Var, Array
 
-SimulationOutput: TypeAlias = dict[str, "Var | Array | float | str"]
+SimulationOutput: TypeAlias = dict[str, "Var | Array | Frame | float | str | dict"]
 
 class Output(TypedDict):
     pass

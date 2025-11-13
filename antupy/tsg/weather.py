@@ -11,7 +11,7 @@ import pandas as pd
 from antupy.ddd_au import DIRECTORY
 from antupy import Var
 from antupy.tsg.settings import TimeParams
-from antupy.loc import Location
+from antupy.utils.loc import Location
 
 import os
 import pandas as pd
@@ -25,11 +25,11 @@ from antupy.ddd_au import (
     DEFINITIONS,
     SIMULATIONS_IO
 )
-from antupy.loc.loc_au import (
+from antupy.utils.loc.loc_au import (
     LocationAU,
     _from_postcode
 )
-from antupy.loc.loc_cl import LocationCL
+from antupy.utils.loc.loc_cl import LocationCL
 
 DIR_DATA = DIRECTORY.DIR_DATA
 DEFINITION_SEASON = DEFINITIONS.SEASON
