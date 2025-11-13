@@ -13,15 +13,64 @@ author = 'David Saldivia'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../../'))
+
+extensions = [
+    'sphinx.ext.duration',
+    'sphinx.ext.doctest',
+    'sphinx.ext.autodoc',
+    "sphinx.ext.napoleon",
+    'sphinx.ext.autosummary',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.intersphinx',
+]
 
 templates_path = ['_templates']
 exclude_patterns = []
 
 
+# --  Napoleon options--------------------------------------------------------
+# use the :param directive
+napoleon_use_param = True
+napoleon_attr_attributes = True
+napoleon_include_init_with_doc = False
+napoleon_include_private_with_doc = False
+
+# -- Autodoc options ---------------------------------------------------------
+
+# Automatically extract typehints when specified and place them in
+# descriptions of the relevant function/method.
+autodoc_typehints = "both"
+
+# Only insert class docstring
+autoclass_content = "class"
+
+# Generate autosummary pages
+autosummary_generate = True
+
+# Include __init__ method if it has a docstring
+autoclass_content = 'both'
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'alabaster'
+html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
+
+# PyData Sphinx Theme options
+html_theme_options = {
+    "github_url": "https://github.com/DavidSaldivia/antupy",
+    "show_toc_level": 2,
+    "navbar_align": "left",
+    "show_nav_level": 2,
+    "navigation_depth": 3,
+    "show_prev_next": True,
+}
+
+# Intersphinx configuration
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3/', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+}

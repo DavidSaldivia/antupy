@@ -1,11 +1,11 @@
 import numpy as np
 from antupy import Var
-from antupy.props import Air
-from antupy.props import DryAir
-from antupy.props import HumidAir
-from antupy.props import SaturatedWater
-from antupy.props import SaturatedSteam
-from antupy.props import SeaWater
+from antupy.utils.props import Air
+from antupy.utils.props import DryAir
+from antupy.utils.props import HumidAir
+from antupy.utils.props import SaturatedWater
+from antupy.utils.props import SaturatedSteam
+from antupy.utils.props import SeaWater
 
 def test_prop_dry_air():
     air = DryAir()

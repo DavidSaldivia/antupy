@@ -1,9 +1,9 @@
 import numpy as np
 
 from antupy import Var
-from antupy.htc import h_horizontal_surface_upper_hot
+from antupy.utils.htc import h_horizontal_surface_upper_hot
 
-def test_cantera_coolprop_props():
+def test_horizontal_surface_upper_hot():
     T_s = 400.
     T_inf = 300.
     L = 1.

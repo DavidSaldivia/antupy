@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "antupy"
 version = "0.1.0"
-description = "Energy system analyser"
+description = "Toolkit for energy engineering"
 authors = ["David Saldivia <david.saldivia.s@gmail.com>"]
 readme = "README.md"
 
@@ -15,6 +15,7 @@ matplotlib = "^3.9.2"
 pvlib = "^0.11.1"
 cantera = "^3.1.0"
 coolprop = "^6.8.0"
+xarray = "^2025.9.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.3"
@@ -25,7 +26,19 @@ isort = "^5.13.2"
 black = "^24.10.0"
 flake8 = "^7.1.1"
 sphinx = "^8.2.3"
+furo = "^2025.7.19"
+sphinx-rtd-theme = "^3.0.2"
+pydata-sphinx-theme = "^0.16.1"
+sphinx-material = "^0.0.36"
+piccolo-theme = "^0.24.0"
+groundwork = "^0.1.17"
+hypothesis = "^6.138.14"
+coverage = {extras = ["toml"], version = "^7.10.7"}
+pytest-cov = "^7.0.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"

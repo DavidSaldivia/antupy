@@ -1,0 +1,304 @@
+import os
+
+import json
+
+from antupy import Var
+from antupy.ddd import DIRECTORY as DIR_BASE
+from antupy.ddd import DEFINITIONS as DEF_BASE
+from antupy.ddd import DEFAULTS as DEFAULT_BASE
+from antupy.ddd import SIMULATIONS_IO as SIM_IO_BASE
+
+
+class DIRECTORY(DIR_BASE):    
+    #DIRS
+    DIR_MAIN = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    DIR_FILE = os.path.dirname(os.path.abspath(__file__))
+    
+    with open(os.path.join(DIR_MAIN, ".dirs"), "r") as f:
+        private_dirs = json.load(f)
+    DIR_DATA_EXTERNAL = private_dirs["data"]
+
+    DIR_DATA = {
+        "energy_market": os.path.join(DIR_DATA_EXTERNAL, "energy_market"),
+        "emissions" : os.path.join(DIR_DATA_EXTERNAL, "emissions"),
+        "HWDP" : os.path.join(DIR_DATA_EXTERNAL, "HWD_profiles"),
+        "layouts" : os.path.join(DIR_DATA_EXTERNAL, "trnsys_layouts"),
+        "location" : os.path.join(DIR_DATA_EXTERNAL, "location"),
+        "SA_processed" : os.path.join(DIR_DATA_EXTERNAL, "SA_processed"),
+        "SA_raw" : os.path.join(DIR_DATA_EXTERNAL, "SA_raw"),
+        "samples" : os.path.join(DIR_DATA_EXTERNAL, "samples"),
+        "specs" : os.path.join(DIR_DATA_EXTERNAL, "device_specs"),
+        "tariffs" : os.path.join(DIR_DATA_EXTERNAL, "tariffs"),
+        "gas" : os.path.join(DIR_DATA_EXTERNAL, "tariffs_gas"),
+        "control" : os.path.join(DIR_DATA_EXTERNAL, "control"),
+        "weather" : os.path.join(DIR_DATA_EXTERNAL, "weather"),
+        }
+    
+    DIR_METEONORM = os.path.join("C:/TRNSYS18/Weather/Meteonorm/Australia-Oceania")
+    FILES_METEONORM = {
+        "Adelaide": "AU-Adelaide-946720.tm2",
+        "Alice_Spring": "AU-Alice-Springs-943260.tm2",
+        "Brisbane": "AU-Brisbane-945780.tm2",
+        "Canberra": "AU-Canberra-949260.tm2",
+        "Darwin": "AU-Darwin-Airport-941200.tm2",
+        "Hobart": "AU-Hobart-Airport-949700.tm2",
+        "Melbourne": "AU-Melbourne-948660.tm2",
+        "Perth": "AU-Perth-946080.tm2",
+        "Sydney": "AU-Sydney-947680.tm2",
+        "Townsville": "AU-Townsville-942940.tm2",
+    }
+
+    #FILES
+    FILES_MODEL_SPECS = {
+        "resistive" : os.path.join(DIR_DATA["specs"], "data_models_RS.csv"),
+        "heat_pump" : os.path.join(DIR_DATA["specs"], "data_models_HP.csv"),
+        "gas_instant": os.path.join(DIR_DATA["specs"], "data_models_GI.csv"),
+        "gas_storage": os.path.join(DIR_DATA["specs"], "data_models_GS.csv"),
+        "solar_thermal": os.path.join(DIR_DATA["specs"], "data_models_TH.csv"),
+    }
+
+    FILES_HWD_SAMPLES ={
+        "HWD_daily" : os.path.join(DIR_DATA["samples"], "HWD_daily_sample_site.csv"),
+        "HWD_events": os.path.join(DIR_DATA["samples"], "HWD_events.xlsx"),
+        }
+    FILES_SOLA = {
+        "CL_INFO": os.path.join(DIR_DATA["SA_processed"], "site_controlled_load_info.csv"),
+        "HW_CLASS": os.path.join(DIR_DATA["SA_processed"], "site_hot_water_classification.csv"),
+        "HW_STATS": os.path.join(DIR_DATA["SA_processed"], "site_hot_water_stats.csv"),
+        "POSTCODES_INFO": os.path.join(DIR_DATA["location"], "site_controlled_load_lat_lng.csv"),
+    }
+    FILES_GAS_TARIFF = {
+        "Adelaide": os.path.join(DIR_DATA["gas"],"sa_origin_standing.json"),
+        "Sydney": os.path.join(DIR_DATA["gas"],"energyaustralia_basic.json"),
+        "Melbourne": os.path.join(DIR_DATA["gas"],"vic_basic.json"),
+        "Canberra": os.path.join(DIR_DATA["gas"],"act_origin_standing.json"),
+        "Brisbane": os.path.join(DIR_DATA["gas"],"qld_origin_standing.json"),
+
+    }
+    FILE_WHOLESALE_PRICES = os.path.join(DIR_DATA["energy_market"], 'SP_2017-2023.csv')
+    FILE_POSTCODES = os.path.join(DIR_DATA["location"], "australian_postcodes.csv") # https://www.matthewproctor.com/australian_postcodes
+    FILE_MERRA2_COORDS = os.path.join(DIR_DATA["location"], "merra2_coord_states.csv")
+    FILE_GAS_TARIFF_SAMPLE = os.path.join(DIR_DATA["gas"],"energyaustralia_basic.json")
+    
+
+class DEFAULTS(DEFAULT_BASE):
+
+    #location
+    LOCATION = "Sydney"
+    HWDP = 1
+    NEM_REGION = "NSW1"
+    
+    #geography
+    TZ = 'Australia/Brisbane'       # NEM timezone
+    LAT = -33.86
+    LON = 151.21
+    TILT = abs(LAT)
+    ORIENT = 180.
+
+    #finance
+    CAPITAL_COST = 1000.        #[AUD]
+    DIVERTER_COST = 1100.       #[AUD]
+    TIMER_COST = 250.           #[AUD]
+    PERM_CLOSE_COST = 1250      #[AUD]
+    TEMP_CLOSE_COST = 200       #[AUD]
+    NEW_ELEC_SETUP = 500.       #[AUD]
+    REBATES = 0                 # [AUD]
+    DISCOUNT_RATE = 0.08        # 8%
+    LIFESPAN = 10               # [years]
+    MAJOR_MAINTANCE = 200.      # AUD
+    HOUSEHOLD_SIZE = 4          # [people]
+    DAILY_HWD = 200.            # [L/day]
+
+
+
+# Definitions and mappings
+class DEFINITIONS(DEF_BASE):
+    LOCATIONS_METEONORM = [
+        'Adelaide', 'Brisbane', 'Canberra',
+        'Darwin', 'Melbourne', 'Perth',
+        'Sydney', 'Townsville',
+    ]
+    LOCATIONS_FEW = ['Sydney', 'Adelaide', 'Brisbane', 'Melbourne']
+    NEM_REGIONS = [ "NSW1", "VIC1", "QLD1", "SA1", "TAS1" ]
+    SIMULATION_TYPES = ["annual", "mc", "historical", "hw_only", "forecast"]
+    DNSPS = [
+        "Actewagl", "Ausgrid", "Ausnet", "CitiPower", "Endeavour",
+        "Essential", "Energex", "Ergon", "Evoenergy", "Horizon", "Jemena",
+        "Powercor", "Powerwater", "SAPN", "TasNetworks", "Unitedenergy", "Western",
+    ]
+    LOCATIONS_DNSP = {
+        "Adelaide": "SAPN",
+        "Brisbane": "Energex",
+        "Canberra": "Evoenergy",
+        "Darwin": "Powerwater",
+        "Melbourne": "CitiPower",
+        "Perth": "Western",
+        "Sydney": "Ausgrid",
+        "Townsville": "Ergon",
+    }
+    STATES = {
+        "SA": "South Australia",
+        "NSW": "New South Wales",
+        "QLD": "Queensland",
+        "TAS": "Tasmania",
+        "VIC": "Victoria",
+        "WA": "Western Australia",
+        "ACT": "Australian Capital Territory",
+        "NT": "Northern Territory",
+    }
+    LOCATIONS_STATE = {
+        "Adelaide": "SA",
+        "Brisbane": "QLD",
+        "Canberra": "ACT",
+        "Darwin": "NT",
+        'Hobart': "TAS",
+        "Melbourne": "VIC",
+        "Perth": "WA",
+        "Sydney": "NSW",
+        "Townsville": "QLD",
+    }
+    LOCATIONS_COORDINATES = {
+        'Adelaide': (138.6011, -34.9289),
+        'Brisbane': (153.0281, -27.4678),
+        'Canberra': (149.1269, -35.2931),
+        'Darwin': (130.8411, -12.4381),
+        'Hobart': (147.3257, -42.8826),
+        'Melbourne': (144.9631, -37.8136),
+        'Perth': (115.8589, -31.9522),
+        'Sydney': (151.21, -33.86),
+        'Townsville': (146.817, -19.25)
+    }
+    LOCATIONS_NEM_REGION = {
+        "Sydney": "NSW1",
+        "Melbourne": "VIC1",
+        "Brisbane": "QLD1",
+        "Adelaide": "SA1",
+        "Canberra": "NSW1",
+        "Townsville": "QLD1",
+    }
+    STATES_NEM_REGION = {
+        "SA":"SA1", "NSW": "NSW1", "QLD":"QLD1", "VIC": "VIC1",
+    }
+    TARIFF_TYPES = {
+        "flat": "Flat Tariff",
+        "tou": "Time of Use",
+        "CL" : "Controlled Load",
+    }
+    CONTROL_TYPES = {
+        "GS": "general supply",
+        "CL": "controlled load",
+        "CL1": "controlled load 1",
+        "CL2": "controlled load 2",
+        "CL3": "controlled load, solar soak option",
+        "timer": "timer",
+        "timer_SS": "timer for solar soak",
+        "timer_OP": "timer for off-peak periods (tou)",
+        "diverter": "diverter",
+    }
+    CL_NAMES = {
+        0:'GS',
+        1:'CL1',
+        2:'CL2',
+        3:'CL3',
+        4:'SS',
+    }
+    CL_MAP = {
+        0:'General Supply',
+        1:'Controlled Load 1',
+        2:'Controlled Load 2',
+        3:'Solar Soak (Ausgrid)',
+        4:'Solar Soak (only)',
+    }
+    HWDP_NAMES = {
+        1:'Mor & Eve Only',
+        2:'Mor & Eve w daytime',
+        3:'Evenly',
+        4:'Morning',
+        5:'Evening',
+        6:'Late Night',
+    }
+    
+
+class SIMULATIONS_IO(SIM_IO_BASE):
+
+    TS_TYPES = {
+        "weather": ["GHI", "temp_amb", "temp_mains", "DNI", "DHI", "WS"],
+        "control": ["CS"],
+        "electric": ["PV_gen", "import_grid", "import_CL"],
+        "HWDP": ["P_HWD", "m_HWD", "m_HWD_day"],
+        "economic": ["tariff", "rate_type", "wholesale_market"],
+        "emissions": ["intensity_index", "marginal_index"],
+    }
+    TS_COLUMNS_ALL = [
+        item for sublist in 
+            [value for _, value in TS_TYPES.items()]
+        for item in sublist
+    ]
+
+    TS_TYPES_TM = ["weather", "control", "HWDP"]    # ts columns for thermal sims
+    TS_TYPES_PV = ["weather", "electric"]                   # ts columns for PV sim
+    TS_TYPES_ECO = ["weather", "economic", "emissions"]     # ts columns for ECO postproc
+
+    OUTPUT_SIM_PV = [
+        "poa_global",
+        "temp_pv",
+        "eta_rel",
+        "pv_power"
+    ]
+    OUTPUT_CONTROL = [
+        "CS",
+        "pv_to_hw",
+        "CS_nopv",
+    ]
+
+    OUTPUT_SIM_DEWH = [
+        'heater_heat',
+        'heater_power',
+        'heater_perf',
+        'tank_flow_rate',
+        'tank_temp_out',
+        'C_all',
+        'tank_temp_avg',
+        'SOC',
+        'SOC2',
+        'SOC3',
+        'E_HWD',
+        'E_level',
+    ]
+    OUTPUT_SIM_STC = [
+        "",
+    ]
+    OUTPUT_ANALYSIS_TM =[
+        "heater_heat_acum", "heater_power_acum", "heater_perf_avg",
+        "E_HWD_acum", "E_losses_acum",
+        "eta_stg", "cycles_day",
+        "SOC_avg", "SOC_min", "SOC_025", "SOC_050", "t_SOC0",
+    ]
+    OUTPUT_ANALYSIS_ECON = [
+        'annual_emissions_total',
+        'annual_emissions_marginal',
+        'solar_ratio_potential',
+        'solar_ratio_real',
+        'annual_hw_household_cost',
+        'annual_hw_wholesale_cost'
+    ]
+    OUTPUT_ANALYSIS_FIN = [
+        "net_present_cost",
+        "payback_period",
+        "LCOHW",
+        "capital_cost",
+        "annual_energy_cost",
+        "daily_supply_cost",
+        "oandm_cost",
+        "others_cost",
+        "rebates",
+        "disconnection_costs",
+        "solar_ratio_real"
+    ]
+
+    FIN_COMP_OUTPUT = [
+        "emission_savings",
+        "cost_savings_household",
+        "cost_savings_retailer",
+    ]
+
