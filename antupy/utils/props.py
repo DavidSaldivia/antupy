@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Protocol
 
-import cantera as ct
 import CoolProp.CoolProp as CP
 import numpy as np
 
@@ -838,27 +837,6 @@ class CO2():
         else:
             raise ValueError(f"{type(P)=} is not a valid type")
         return Var(CP.PropsSI('V', 'T', temp, 'P', pressure, 'CO2'), "Pa-s")
-
-
-class CO2_cantera():
-    _ct_solution = ct.Solution('gri30.yaml','gri30') # type: ignore
-
-    def rho(self, temp: float, pressure: float) -> Var:
-        self._ct_solution.TPY = temp, pressure, 'CO2:1.00'
-        return Var(self._ct_solution.density_mass, "kg/m3")
-    
-    def cp(self, temp: float, pressure: float) -> Var:
-        self._ct_solution.TPY = temp, pressure, 'CO2:1.00'
-        return Var(self._ct_solution.cp, "J/kg-K")
-    
-    def k(self, temp: float, pressure: float) -> Var:
-        self._ct_solution.TPY = temp, pressure, 'CO2:1.00'
-        return Var(self._ct_solution.thermal_conductivity, "W/m-K")
-    
-    def viscosity(self, temp: float, pressure: float) -> Var:
-        self._ct_solution.TPY = temp, pressure, 'CO2:1.00'
-        return Var(self._ct_solution.viscosity, "Pa-s")
-
 
 class TherminolVP1():
     def rho(
