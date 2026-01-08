@@ -87,7 +87,7 @@ class Weather(Protocol):
 
 
 @dataclass
-class TMY:
+class TMY(Weather):
     """
     TMY (Typical Meteorological Year) weather generator.
     One year of data, usually with TMY files.
@@ -110,7 +110,7 @@ class TMY:
 
 
 @dataclass
-class WeatherMC:
+class WeatherMC(Weather):
     """
     Monte Carlo weather generator.
     Random sample of temporal unit (e.g. days) from set (month, week, day).
@@ -140,7 +140,7 @@ class WeatherMC:
 
 
 @dataclass
-class WeatherHist:
+class WeatherHist(Weather):
     """
     Historical weather generator.
     Specific dates for a specific location from historical datasets.
@@ -167,7 +167,7 @@ class WeatherHist:
 
 
 @dataclass
-class WeatherConstantDay:
+class WeatherConstantDay(Weather):
     """
     Constant day weather generator.
     Environmental variables kept constant throughout the simulation.

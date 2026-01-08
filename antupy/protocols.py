@@ -5,14 +5,6 @@ import pandas as pd
 from typing import Protocol, Self, TypedDict, TypeAlias
 
 
-
-
-# class Simulator(Protocol):
-#     def layout(self) -> Layout:
-#         ...
-#     def run_simulation(self) -> Output:
-#         ...
-
 class Analyser(Protocol):
     def inputs(self) -> Input:
         ...

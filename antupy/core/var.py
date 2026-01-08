@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from typing import Self
 
 import math
+import re
 
 import numpy as np
 from antupy.core.units import Unit, _assign_unit, _conv_temp, _mul_units, _div_units
@@ -334,47 +335,14 @@ class Var():
         return f"{self.value:} [{self.unit.u}]"
 
     def __format__(self, format_spec: str) -> str:
-        """
-        Format the Var object for use in f-strings and format() calls.
-        
-        Supports various format specifications:
-        - Precision: .2f, .3e, etc. (applies to value only)
-        - Width/alignment: >15, <10, ^20 (applies to entire string)
-        - Combined: >15.2f (width applies to entire string, precision to value)
-        
-        Parameters
-        ----------
-        format_spec : str
-            Format specification string
-            
-        Returns
-        -------
-        str
-            Formatted string representation of the Var
-            
-        Examples
-        --------
-        >>> var = Var(3.14159, "m")
-        >>> f"{var:.2f}"
-        '3.14 [m]'
-        >>> f"{var:>15}"
-        '    3.14159 [m]'
-        >>> f"{var:>15.2f}"
-        '       3.14 [m]'
-        """
         if self.value is None:
             base_str = f"None [{self.unit.u}]"
             if format_spec:
-                # Extract width/alignment only for None values
-                import re
                 width_match = re.match(r'([<>=^]?)(\d+)', format_spec)
                 if width_match:
                     align, width = width_match.groups()
                     return format(base_str, f"{align}{width}")
             return base_str
-        
-        # Parse format specification to separate width/alignment from precision/type
-        import re
         
         # Match format patterns like: [fill][align][width][.precision][type]
         match = re.match(r'([<>=^]?)(\d*)(?:\.(\d+))?([a-zA-Z%]?)', format_spec)

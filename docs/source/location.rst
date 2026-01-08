@@ -20,7 +20,7 @@ Key Features:
 Location Protocol
 -----------------
 
-.. autoclass:: antupy.loc.loc.Location
+.. autoclass:: antupy.utils.loc.Location
    :members:
    :show-inheritance:
    :no-index:
@@ -29,7 +29,7 @@ The ``Location`` Protocol defines the standard interface for all location classe
 
 .. code-block:: python
 
-   from antupy.loc import Location, LocationAU
+   from antupy.utils.loc import Location, LocationAU
    
    # Create a location
    location = LocationAU("Sydney")
@@ -46,7 +46,7 @@ Location Classes
 LocationAU (Australian Locations)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: antupy.loc.loc_au.LocationAU
+.. autoclass:: antupy.utils.loc.LocationAU
    :members:
    :show-inheritance:
    :no-index:
@@ -57,7 +57,7 @@ The ``LocationAU`` class provides comprehensive Australian location support with
 
 .. code-block:: python
 
-   from antupy.loc import LocationAU
+   from antupy.utils.loc import LocationAU
    
    # Major Australian cities
    sydney = LocationAU("Sydney")
@@ -95,7 +95,7 @@ The ``LocationAU`` class provides comprehensive Australian location support with
 LocationCL (Chilean Locations)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: antupy.loc.loc_cl.LocationCL
+.. autoclass:: antupy.utils.loc.LocationCL
    :members:
    :show-inheritance:
    :no-index:
@@ -104,7 +104,7 @@ Basic Chilean location support:
 
 .. code-block:: python
 
-   from antupy.loc import LocationCL
+   from antupy.utils.loc import LocationCL
    
    # Chilean cities
    santiago = LocationCL("Santiago")
@@ -169,56 +169,6 @@ Returns the nearest Australian postcode:
    nearest_postcode = coords_location.postcode
    print(f"Nearest postcode: {nearest_postcode}")
 
-Utility Functions
------------------
-
-The LocationAU module provides utility functions for postcode and coordinate conversions:
-
-_from_postcode Function
-~~~~~~~~~~~~~~~~~~~~~~~
-
-.. autofunction:: antupy.loc.loc_au._from_postcode
-   :no-index:
-
-Convert postcodes to geographical information:
-
-.. code-block:: python
-
-   from antupy.loc.loc_au import _from_postcode
-   
-   # Get state from postcode
-   state = _from_postcode(2000, get="state")  # Returns "NSW"
-   
-   # Get coordinates from postcode
-   coords = _from_postcode(3000, get="coords")  # Returns (lon, lat)
-   
-   print(f"Postcode 2000: {state}")
-   print(f"Postcode 3000 coordinates: {coords}")
-
-_from_coords Function
-~~~~~~~~~~~~~~~~~~~~~
-
-.. autofunction:: antupy.loc.loc_au._from_coords
-   :no-index:
-
-Convert coordinates to Australian postcode/state information:
-
-.. code-block:: python
-
-   from antupy.loc.loc_au import _from_coords
-   
-   # Sydney Opera House coordinates
-   coords = (151.2153, -33.8570)
-   
-   # Find nearest postcode
-   postcode = _from_coords(coords, get="postcode")
-   
-   # Find state
-   state = _from_coords(coords, get="state")
-   
-   print(f"Coordinates {coords}")
-   print(f"Nearest postcode: {postcode}")
-   print(f"State: {state}")
 
 Weather Integration
 -------------------

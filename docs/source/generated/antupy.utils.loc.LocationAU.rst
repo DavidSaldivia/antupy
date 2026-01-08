@@ -1,7 +1,7 @@
-﻿antupy.loc.loc\_au.LocationAU
-=============================
+﻿antupy.utils.loc.LocationAU
+===========================
 
-.. currentmodule:: antupy.loc.loc_au
+.. currentmodule:: antupy.utils.loc
 
 .. autoclass:: LocationAU
 
