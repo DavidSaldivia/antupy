@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Antupy'
-copyright = '2025, David Saldivia'
+copyright = '2026, David Saldivia'
 author = 'David Saldivia'
 
 # -- General configuration ---------------------------------------------------
@@ -16,6 +16,9 @@ author = 'David Saldivia'
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../../'))
+
+release = "0.5.0"
+version = ".".join(release.split(".")[:2])
 
 extensions = [
     'sphinx.ext.duration',
@@ -67,6 +70,15 @@ html_theme_options = {
     "show_nav_level": 2,
     "navigation_depth": 3,
     "show_prev_next": True,
+}
+
+# ReadTheDocs-specific
+html_context = {
+    "display_github": True,
+    "github_user": "DavidSaldivia",
+    "github_repo": "antupy",
+    "github_version": "main",
+    "conf_py_path": "/docs/source/",
 }
 
 # Intersphinx configuration

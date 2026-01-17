@@ -4,6 +4,9 @@ version = "0.5.0"
 description = "Toolkit for energy engineering"
 authors = ["David Saldivia <david.saldivia.s@gmail.com>"]
 readme = "README.md"
+license = "MIT"
+homepage = "https://github.com/DavidSaldivia/antupy"
+repository = "https://github.com/DavidSaldivia/antupy"
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.14"

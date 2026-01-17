@@ -3,7 +3,7 @@
 
 An object-oriented software, it is structured in three main interdependent modules:
  - A **unit manager** to store and represent physical quantities. It offers three classes to represent data structures. `Var`, for scalar or 0D data; `Array`, for 1D-vectors (or timeseries), and `Frame` for 2D-dataframe-style data.
- - To help **simulate** real world systems, it provides classes to represent `Model`s and `Plant`s, that can be used with different analysers, such as, the `Parametric` class. To help these simulations, a couple of Timeseries Generators (`TSG`s) are presented, such as `Weather`, `Market`, and Hot Water Draw (`HWD`) data generators. 
+ - To help **simulate** real world systems, it provides classes to represent `Model`s and `Plant`s, that can be used with different analysers, such as, the `Parametric` class. To help these simulations, a couple of Timeseries Generators (`TSG`s) are presented, such as `Weather` and `Market` data generators. 
  - A set of **utility** modules based on the unit manager system. `props`: a thermophysical properties library; `htc`: a heat transfer coefficient library; `solar`: a module with solar-related functions; `loc`: a location manager.
 
 Due to the wide range of possibilities and variety of these systems, the development has been focused on the developers' research. Therefore, at the moment, the only simulations implemented so far are domestic water heating (`dwh`), and concentrated solar thermal (`cst`) systems.
