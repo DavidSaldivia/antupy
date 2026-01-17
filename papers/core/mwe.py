@@ -31,7 +31,7 @@ class HotWaterTank():
 class SolarWaterHeating(Plant):
     heater = SolarCollector()
     tank = HotWaterTank()
-    weather = TMY(location="Antofagasta", country="CL")
+    weather = TMY(location="Antofagasta")
     
     def run_simulation(self, verbose: bool = False) -> SimulationOutput:
         for _, row in self.weather.load_data().iterrows():

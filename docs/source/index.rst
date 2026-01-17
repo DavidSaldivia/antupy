@@ -24,12 +24,10 @@ It is an object-oriented software, with a unit manager in its core, creating two
 
    overview
    units
-   variable_system
-   props
-   htc
-   tsg_settings
-   location
+   core_classes
+   system_classes
    tsg_weather
+   utilities
    api
 
 

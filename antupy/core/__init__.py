@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from typing import TypedDict, TypeAlias, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from antupy import Var, Array
+    from antupy import Var, Array, Frame
 
 SimulationOutput: TypeAlias = dict[str, "Var | Array | Frame | float | str | dict"]
 

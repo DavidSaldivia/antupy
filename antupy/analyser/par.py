@@ -16,14 +16,8 @@ from typing import Any, overload
 
 import numpy as np
 
-from antupy.core import Simulation
-from antupy.core.plant import Plant
-from antupy.core.var import Var
-from antupy.core.array import Array
-from antupy.core.frame import Frame
+from antupy import Simulation, Plant, Var, Array, Frame
 
-
-# Type aliases for better readability
 ParameterValue = Array | Iterable[str | int | float]
 SimulationType = Simulation | Plant
 
@@ -32,10 +26,7 @@ class Parametric:
     """
     Enhanced parametric analysis manager with full unit tracking.
     
-    This class handles the setup, execution, and management of parametric 
-    studies where multiple input parameters are varied systematically 
-    to explore their effects on simulation outputs. Results are stored
-    in ap.Frame with full unit preservation.
+    This class handles the setup, execution, and management of parametric studies where multiple input parameters are varied systematically  to explore their effects on simulation outputs. Results are stored in ap.Frame.
     
     Parameters
     ----------

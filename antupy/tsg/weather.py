@@ -18,7 +18,7 @@ import pandas as pd
 import numpy as np
 import xarray as xr
 
-from typing import Optional, Union, Any, Literal, Protocol, runtime_checkable
+from typing import Optional, Literal, Protocol, runtime_checkable
 
 from antupy.ddd_au import (
     DIRECTORY,

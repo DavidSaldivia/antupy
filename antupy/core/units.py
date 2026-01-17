@@ -1,6 +1,3 @@
-"""
-module with a simple units manager
-"""
 from __future__ import annotations
 import numpy as np
 from typing import TYPE_CHECKING, TypedDict

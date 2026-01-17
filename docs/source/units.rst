@@ -1,7 +1,10 @@
 The unit manager
 ==================
 
-The ``units`` module is the core of the unit manager used by Antupy. It contains the core class :py:class:`~antupy.units.Unit` that allows to represent any valid unit string into a standardized format. The standardized format, here called *base representantion* corresponds to a conversion factor (float) and a dictionary. The dictionary contains the unit name as key and the exponent as value.
+.. note::
+    This section provides a detailed description of the unit system underlying Antupy. In practice, most users will interact with the :py:class:`~antupy.Var`, :py:class:`~antupy.Array`, and :py:class:`~antupy.Frame` classes, which handle unit management automatically. Direct use of the :py:class:`~antupy.Unit` class is only needed in very specific cases. If you want a quick dive into the software, feel free to skip to :ref:`core_classes` to learn about the ``Var`` class.
+
+The ``units`` module is the core of the unit manager used by Antupy. It contains the core class :py:class:`~antupy.units.Unit` that allows to represent any valid unit string into a standardized format. The standardized format, here is called *base representantion* and corresponds to a conversion factor (float) and a dictionary. The dictionary contains the unit name as key and the exponent as value.
 
 The available units are classified in three categories: base units, derived units, and related units. The base units are the seven `SI base units <https://en.wikipedia.org/wiki/International_System_of_Units#SI_base_units>`_. The only difference is for mass, which is represented by gram (*g*), to simplify the task to represent prefixes. Additionally, the dimensionless quantity (represented by a single `-`), and the US dollars (USD), as base unit for money, are included, totalling nine base units.
 
@@ -27,7 +30,7 @@ A valid unit string (here called a *unit label*) correspond to a combination of 
 - Units can be multiplied by using the hyphon **(-)** symbol (e.g. ``m-s`` for meter-seconds). For simplicity, other symbols such as **\***, **x**, or simply whitespace are **not** allowed.
 - Units can be raised to a power by appending the exponent to the unit (e.g. ``m2`` for square meters). Negative exponents are **not** allowed. Include them in the denominator.
 - Units can be divided by using the **/** symbol (e.g. ``m/s`` for meters per second). **Only one** division symbol is allowed in a valid unit string.
-- Parenthesis are **not** allowed yet.
+- Parenthesis are **not** allowed (yet).
 
 Examples of valid and invalid unit strings:
 
@@ -74,12 +77,3 @@ Finally, you can show the SI representation by using the ``si`` property.
     >>> u.si
     '1.00e+06[m2-g/s2]'
 
-
-The ``units`` classes
-------------------------
-
-.. autoclass:: antupy.Unit
-    :members:
-
-.. autoclass:: antupy.core.units.UnitDict
-    :members:

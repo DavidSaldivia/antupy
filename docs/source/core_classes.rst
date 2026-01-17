@@ -1,0 +1,115 @@
+Core Classes
+=================
+
+The :py:class:`~antupy.Var` class is a simple representation of a variable with a value and a unit. It allows for basic arithmetic operations, unit conversions, and comparisons. The class ensures that operations between variables are consistent in terms of units, providing a robust framework for handling physical quantities.
+
+``antupy`` works in its core with a Unit management module ``units``, which include the class :py:class:`~antupy.Unit` mostly compatible with the SI unit system. From this, three classes are built. The :py:class:`~antupy.Var` class to manage single variables in the form of ``(value:float, unit:str)`` structure. The :py:class:`~antupy.Array` class for structures in the form of ``(array:np.ndarray, unit:str)``. And the :py:class:`~antupy.Frame` class to manage dataframes with multiple columns, each with its own unit, in the form of ``(dataframe:pd.DataFrame, units:dict)``.
+
+The :py:class:`~antupy.Var` class is used to represent scalar values, while the :py:class:`~antupy.Array` class is used for vectors or time series data. Both classes are designed to handle units and conversions seamlessly, allowing for easy manipulation of physical quantities in simulations.
+
+The :py:class:`~antupy.Var` class
+-----------------------------------
+The :py:class:`~antupy.Var` class is a simple representation of a variable with a value and a unit. It allows for basic arithmetic operations, unit conversions, and comparisons. The class ensures that operations between variables are consistent in terms of units, providing a robust framework for handling physical quantities. To create a variable, you can instantiate the :py:class:`~antupy.Var` class with a value and a unit. For example:
+
+.. code-block:: python
+
+    from antupy import Var
+    mass = Var(5.0, "kg")
+    pressure = Var(101325, "Pa")
+
+Retrieving the properties in different units with ``get_value`` or simple ``gv`` and  provide a compatible unit as argument.
+
+.. code-block:: python
+    
+    print(mass.get_value("g"))  # Outputs: 5000.0 '[g]'
+    print(mass.gv("ton"))  # Outputs: 0.005 '[ton]'
+    print(mass.gv("s"))   # Outputs: ValueError
+
+You can perform arithmetic operations, like addition and subtraction, if both units represent the same quantities. The units will be automatically handled, and the result will be in the first variable's unit. For example:
+
+.. code-block:: python
+
+    result = mass + Var(500, "g")  # Adds 0.5 kg to 5 kg
+    print(result)  # Outputs: 5.5 '[kg]'
+
+You can multiply and divide variables with different units, and the resulting unit will be automatically calculated. For example:
+
+.. code-block:: python
+
+    time_sim = Var(1, "day")
+    nom_power = Var(100, "kW")
+    energy = nom_power * time_sim
+    print(energy) # Outputs: 100 [kW-day]
+    print(energy.gv("kW-hr")) # Outputs:  2400.0
+    print(energy.gv("kWh")) # Outputs: 2400.0
+    print(energy.gv("kJ")) # Outputs 8640000.0
+
+
+.. note::
+    Be careful while converting between temperature units. You can convert between Celsius and Kelvin when using ``get_value``. However, you cannot add or substract between them. As a recommendation, use always Kelvin, as this is the absolute temperature scale. Farenheit (``°F``) is not supported.
+
+
+Additionally, the Var class provides a convenient way to set the unit of the output using the ``set_units`` or ``su`` method. This is a useful feature when you want to express the result in a specific unit. Both methods return a new instance of the same variable and is a useful way to detect wrong unit handling and possible errors.
+Note in the following example, how the expected quantity can be set with "kWh" but will throw an error when trying to convert to a non-compatible unit like "MW" (megawatts).
+
+.. code-block:: python
+    
+    time_sim = Var(1, "day")
+    nom_power = Var(100, "kW")
+    energy = nom_power * time_sim
+    print((8*energy/2 - energy*2)) # Outputs: 200 ["kW-day"]
+    print((8*energy/2 - energy*2).su("kWh")) # Outputs: 4800 ["kWh"]
+    print((8*energy/2 - energy*2).su("MW"))  # Outputs: Traceback (most recent call last): ...
+
+
+The ``CF`` function
+---------------------
+
+The module also provides a ``CF`` function, to provide useful conversion factors between units. The function accepts two strings, and returns a ``Var`` object with the corresponding conversion factor. For example, to convert from meters to kilometers:
+
+.. code-block:: python
+
+    from antupy import CF
+    distance = Var(1500, "m")
+    distance_km = distance * CF("m", "km")   # Applies the conversion factor
+    print(distance_km)  # Outputs: 1.5 [km]
+
+
+The :py:class:`~antupy.Array` class
+------------------------------------
+The :py:class:`~antupy.Array` class extends the functionality of the :py:class:`~antupy.Var` class to handle arrays of values, which can represent time series data or vectors. It supports operations such as element-wise arithmetic, unit conversions, and statistical analysis. The class is designed to work seamlessly with NumPy arrays, leveraging its powerful capabilities for numerical computations.
+
+.. code-block:: python
+    
+    receiver_powers = Array([10., 20., 40.], "MW")
+    receiver_areas = Array(np.linspace(20,50,3), "m2")
+    receiver_flux_avg = receiver_powers / receiver_areas
+    print(receiver_flux_avg) # Outputs: [0.5        0.57142857 0.8       ] [MW/m2]
+
+
+The :py:class:`~antupy.Frame` class
+-------------------------------------
+The :py:class:`~antupy.Frame` class adds unit tracking to pandas DataFrames. It maintains a unit per column via the ``units`` mapping, lets you query with ``unit()``/``get_units()``, convert with ``set_units()``/``su()``, and fetch data as :py:class:`~antupy.Array` with ``get_values()``/``gv()``. Use ``.df`` to obtain a plain pandas DataFrame when needed.
+
+.. code-block:: python
+
+    import numpy as np
+    from antupy import Frame
+
+    data = {"power": [10., 20., 40.], "area": np.linspace(20, 50, 3)}
+    f = Frame(data=data, units={"power": "MW", "area": "m2"})
+
+    # Inspect units
+    print(f.unit())              # {'power': 'MW', 'area': 'm2'}
+
+    # Convert units in-place
+    f.su({"power": "kW"})      # power converted to kW
+
+    # Work with unit-aware Arrays
+    vals = f.get_values(["power", "area"])
+    flux = vals["power"] / vals["area"]
+    print(flux)                  # Array with unit [kW/m2]
+
+    # Get a plain pandas DataFrame
+    df = f.df
+    

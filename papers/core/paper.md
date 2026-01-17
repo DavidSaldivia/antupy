@@ -58,7 +58,7 @@ The `antupy` codebase represents a formalization and generalization of simulatio
 
 # AI usage disclosure
 
-All the main classes were coded without AI assistance, except by `Frame` and `Plant`, that were developed with assistance of VSCode-integrated Claude Sonnet 4.5. The same tool was used to develop part of the tests and docstrings using an iterative process.
+All the main classes were coded without any AI assistance, except by `Frame` and `Plant`, that were developed with assistance of VSCode-integrated Claude Sonnet 4.5. The same tool was used to develop part of the tests and the main classes docstrings using an iterative process.
 
 
 # Acknowledgments
