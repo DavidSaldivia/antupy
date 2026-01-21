@@ -28,7 +28,7 @@ class Mock(MagicMock):
 MOCK_MODULES = ['CoolProp', 'CoolProp.CoolProp', 'pvlib', 'scipy', 'matplotlib', 'xarray']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
-release = "0.6.0"  # Update this when you bump version
+release = "0.5.0"  # Update this when you bump version
 version = ".".join(release.split(".")[:2])
 
 extensions = [
