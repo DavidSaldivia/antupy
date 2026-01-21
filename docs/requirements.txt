@@ -1,0 +1,15 @@
+# Minimal requirements for building documentation
+# Only what Sphinx needs to import the code
+
+# Core dependencies for imports
+numpy>=2.1.2
+pandas>=2.2.3
+polars>=1.9.0
+
+# Sphinx and extensions
+sphinx>=8.2.3
+furo>=2025.7.19
+sphinx-rtd-theme>=3.0.2
+
+# Mock heavy dependencies (Sphinx will fake-import these)
+# CoolProp and pvlib won't actually be installed but imports won't fail

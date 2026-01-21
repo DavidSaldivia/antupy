@@ -15,9 +15,20 @@ author = 'David Saldivia'
 
 import os
 import sys
+from unittest.mock import MagicMock
+
 sys.path.insert(0, os.path.abspath('../../'))
 
-release = "0.5.0"
+# Mock heavy dependencies for ReadTheDocs
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+        return MagicMock()
+
+MOCK_MODULES = ['CoolProp', 'CoolProp.CoolProp', 'pvlib', 'scipy', 'matplotlib', 'xarray']
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+
+release = "0.6.0"  # Update this when you bump version
 version = ".".join(release.split(".")[:2])
 
 extensions = [
