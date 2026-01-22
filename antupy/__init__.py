@@ -6,10 +6,14 @@ from antupy.core import Simulation, SimulationOutput
 from antupy.core.plant import Plant, component, constraint, derived
 from antupy.analyser import Parametric
 
+from antupy.utils import props, htc, solar
+from antupy.utils import loc
+
 __all__ = [
     "Unit",
     "Var", "CF", "Array", "Frame",
     "Simulation", "Plant", "SimulationOutput",
     "component", "constraint", "derived",
     "Parametric",
+    "props", "htc", "solar", "loc",
 ]

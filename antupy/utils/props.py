@@ -7,18 +7,18 @@ import numpy as np
 from antupy import Var
 
 class Fluid(Protocol):
-    def rho (self, T: float|Var) -> Var: ...
-    def cp  (self, T: float|Var) -> Var: ...
-    def k (self, T: float|Var) -> Var: ...
+    def rho(self, T: float|Var) -> Var: ...
+    def cp(self, T: float|Var) -> Var: ...
+    def k(self, T: float|Var) -> Var: ...
     def viscosity(self, T: float|Var) -> Var: ...
 
 
 class Material(Protocol):
-    def rho (self, T: float|Var) -> Var:
+    def rho(self, T: float|Var) -> Var:
         ...
-    def cp  (self, T: float|Var) -> Var:
+    def cp(self, T: float|Var) -> Var:
         ...
-    def k (self, T: float|Var) -> Var:
+    def k(self, T: float|Var) -> Var:
         ...
 
 
@@ -37,7 +37,7 @@ class SolarSalt(Fluid):
         return "Solar salt (NaNO3-KNO3 mixture)"
 
 
-class Carbo():
+class Carbo(Material):
     def rho(
             self,
             T: float|Var = Var(273.15, "K")

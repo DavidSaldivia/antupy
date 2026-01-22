@@ -1,9 +1,9 @@
-﻿antupy.utils.loc.Location
-=========================
+﻿antupy.loc.Location
+===================
 
-.. currentmodule:: antupy.utils.loc
+.. currentmodule:: antupy
 
-.. autoclass:: Location
+.. autoclass:: loc.Location
 
    
    .. automethod:: __init__
@@ -13,7 +13,7 @@
 
    .. autosummary::
    
-      ~Location.__init__
+      ~loc.Location.__init__
    
    
 
@@ -23,6 +23,6 @@
 
    .. autosummary::
    
-      ~Location.value
+      ~loc.Location.value
    
    

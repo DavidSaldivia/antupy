@@ -15,7 +15,7 @@ Materials provide basic thermophysical properties like density, specific heat, a
 
 .. code-block:: python
 
-    from antupy.utils.props import Copper
+    from antupy.props import Copper
     from antupy import Var
 
     # Create material instance
@@ -34,11 +34,11 @@ Materials provide basic thermophysical properties like density, specific heat, a
 Using Fluid Properties
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Fluids offer additional properties like viscosity, enthalpy, and Prandtl number. Example with saturated water:
+Fluids offer additional properties like viscosity. Example with saturated water:
 
 .. code-block:: python
 
-    from antupy.utils.props import SaturatedWater
+    from antupy.props import SaturatedWater
     from antupy import Var
 
     # Create fluid instance
@@ -67,33 +67,21 @@ The ``htc`` library
 -----------------------
 
 .. warning::
-	This HTC module documentation reflects an incomplete initial version. Several functions are placeholders and important correlations and use-cases still need to be implemented and documented in future expansions.
+	This a very limited initial version of this module. Only a couple of correlations are presented as example. It is expected to implemented a wider range of correlations in future expansions.
 
-The ``htc`` module provides simple helpers to estimate radiative and convective heat transfer terms. It includes a sky temperature approximation and basic correlations for natural and external forced convection. Results use SI units; where returned as :py:class:`~antupy.Var`, the unit is ``W/m2-K``. The available functions are:
+The ``htc`` module provides a collection of functions to estimate convective heat transfer coefficients. The source are diverse of heat transfer textbooks. It includes other functions for useful correlations (such as sky temperature approximation). Results are in SI units, returned as :py:class:`~antupy.Var`, with its unit as ``W/m2-K``. The available functions so far are:
 
-- :py:func:`antupy.utils.htc.temp_sky_simplest` — Approximate sky temperature as ``T_sky = T_amb - 15 K``.
-- :py:func:`antupy.utils.htc.h_horizontal_surface_upper_hot` — Natural convection on an upper hot horizontal plate (Holman or Nellis-Klein correlations). Returns ``h`` as a float ``[W/m2-K]``.
-- :py:func:`antupy.utils.htc.h_ext_flat_plate` — External forced convection over a flat plate (transition-aware). Returns a :py:class:`~antupy.Var` with unit ``W/m2-K``.
+- :py:func:`antupy.htc.temp_sky_simplest` — Approximate sky temperature as ``T_sky = T_amb - 15 K``.
+- :py:func:`antupy.htc.h_horizontal_surface_upper_hot` — Natural convection on an upper hot horizontal plate (Holman or Nellis-Klein correlations).
+- :py:func:`antupy.htc.h_ext_flat_plate` — External forced convection over a flat plate (transition-aware).
 
 Examples of usage:
 
 .. code-block:: python
-
-	# Sky temperature approximation
-	from antupy.utils.htc import temp_sky_simplest
-	T_amb = 293.15  # K
-	T_sky = temp_sky_simplest(T_amb)
-	print(f"Sky temperature: {T_sky:.2f} K")
-
-	# Natural convection: upper hot horizontal surface (air)
-	from antupy.utils.htc import h_horizontal_surface_upper_hot
-	h_nat = h_horizontal_surface_upper_hot(T_s=333.15, T_inf=293.15, L=0.5, correlation="NellisKlein")
-	print(f"Natural convection h: {h_nat:.2f} W/m2-K")
-
 	# External forced convection over a flat plate (water)
-	from antupy.utils.htc import h_ext_flat_plate
 	from antupy import Var
-	from antupy.utils.props import Water
+	from antupy.htc import h_ext_flat_plate
+	from antupy.props import Water
 
 	h_forced = h_ext_flat_plate(
 		temp_surf=Var(300, "K"),
@@ -102,6 +90,6 @@ Examples of usage:
 		u_inf=Var(2.0, "m/s"),
 		fluid=Water()
 	)
-	print(h_forced)            # -> e.g., 123.4 [W/m2-K]
+	print(h_forced)            # -> e.g., 10.4 [W/m2-K]
 	print(h_forced.gv("W/m2-K"))  # numeric value only
 

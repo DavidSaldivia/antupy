@@ -21,7 +21,6 @@ class Simulation(Protocol):
         ...
 
 class Model(Protocol):
-    solver: Solver
     @classmethod
     def set_model(cls, by:tuple[str|None,str|None]) -> Self:
         ...
@@ -35,10 +34,6 @@ class TimeSeriesGenerator(Protocol):
     def get_data(self, cols:list[str]) -> pd.DataFrame:
         ...
 
-
-class Solver(Protocol):
-    def run_solver(self, ts: pd.DataFrame) -> pd.DataFrame:
-        ...
 
 
 Input: TypeAlias = list[Model|TimeSeriesGenerator]

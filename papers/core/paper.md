@@ -32,7 +32,7 @@ The package is designed for minimal friction in typical workflows. A simple exam
 
 ```python
 from antupy import Var
-from antupy.utils.props import Water
+from antupy.props import Water
 
 temp_max = Var(60, "degC")
 temp_mains = Var(20, "degC")

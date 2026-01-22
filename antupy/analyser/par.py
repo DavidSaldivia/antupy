@@ -24,9 +24,7 @@ SimulationType = Simulation | Plant
 
 class Parametric:
     """
-    Enhanced parametric analysis manager with full unit tracking.
-    
-    This class handles the setup, execution, and management of parametric studies where multiple input parameters are varied systematically  to explore their effects on simulation outputs. Results are stored in ap.Frame.
+    Enhanced parametric analysis manager with full unit tracking. This class handles the setup, execution, and management of parametric studies where multiple input parameters are varied systematically to explore their effects on simulation outputs. Results are stored in a Frame.
     
     Parameters
     ----------

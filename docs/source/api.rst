@@ -14,7 +14,6 @@ Unit-aware data structures for scalar values, arrays, and dataframes.
    antupy.Frame
    antupy.CF
    antupy.Unit
-   antupy.core.units.UnitDict
 
 
 System Classes
@@ -58,31 +57,35 @@ Helper functions and classes for locations, heat transfer, thermophysical proper
 .. autosummary::
    :toctree: generated
 
-   antupy.utils.loc.Location
-   antupy.utils.loc.LocationAU
-   antupy.utils.loc.LocationCL
+   antupy.loc.Location
+   antupy.loc.LocationAU
+   antupy.loc.LocationCL
 
 
 Thermophysical Properties
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Material and fluid property classes.
+**Available Materials** (provide ``rho(T)``, ``cp(T)``, ``k(T)`` methods):
 
 .. autosummary::
-   :toctree: generated
 
-   antupy.utils.props.SolarSalt
-   antupy.utils.props.Carbo
-   antupy.utils.props.Aluminium
-   antupy.utils.props.Copper
-   antupy.utils.props.CopperNickel
-   antupy.utils.props.StainlessSteel
-   antupy.utils.props.Glass
-   antupy.utils.props.SaturatedWater
-   antupy.utils.props.SaturatedSteam
-   antupy.utils.props.SeaWater
-   antupy.utils.props.Air
-   antupy.utils.props.HumidAir
-   antupy.utils.props.CO2
-   antupy.utils.props.TherminolVP1
-   antupy.utils.props.Syltherm800
+   antupy.props.SolarSalt
+   antupy.props.Carbo
+   antupy.props.Aluminium
+   antupy.props.Copper
+   antupy.props.CopperNickel
+   antupy.props.StainlessSteel
+   antupy.props.Glass
+
+**Available Fluids** (provide additional ``mu(T)``, ``h(T)``, ``Pr(T)`` and other fluid properties):
+
+.. autosummary::
+
+   antupy.props.SaturatedWater
+   antupy.props.SaturatedSteam
+   antupy.props.SeaWater
+   antupy.props.Air
+   antupy.props.HumidAir
+   antupy.props.CO2
+   antupy.props.TherminolVP1
+   antupy.props.Syltherm800
