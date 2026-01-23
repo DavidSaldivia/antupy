@@ -10,8 +10,6 @@ class DIRECTORY:
     with open(os.path.join(DIR_MAIN, ".dirs"), "r") as f:
         private_dirs = json.load(f)
     DIR_DATA_EXTERNAL = private_dirs["data"]
-    FILE_TRNSYS_EXEC = private_dirs["trnsys"]
-    DIR_TRNSYS_TEMP = private_dirs["trnsys_temp"]
 
     DIR_RESULTS = os.path.join(DIR_MAIN, "results")
     DIR_PROJECTS = os.path.join(DIR_MAIN, "projects")
