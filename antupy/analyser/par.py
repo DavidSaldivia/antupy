@@ -53,10 +53,7 @@ class Parametric:
     isolation_mode : str, optional
         Simulation isolation mode. Options:
         - 'reuse' (default): Reuses the same base_case instance across simulations.
-          Much faster, especially with SmartPlant. Works well for pure simulations.
-        - 'deepcopy': Each simulation uses a deep copy of base_case.
-          Guarantees complete isolation but slower performance.
-          Use if run_simulation() has side effects or modifies internal state.
+        - 'deepcopy': Each simulation uses a deep copy of base_case. Guarantees complete isolation but slower performance. Use if run_simulation() has side effects or modifies internal state.
     verbose : bool, optional
         Whether to print progress information during analysis.
         Default is True.
