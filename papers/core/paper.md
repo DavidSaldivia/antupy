@@ -12,7 +12,7 @@ bibliography: antupy_references.bib
 
 # Summary
 
-`antupy`, from Mapuche language *antü*, meaning "sun"[@wiki_mapuche], is a Python package designed as a toolkit for energy system simulations. The package provides a framework organised around three type of classes. The core data types (`Var`, `Array`, `Frame`) for handling physical quantities with automatic unit conversion; abstract classes (`Model`, `Plant`, `Analyser`, `TimeSeriesGenerator`) that enable modular and extensible simulation workflows; and a suite of utility modules for thermophysical properties (`props`), heat transfer correlations (`htc`), and solar calculations (`solar`). Built on top of established scientific libraries including NumPy [@numpy], pandas [@pandas] (with a polars migration as a future project), and SciPy [@scipy]. This paper focuses on the core unit management system, some of the utility modules, and the abstract protocol architecture that enables researchers to develop custom energy system models with minimal boilerplate code while maintaining dimensional consistency throughout their simulations and post-processing.
+`antupy`, from Mapuche language *antü*, meaning "sun"[@wiki_mapuche], is a Python package designed as a toolkit for energy system simulations. The package provides a framework organised around three type of classes. The core data types (`Var`, `Array`, `Frame`) for handling physical quantities with automatic unit conversion; simulation classes (`Model`, `Plant`, `Analyser`, `TimeSeriesGenerator`) that enable modular and extensible simulation workflows; and a suite of utility modules for thermophysical properties (`props`), heat transfer correlations (`htc`), and solar calculations (`solar`). Built on top of established scientific libraries including NumPy [@numpy], pandas [@pandas] (with a polars migration as a future project), and SciPy [@scipy]. This paper focuses on the core unit management system, some of the utility modules, and the abstract protocol architecture that enables researchers to develop custom energy system models with well-structured code while maintaining dimensional consistency throughout their simulations and post-processing.
 
 # Statement of need
 
@@ -63,6 +63,6 @@ All the main classes were coded without any AI assistance, except by `Frame` and
 
 # Acknowledgments
 
-The author expresses gratitude to the projects ANID/FONDAP/1523A0006 "Solar Energy Research Center"—SERC-Chile and ANID's scholarship program "Becas Chile" (grant number TBD). Additionally, with the name, the author acknowledges the Mapuche people and its worldview as an inspiration. The first beta version of this codebase was written in Temuco, in Mapuche's heartland.
+The author expresses gratitude to the project ANID/FONDAP/1523A0006 "Solar Energy Research Center"—SERC-Chile. Additionally, with the name, the author acknowledges the Mapuche people and its worldview as an inspiration. The first beta version of this codebase was written in Temuco, in Mapuche's heartland.
 
 # References
