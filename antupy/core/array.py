@@ -42,7 +42,7 @@ class Array():
     --------
     Basic usage:
     
-    >>> from antupy.core import Array
+    >>> from antupy import Array
     >>> temperatures = Array([20.0, 25.0, 30.0], "°C")
     >>> print(temperatures)
     [20. 25. 30.] [°C]

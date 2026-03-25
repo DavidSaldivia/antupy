@@ -47,7 +47,7 @@ def CF(unit1: str|Unit, unit2: str|Unit) -> Var:
     --------
     Basic unit conversions:
     
-    >>> from antupy.core import CF
+    >>> from antupy import CF
     >>> cf = CF("m", "km")
     >>> print(cf.v)  # Get the numerical value
     0.001
@@ -130,7 +130,7 @@ class Var():
     --------
     Creating variables with units:
     
-    >>> from antupy.core import Var
+    >>> from antupy import Var
     >>> mass = Var(5.0, "kg")
     >>> velocity = Var(10, "m/s")
     
@@ -167,19 +167,21 @@ class Var():
     Array : For handling arrays of values with the same unit
     antupy.units.Unit : The underlying unit representation class
     """
-    value: float|None = None
+    _value: float|None|Var = None
     _unit: str|Unit|None = None
+    value: float|None = field(init=False)
     unit: Unit = field(init=False)
 
     def __post_init__(self):
-        if isinstance(self.value, Var) and self._unit is None:
-            object.__setattr__(self, "value", self.value.v)
-            object.__setattr__(self, "unit", self.value.u)
-        if isinstance(self.value, Var) and self._unit is not None:
+        if isinstance(self._value, Var) and self._unit is None:
+            object.__setattr__(self, "value", self._value.v)
+            object.__setattr__(self, "unit", self._value.u)
+        elif isinstance(self._value, Var) and self._unit is not None:
             unit_ = _assign_unit(self._unit)
-            object.__setattr__(self, "value", self.value.gv(unit_.label_unit))
-            object.__setattr__(self, "_unit", unit_)
+            object.__setattr__(self, "value", self._value.gv(unit_.label_unit))
+            object.__setattr__(self, "unit", unit_)
         else:
+            object.__setattr__(self, "value", self._value)
             object.__setattr__(self, "unit", _assign_unit(self._unit))
 
 

@@ -1,6 +1,6 @@
 ID,name,description,stage,
 000,antupy wishlist,"this is the wishlist of tasks and improvements",None
-001,finish variable system,include Array and Frame,wip,
+001,finish variable system,migrate Frame to polars,wip,
 002,dewh's mwe,minimal workable example of a DEWH module's simulation,wip,
 003,csp's mwe,minimal workable example of a CSP module's simulation,wip,
 004,documentation,create documentation with working examples and analysers,,
