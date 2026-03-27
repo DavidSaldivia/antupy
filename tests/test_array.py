@@ -11,6 +11,30 @@ def test_array_creation():
     assert Array(data1, u1) == Array(data2*cf, u2)
     assert Array(data1, u1) / cf == Array(data2, u2)
 
+def test_init_array():
+    data = [1., 2., 3.]
+    arr1 = Array(data, "m")
+    arr2 = Array(arr1)
+    arr3 = Array(arr1, "m")
+    arr4 = Array(arr1, "km")
+
+    assert isinstance(arr2, Array)
+    assert isinstance(arr3, Array)
+    assert isinstance(arr4, Array)
+
+def test_array_var_operations():
+    array = Array([1,2,3], "m")
+    var = Var(2, "m")
+    assert array + var == Array([3,4,5], "m")
+    assert array - var == Array([-1,0,1], "m")
+    assert var + array == Array([3,4,5], "m")
+    assert var - array == Array([1,0,-1], "m")
+    assert array * var == Array([2,4,6], "m2")
+    assert var * array == Array([2,4,6], "m2")
+    assert array / var == Array([0.5,1,1.5], "")
+    assert var / array == Array([2,1,2/3], "")
+
+
 def test_add_array():
     array1 = Array([1,2,3], "day")
     array2 = Array([24,48,72], "hr")

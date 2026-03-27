@@ -79,19 +79,27 @@ class Array():
     Var : For handling single values with units
     antupy.units.Unit : The underlying unit representation class
     """
-    value_: np.ndarray|list|None= None
+    _value: np.ndarray|list|Array|None= None
     _unit: str|Unit|None = None
 
     value: np.ndarray = field(init=False)
     unit: Unit = field(init=False)
     
     def __post_init__(self):
-        object.__setattr__(self, "value", np.array(self.value_))
-        object.__setattr__(self, "unit", _assign_unit(self._unit))
+        if isinstance(self._value, Array) and self._unit is None:
+            object.__setattr__(self, "value", self._value.value)
+            object.__setattr__(self, "unit", self._value.unit)
+        elif isinstance(self._value, Array) and self._unit is not None:
+            unit_ = _assign_unit(self._unit)
+            object.__setattr__(self, "value", self._value.gv(unit_.label_unit))
+            object.__setattr__(self, "unit", unit_)
+        else:
+            object.__setattr__(self, "value", np.array(self._value))
+            object.__setattr__(self, "unit", _assign_unit(self._unit))
 
-    def __add__(self, other: Self):
+    def __add__(self, other: Self|Var):
         """ Overloading the addition operator. """
-        if not isinstance(other, Array):
+        if not isinstance(other, (Array, Var)):
             return NotImplemented
         if self.unit == other.unit:
             return Array(self.value + other.value, self.unit)
@@ -99,10 +107,21 @@ class Array():
             return Array(self.value + other.gv(self.unit.label_unit), self.unit)
         else:
             raise TypeError(f"Cannot add {self.unit} with {other.unit}. Units are not compatible.")
+    
+    def __radd__(self, other: Self|Var):
+        """ Overloading the addition operator. """
+        if not isinstance(other, (Var,Array)):
+            return NotImplemented
+        if self.unit == other.unit:
+            return Array(self.value + other.value, other.unit)
+        elif self.unit.base_units == other.unit.base_units:
+            return Array(other.value + self.gv(other.unit.u), other.unit)
+        else:
+            raise TypeError(f"Cannot add {self.unit} with {other.unit}. Units are not compatible.")    
         
-    def __sub__(self, other: Self):
+    def __sub__(self, other: Self|Var):
         """ Overloading the subtraction operator. """
-        if not isinstance(other, Array):
+        if not isinstance(other, (Array, Var)):
             return NotImplemented
         if self.unit == other.unit:
             return Array(self.value - other.value, self.unit)
@@ -111,20 +130,20 @@ class Array():
         else:
             raise TypeError(f"Cannot subtract {self.unit} with {other.unit}. Units are not compatible.")
     
-    def __radd__(self, other: Self):
-        """ Overloading the addition operator. """
-        if not isinstance(other, Array):
+    def __rsub__(self, other: Self|Var):
+        """ Overloading the subtraction operator. """
+        if not isinstance(other, (Array, Var)):
             return NotImplemented
         if self.unit == other.unit:
-            return Array(self.value + other.value, other.unit)
+            return Array(other.value - self.value, self.unit)
         elif self.unit.base_units == other.unit.base_units:
-            return Array(other.value + self.gv(other.unit.u), other.unit)
+            return Array(other.gv(self.unit.u) - self.value, self.unit)
         else:
-            raise TypeError(f"Cannot add {self.unit} with {other.unit}. Units are not compatible.")    
+            raise TypeError(f"Cannot subtract {self.unit} with {other.unit}. Units are not compatible.")
     
-    def __mul__(self, other: Self|float|int):
+    def __mul__(self, other: Self|Var|float|int):
         """ Overloading the multiplication operator. """
-        if isinstance(other, Array):
+        if isinstance(other, (Array, Var)):
             if self.value is None:
                 return Array(None, _mul_units(self.unit.u, other.unit.u))
             return Array(
@@ -136,9 +155,9 @@ class Array():
         else:
             raise TypeError(f"Cannot multiply {type(self)} with {type(other)}")
     
-    def __rmul__(self, other: Self|float|int):
+    def __rmul__(self, other: Self|Var|float|int):
         """ Overloading the multiplication operator. """
-        if isinstance(other, Array):
+        if isinstance(other, (Array, Var)):
             if self.value is None:
                 return Array(None, _mul_units(other.unit.u, self.unit.u))
             return Array(
@@ -150,9 +169,9 @@ class Array():
         else:
             raise TypeError(f"Cannot multiply {type(self)} with {type(other)}")
 
-    def __truediv__(self, other: Self|float|int):
+    def __truediv__(self, other: Self|Var|float|int):
         """ Overloading the division operator. """
-        if isinstance(other, Array):
+        if isinstance(other, (Array, Var)):
             return Array(self.value / other.value, _div_units(self.unit.u, other.unit.u))
         elif isinstance(other, (int, float)):
             if self.value is None:
@@ -160,6 +179,17 @@ class Array():
             return Array(self.value / other, self.unit)
         else:
             raise TypeError(f"Cannot divide {type(self)} by {type(other)}")
+        
+    def __rtruediv__(self, other: Self|Var|float|int):
+        """ Overloading the division operator. """
+        if isinstance(other, (Array, Var)):
+            return Array(other.value / self.value, _div_units(other.unit.u, self.unit.u))
+        elif isinstance(other, (int, float)):
+            if self.value is None:
+                return Var(None, _div_units("", self.unit.u))
+            return Array(other / self.value, _div_units("", self.unit.u))
+        else:
+            raise TypeError(f"Cannot divide {type(other)} by {type(self)}")
 
     def __eq__(self, other) -> bool:
         """ Overloading the equality operator. """
