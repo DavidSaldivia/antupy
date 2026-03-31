@@ -266,7 +266,7 @@ class Array():
     
     def var(self, unit: str | None = None) -> Var:
         u = self.u if unit is None else unit
-        return Var(self.gv(u).var(), u)
+        return Var(self.gv(u).var(), _mul_units(u, u))
     
     def max(self, unit: str | None = None) -> Var:
         u = self.u if unit is None else unit
