@@ -2,8 +2,12 @@
 Custom DataFrame with unit tracking functionality.
 """
 
+from __future__ import annotations
+from dataclasses import dataclass, field
+
 import numpy as np
 import pandas as pd
+import polars as pl
 from typing import Dict, List, Any, overload
 from antupy import Array
 
@@ -302,6 +306,7 @@ class Frame(pd.DataFrame):
 
     # Use pandas' built-in metadata system instead of overriding __finalize__
     _metadata = ['_units']
+
 # Fixed convenience function
 def dataframe_with_units(
     data=None, 
@@ -317,3 +322,24 @@ def dataframe_with_units(
     This is an alternative to the class-based approach.
     """
     return Frame(data=data, index=index, columns=columns, dtype=dtype, copy=copy, units=units)
+
+
+@dataclass(frozen=True)
+class Frame2():
+    _data: pl.DataFrame | Frame2 | np.ndarray | None = field(default_factory=pl.DataFrame)
+    _units: dict[str, str] = field(default_factory=dict)
+    data: pl.DataFrame = field(init=False)
+    units: dict[str, str] = field(init=False)
+
+    def __post_init__(self):
+        if isinstance(self._data, Frame2):
+            object.__setattr__(self, 'data', self._data.df)
+            object.__setattr__(self, 'units', self._data.units)
+        elif isinstance(self._data, pl.DataFrame):
+            object.__setattr__(self, 'data', self._data)
+            object.__setattr__(self, 'units', self._units)
+
+    @property
+    def df(self) -> pl.DataFrame:
+        """Return the underlying DataFrame."""
+        return self.data

@@ -255,3 +255,52 @@ class Array():
     def su(self, unit: str|None = None) -> Array:
         """Alias of self.set_unit"""
         return self.set_unit(unit)
+    
+    def mean(self, unit: str | None = None) -> Var:
+        u = self.u if unit is None else unit
+        return Var(self.gv(u).mean(), u)
+    
+    def std(self, unit: str | None = None) -> Var:
+        u = self.u if unit is None else unit
+        return Var(self.gv(u).std(), u)
+    
+    def var(self, unit: str | None = None) -> Var:
+        u = self.u if unit is None else unit
+        return Var(self.gv(u).var(), u)
+    
+    def max(self, unit: str | None = None) -> Var:
+        u = self.u if unit is None else unit
+        return Var(self.gv(u).max(), u)
+    
+    def min(self, unit: str | None = None) -> Var:
+        u = self.u if unit is None else unit
+        return Var(self.gv(u).min(), u)
+    
+    def argmax(self) -> int:
+        return int(np.argmax(self.v))
+    
+    def argmin(self) -> int:
+        return int(np.argmin(self.v))
+
+    def sum(self, unit: str | None = None) -> Var:
+        u = self.u if unit is None else unit
+        return Var(self.gv(u).sum(), u)
+    
+    def prod(self, unit: str | None = None) -> Var:
+        u = self.u if unit is None else unit
+        u_f = ""
+        for _ in range(len(self)):
+            u_f = _mul_units(u, u_f)
+        return Var(self.gv(u).prod(), u_f)
+    
+    def cumsum(self, unit: str | None = None) -> Array:
+        u = self.u if unit is None else unit
+        return Array(self.gv(u).cumsum(), u)
+    
+    def sort(self, unit: str | None = None) -> Array:
+        u = self.u if unit is None else unit
+        return Array(self.gv(u).sort(), u)
+    
+    def round(self, decimals: int = 0, unit: str | None = None) -> Array:
+        u = self.u if unit is None else unit
+        return Array(np.round(self.gv(u), decimals), u)
