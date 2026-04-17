@@ -256,6 +256,10 @@ class Array():
         """Alias of self.set_unit"""
         return self.set_unit(unit)
     
+    def compatible(self) -> list[str]:
+        """ Return a list of compatible units for the variable unit. """
+        return self.unit.compatible()
+    
     def mean(self, unit: str | None = None) -> Var:
         u = self.u if unit is None else unit
         return Var(self.gv(u).mean(), u)

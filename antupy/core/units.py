@@ -241,6 +241,12 @@ class Unit():
         This is just a shorter alias for label_unit."""
         return self.label_unit 
 
+    def compatible(self) -> list[str]:
+        return [
+            label for label in (BASE_UNITS | DERIVED_UNITS | RELATED_UNITS)
+            if self.base_units == Unit(label).base_units
+        ]
+
     def _update_base_repr(self, name: str, exponent: int):
         exponent_prev = self.base_units.get(name,0)
         self.base_units[name] = exponent+exponent_prev
@@ -339,16 +345,16 @@ def _assign_unit(unit: str|Unit|None = None) -> Unit:
 def _mul_units(unit1: str|None, unit2: str|None) -> str:
     """ Function to merge two units into a single unit by multiplication.
     """
-    admin_units = ["", "-", "adim"]
+    adim_units = ["", "-", "adim"]
     if unit1 is None:
         return unit2 if unit2 is not None else ""
     if unit2 is None:
         return unit1
-    if unit1 in admin_units and unit2 not in admin_units:
+    if unit1 in adim_units and unit2 not in adim_units:
         return unit2
-    if unit2 in admin_units and unit1 not in admin_units:
+    if unit2 in adim_units and unit1 not in adim_units:
         return unit1
-    if unit1 in admin_units and unit2 in admin_units:
+    if unit1 in adim_units and unit2 in adim_units:
         return "-"
 
     top = []
@@ -416,14 +422,14 @@ def _div_units(unit1: str|None, unit2: str|None) -> str:
         return f"{'-'.join(top)}"
     
 
-
-
 CONSTANTS: dict[str, tuple[float, str]] = {
     "delta_v_c": (9192631770, "Hz"), # Hyperfine transition frequency of 133Cs
     "c": (299792458, "m/s"),  # Speed of light
     "h": (6.62607015e-34, "J*s"),  # Planck's constant
     "e": (1.602176634e-19, "C"),  # Elementary charge
     "k": (1.380649e-23, "J/K"),  # Boltzmann constant
+    "sigma": (5.670374419e-8, "W/m2-K4"),  # Stefan-Boltzmann constant
+    "R": (8.314462618, "J/mol-K"),  # Gas constant
     "N_A": (6.02214076e23, "1/mol"),  # Avogadro constant
     "K_cd": (683, "lm/W"),  # Luminous efficacy of 540 THz radiation
 }

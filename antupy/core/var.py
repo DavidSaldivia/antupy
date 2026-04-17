@@ -2,6 +2,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Self
 
+from enum import Enum
+
 import math
 import re
 
@@ -421,4 +423,44 @@ class Var():
     def su(self, unit: str|None = None) -> Var:
         """Alias of self.set_unit"""
         return self.set_unit(unit)
+    
+    def compatible(self) -> list[str]:
+        """ Return a list of compatible units for the variable unit. """
+        return self.unit.compatible()
 
+
+class C():
+    c = Var(299792458, "m/s")  # Speed of light
+    G = Var(6.6743015e-11, "m3/kg-s2")  # Gravitational constant
+    delta_v_c = Var(9192631770, "Hz") # Hyperfine transition frequency of 133Cs
+    h = Var(6.62607015e-34, "J-s")  # Planck's constant
+    eps_0 = Var(8.8541878188e-12, "F/m")  # Vacuum permittivity
+    mu_0 = Var(1.25663706127e-6, "N/A2")  # Vacuum permeability
+    e = Var(1.602176634e-19, "C")  # Elementary charge
+    m_e = Var(9.1093837139e-31, "kg")  # Electron mass
+    k = Var(1.380649e-23, "J/K")  # Boltzmann constant
+    sigma = Var(5.670374419e-8, "W/m2-K4")  # Stefan-Boltzmann constant
+    R = Var(8.314462618, "kJ/kmol-K")  # Gas constant
+    N_A = Var(6.02214076e23, "1/mol")  # Avogadro constant
+    K_cd = Var(683, "lm/W")  # Luminous efficacy of 540 THz radiation
+
+    pi = Var(math.pi, "-")
+    euler = Var(math.e, "-")
+    phi = Var((1 + math.sqrt(5)) / 2, "-")
+
+
+CONSTANTS: dict[str, Var] = {
+    "c": Var(299792458, "m/s"),  # Speed of light
+    "G": Var(6.6743015e-11, "m3/kg-s2"),  # Gravitational constant
+    "delta_v_c": Var(9192631770, "Hz"), # Hyperfine transition frequency of 133Cs
+    "h": Var(6.62607015e-34, "J-s"),  # Planck's constant
+    "eps_0": Var(8.8541878188e-12, "F/m"),  # Vacuum permittivity
+    "mu_0": Var(1.25663706127e-6, "N/A2"),  # Vacuum permeability
+    "e": Var(1.602176634e-19, "C"),  # Elementary charge
+    "m_e": Var(9.1093837139e-31, "kg"),  # Electron mass
+    "k": Var(1.380649e-23, "J/K"),  # Boltzmann constant
+    "sigma": Var(5.670374419e-8, "W/m2-K4"),  # Stefan-Boltzmann constant
+    "R": Var(8.314462618, "kJ/kmol-K"),  # Gas constant
+    "N_A": Var(6.02214076e23, "1/mol"),  # Avogadro constant
+    "K_cd": Var(683, "lm/W"),  # Luminous efficacy of 540 THz radiation
+}
