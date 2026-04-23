@@ -246,7 +246,7 @@ class Unit():
             label for label in (BASE_UNITS | DERIVED_UNITS | RELATED_UNITS)
             if self.base_units == Unit(label).base_units
         ]
-
+    
     def _update_base_repr(self, name: str, exponent: int):
         exponent_prev = self.base_units.get(name,0)
         self.base_units[name] = exponent+exponent_prev
