@@ -307,39 +307,42 @@ class Frame(pd.DataFrame):
     # Use pandas' built-in metadata system instead of overriding __finalize__
     _metadata = ['_units']
 
-# Fixed convenience function
-def dataframe_with_units(
-    data=None, 
-    index=None, 
-    columns=None, 
-    dtype=None, 
-    copy=True, 
-    units: list[str] | dict[str, str] | None = None
-) -> Frame:
-    """
-    Create a DataFrame with units using function approach.
-    
-    This is an alternative to the class-based approach.
-    """
-    return Frame(data=data, index=index, columns=columns, dtype=dtype, copy=copy, units=units)
 
+class Framepl():
 
-@dataclass(frozen=True)
-class Frame2():
-    _data: pl.DataFrame | Frame2 | np.ndarray | None = field(default_factory=pl.DataFrame)
-    _units: dict[str, str] = field(default_factory=dict)
-    data: pl.DataFrame = field(init=False)
-    units: dict[str, str] = field(init=False)
-
-    def __post_init__(self):
-        if isinstance(self._data, Frame2):
-            object.__setattr__(self, 'data', self._data.df)
-            object.__setattr__(self, 'units', self._data.units)
-        elif isinstance(self._data, pl.DataFrame):
-            object.__setattr__(self, 'data', self._data)
-            object.__setattr__(self, 'units', self._units)
+    def __init__(
+            self,
+            _data: pl.DataFrame | Framepl | pd.DataFrame | dict[str, Any] | None = None,
+            _units: dict[str, str] | None = None
+    ):
+        if isinstance(_data, Framepl):
+            self.data = _data.df
+            self.units = _data.u
+        elif isinstance(_data, (pl.DataFrame, pd.DataFrame, dict)):
+            self.data = pl.DataFrame(_data)
+            self.units = _units if _units is not None else {}
+        else:
+            raise TypeError("data must be a ap.Frame, pl.DataFrame, pd.DataFrame, dict, or None")
 
     @property
     def df(self) -> pl.DataFrame:
         """Return the underlying DataFrame."""
         return self.data
+
+    @property
+    def u(self) -> dict[str, str]:
+        """Return the units dictionary."""
+        return self.units
+    
+    @property
+    def columns(self) -> list[str]:
+        """Return the list of column names."""
+        return self.data.columns
+     
+
+def main():
+
+    pass
+
+if __name__ == "__main__":
+    main()

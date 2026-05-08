@@ -4,7 +4,7 @@ from antupy.core.array import Array
 from antupy.core.frame import Frame
 from antupy.core import Simulation, SimulationOutput
 from antupy.core.plant import Plant, component, constraint, derived
-from antupy.analyser import Parametric
+from antupy.core.par import Parametric
 
 from antupy.utils import props, htc, solar
 from antupy.utils import loc

@@ -18,7 +18,7 @@ from unittest.mock import patch, MagicMock, mock_open
 import tempfile
 import os
 
-from antupy.tsg.weather import TMY, WeatherMC, WeatherHist, WeatherConstantDay
+from antupy.tsg.wea import TMY, WeatherMC, WeatherHist, WeatherConstantDay
 from antupy.tsg.settings import TimeParams
 from antupy.utils.loc.loc_au import LocationAU
 from antupy import Var
@@ -56,7 +56,7 @@ class TestWeatherDataLoading:
             'P': np.random.uniform(990, 1020, 24)   # Atmospheric Pressure
         })
     
-    @patch('antupy.tsg.weather._load_tmy')
+    @patch('antupy.tsg.wea._load_tmy')
     def test_tmy_load_data_integration(self, mock_load_tmy):
         """Test TMY load_data integration with mock data."""
         mock_load_tmy.return_value = self.sample_weather_data
@@ -76,7 +76,7 @@ class TestWeatherDataLoading:
         assert isinstance(result, pd.DataFrame)
         assert 'GHI' in result.columns or 'DateTime' in result.columns
     
-    @patch('antupy.tsg.weather._load_montecarlo')
+    @patch('antupy.tsg.wea._load_montecarlo')
     def test_weathermc_load_data_integration(self, mock_load_montecarlo):
         """Test WeatherMC load_data integration with mock data."""
         mock_load_montecarlo.return_value = self.sample_weather_data
@@ -97,7 +97,7 @@ class TestWeatherDataLoading:
         # Verify result
         assert isinstance(result, pd.DataFrame)
     
-    @patch('antupy.tsg.weather._load_historical')
+    @patch('antupy.tsg.wea._load_historical')
     def test_weatherhist_load_data_integration(self, mock_load_historical):
         """Test WeatherHist load_data integration with mock data."""
         mock_load_historical.return_value = self.sample_weather_data
@@ -120,7 +120,7 @@ class TestWeatherDataLoading:
         # Verify result
         assert isinstance(result, pd.DataFrame)
     
-    @patch('antupy.tsg.weather._load_day_constant_random')
+    @patch('antupy.tsg.wea._load_day_constant_random')
     def test_weatherconstantday_load_data_integration(self, mock_load_constant):
         """Test WeatherConstantDay load_data integration with mock data."""
         mock_load_constant.return_value = self.sample_weather_data
@@ -153,7 +153,7 @@ class TestWeatherLocationIntegration:
             YEAR=Var(2023, "-")
         )
     
-    @patch('antupy.tsg.weather._load_tmy')
+    @patch('antupy.tsg.wea._load_tmy')
     def test_multiple_australian_locations(self, mock_load_tmy):
         """Test TMY loading with different Australian locations."""
         mock_weather_data = pd.DataFrame({
@@ -190,7 +190,7 @@ class TestWeatherDataValidation:
             YEAR=Var(2023, "-")
         )
     
-    @patch('antupy.tsg.weather._load_tmy')
+    @patch('antupy.tsg.wea._load_tmy')
     def test_empty_data_handling(self, mock_load_tmy):
         """Test handling of empty weather data."""
         mock_load_tmy.return_value = pd.DataFrame()
@@ -204,7 +204,7 @@ class TestWeatherDataValidation:
         result = tmy.load_data()
         assert isinstance(result, pd.DataFrame)
     
-    @patch('antupy.tsg.weather._load_tmy')
+    @patch('antupy.tsg.wea._load_tmy')
     def test_invalid_dataset_handling(self, mock_load_tmy):
         """Test handling of invalid dataset."""
         mock_load_tmy.side_effect = ValueError("Invalid dataset")
@@ -232,7 +232,7 @@ class TestWeatherMemoryAndPerformance:
             YEAR=Var(2023, "-")
         )
     
-    @patch('antupy.tsg.weather._load_tmy')
+    @patch('antupy.tsg.wea._load_tmy')
     def test_large_dataset_memory_efficiency(self, mock_load_tmy):
         """Test memory efficiency with large datasets."""
         # Create large mock dataset
@@ -269,7 +269,7 @@ class TestWeatherEdgeCases:
             YEAR=Var(2023, "-")
         )
     
-    @patch('antupy.tsg.weather._load_day_constant_random')
+    @patch('antupy.tsg.wea._load_day_constant_random')
     def test_single_timestep_constantday(self, mock_load_constant):
         """Test WeatherConstantDay with single timestep."""
         mock_data = pd.DataFrame({
@@ -291,7 +291,7 @@ class TestWeatherEdgeCases:
         assert isinstance(result, pd.DataFrame)
         assert len(result) == 1
     
-    @patch('antupy.tsg.weather._load_montecarlo')
+    @patch('antupy.tsg.wea._load_montecarlo')
     def test_extreme_time_parameters(self, mock_load_montecarlo):
         """Test with extreme time parameters."""
         extreme_time_params = TimeParams(

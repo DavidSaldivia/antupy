@@ -10,14 +10,17 @@ repository = "https://github.com/DavidSaldivia/antupy"
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.14"
-numpy = "^2.1.2"
-pandas = "^2.2.3"
-polars = "^1.9.0"
-scipy = "^1.14.1"
-matplotlib = "^3.9.2"
-pvlib = "^0.11.1"
-coolprop = "^6.8.0"
-xarray = "^2025.9.0"
+numpy = "^2.0"
+pandas = "^2.0"
+polars = "^1.0.0"
+scipy = "^1.11"
+coolprop = {version = "^6.6", optional = true}
+xarray = {version = "^2024.1", optional = true}
+matplotlib = {version = "^3.8", optional = true}
+pvlib = {version = "^0.10", optional = true}
+
+[tool.poetry.extras]
+all = ["coolprop", "xarray", "matplotlib", "pvlib"]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.3"

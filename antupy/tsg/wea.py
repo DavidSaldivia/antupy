@@ -376,8 +376,8 @@ def _load_dataset_merra2(
 
     df_w.index = pd.to_datetime(df_w.index).tz_localize('UTC')
     tz = 'Australia/Brisbane'
-    df_w.index = df_w.index.tz_convert(tz)
-    df_w.index = df_w.index.tz_localize(None)
+    df_w.index = pd.to_datetime(df_w.index).tz_convert(tz)
+    df_w.index = pd.to_datetime(df_w.index).tz_localize(None)
     df_w.rename(columns={'SWGDN':'GHI','T2M':'Temp_Amb'},inplace=True)
     df_w = df_w[['GHI','Temp_Amb']].copy()
     df_w = df_w.resample(f"{STEP}T").interpolate()       #Getting the data in half hours

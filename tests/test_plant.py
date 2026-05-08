@@ -499,6 +499,55 @@ class TestEdgeCases:
             derived(failing_func, plant.zf)
 
 
+# Additional coverage tests
+# ==========================
+
+class TestRunSimulation:
+
+    def test_run_simulation_returns_out(self):
+        plant = SimpleTestPlant()
+        plant.out = {"result": Var(42.0, "m")}
+        result = plant.run_simulation()
+        assert result == plant.out
+
+    def test_run_simulation_verbose(self):
+        plant = SimpleTestPlant()
+        result = plant.run_simulation(verbose=True)
+        assert result == {}
+
+
+class TestComputeParamsHash:
+
+    def test_unsupported_type_raises(self):
+        plant = SimpleTestPlant()
+        plant.__dict__["_tmp_bad"] = 123
+        with pytest.raises(TypeError):
+            plant._compute_params_hash({"_tmp_bad"})
+
+
+@dataclass
+class PlantWithDefaultParam(Plant):
+    zf: Var = Var(50.0, "m")
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.out = {}
+
+    @property
+    def comp_with_default(self) -> ComplexComponent:
+        return component(ComplexComponent(
+            zf=constraint(self.zf),
+        ))
+
+
+class TestBuildComponentKwargs:
+
+    def test_component_uses_default_for_missing_param(self):
+        plant = PlantWithDefaultParam()
+        comp = plant.comp_with_default
+        assert comp.zf.gv("m") == 50.0
+        assert comp.fzv.gv("-") == 0.83
+
+
 if __name__ == "__main__":
-    # Run tests if script is executed directly
     pytest.main([__file__, "-v"])

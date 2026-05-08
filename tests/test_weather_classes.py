@@ -12,7 +12,7 @@ This module tests:
 import pytest
 import pandas as pd
 
-from antupy.tsg.weather import TMY, WeatherMC, WeatherHist, WeatherConstantDay
+from antupy.tsg.wea import TMY, WeatherMC, WeatherHist, WeatherConstantDay
 from antupy.tsg.settings import TimeParams
 from antupy.utils.loc.loc_au import LocationAU
 from antupy import Var

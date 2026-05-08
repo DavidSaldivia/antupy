@@ -193,7 +193,7 @@ class Array():
 
     def __eq__(self, other) -> bool:
         """ Overloading the equality operator. """
-        if not isinstance(other, Array) or other.value is None:
+        if not isinstance(other, Array) or other._value is None:
             return False
         return (
             np.allclose(self.value, other.value * CF(other.unit.u, self.unit.u).v)

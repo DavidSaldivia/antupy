@@ -15,7 +15,7 @@ import numpy as np
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from antupy.tsg.weather import (
+from antupy.tsg.wea import (
     _load_day_constant_random,
     _random_days_from_dataframe,
     from_tmy,

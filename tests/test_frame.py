@@ -10,8 +10,6 @@ import pandas as pd
 import numpy as np
 import antupy as ap
 
-from antupy.core.frame import dataframe_with_units
-
 
 class TestDataFrameBasics:
     """Test basic DataFrame creation and functionality."""
@@ -432,18 +430,6 @@ class TestEdgeCases:
         df = ap.Frame({'energy': [100]}, units=[long_unit])
         assert df.units == {'energy': long_unit}
         assert df.unit('energy') == {'energy': long_unit}
-
-
-def test_convenience_function():
-    """Test the convenience function dataframe_with_units."""
-    df = dataframe_with_units({
-        'A': [1, 2],
-        'B': [3, 4]
-    }, units=['m', 's'])
-    
-    assert isinstance(df, ap.Frame)
-    assert df.units == {'A': 'm', 'B': 's'}
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

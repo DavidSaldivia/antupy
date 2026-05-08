@@ -147,3 +147,7 @@ dmypy.json
 
 # MacOS
 .DS_Store
+
+
+~$*.pptx
+~$*.ppt

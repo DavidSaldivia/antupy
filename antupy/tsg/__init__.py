@@ -1,4 +1,4 @@
 from antupy.tsg.settings import TimeParams
-from antupy.tsg.weather import Weather
+from antupy.tsg.wea import Weather
 
 __all__ = ["TimeParams", "Weather"]

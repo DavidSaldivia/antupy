@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from antupy import SimulationOutput, Var, Plant, Parametric
-from antupy.tsg.weather import TMY, HWD
+from antupy.tsg.wea import TMY, HWD
 from antupy.utils.props import Water
 
 @dataclass
