@@ -13,11 +13,12 @@ class DIRECTORY(DIR_BASE):
     #DIRS
     DIR_MAIN = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     DIR_FILE = os.path.dirname(os.path.abspath(__file__))
-    
-    with open(os.path.join(DIR_MAIN, ".dirs"), "r") as f:
-        private_dirs = json.load(f)
-    DIR_DATA_EXTERNAL = private_dirs["data"]
-
+    try:
+        with open(os.path.join(DIR_MAIN, ".dirs"), "r") as f:
+            private_dirs = json.load(f)
+        DIR_DATA_EXTERNAL = private_dirs["data"]
+    except:
+        DIR_DATA_EXTERNAL = ""
     DIR_DATA = {
         "energy_market": os.path.join(DIR_DATA_EXTERNAL, "energy_market"),
         "emissions" : os.path.join(DIR_DATA_EXTERNAL, "emissions"),

@@ -6,10 +6,13 @@ from antupy import Var
 class DIRECTORY:
     DIR_MAIN = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     DIR_FILE = os.path.dirname(os.path.abspath(__file__))
-    
-    with open(os.path.join(DIR_MAIN, ".dirs"), "r") as f:
-        private_dirs = json.load(f)
-    DIR_DATA_EXTERNAL = private_dirs["data"]
+    try:
+        with open(os.path.join(DIR_MAIN, ".dirs"), "r") as f:
+            private_dirs = json.load(f)
+        DIR_DATA_EXTERNAL = private_dirs["data"]
+    except:
+        DIR_DATA_EXTERNAL = ""
+
 
     DIR_RESULTS = os.path.join(DIR_MAIN, "results")
     DIR_PROJECTS = os.path.join(DIR_MAIN, "projects")
