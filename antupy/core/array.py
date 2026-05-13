@@ -175,7 +175,7 @@ class Array():
             return Array(self.value / other.value, _div_units(self.unit.u, other.unit.u))
         elif isinstance(other, (int, float)):
             if self.value is None:
-                return Var(None, self.unit)
+                return Array(None, self.unit)
             return Array(self.value / other, self.unit)
         else:
             raise TypeError(f"Cannot divide {type(self)} by {type(other)}")
@@ -186,7 +186,7 @@ class Array():
             return Array(other.value / self.value, _div_units(other.unit.u, self.unit.u))
         elif isinstance(other, (int, float)):
             if self.value is None:
-                return Var(None, _div_units("", self.unit.u))
+                return Array(None, _div_units("", self.unit.u))
             return Array(other / self.value, _div_units("", self.unit.u))
         else:
             raise TypeError(f"Cannot divide {type(other)} by {type(self)}")

@@ -2,8 +2,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Self
 
-from enum import Enum
-
 import math
 import re
 
@@ -262,6 +260,14 @@ class Var():
             if self.value is None:
                 return Var(None, self.unit)
             return Var(self.value / other, self.unit)
+        else:
+            return NotImplemented
+        
+    def __rtruediv__(self, other):
+        if isinstance(other, (int, float)):
+            if self.value is None:
+                return Var(None, self.unit)
+            return Var(other / self.value, _div_units("-", self.unit.u))
         else:
             return NotImplemented
     

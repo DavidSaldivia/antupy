@@ -1,9 +1,10 @@
 ID,name,description,stage,
 000,antupy wishlist,"this is the wishlist of tasks and improvements",None
-001,finish variable system,migrate Frame to polars,wip,
+001,frame class,refactor Frame and migrate to polars,wip,
+002,finish system classes, 
 002,dewh's mwe,minimal workable example of a DEWH module's simulation,wip,
 003,csp's mwe,minimal workable example of a CSP module's simulation,wip,
-004,documentation,create documentation with working examples and analysers,,
+004,documentation,improve/develop documentation,,
 005,parametric analyser,create the parametric analyser and test it with examples,,
 006,stochastic analyser,create the stochastic (MC) analyser and test it with examples,,
 007,csp module,create the module extending the mwe,,

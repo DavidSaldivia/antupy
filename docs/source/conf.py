@@ -15,6 +15,7 @@ author = 'David Saldivia'
 
 import os
 import sys
+from importlib import metadata
 from unittest.mock import MagicMock
 
 sys.path.insert(0, os.path.abspath('../../'))
@@ -28,7 +29,11 @@ class Mock(MagicMock):
 MOCK_MODULES = ['CoolProp', 'CoolProp.CoolProp', 'pvlib', 'scipy', 'matplotlib', 'xarray']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
-release = "0.5.0"  # Update this when you bump version
+try:
+    release = metadata.version("antupy")
+except metadata.PackageNotFoundError:
+    # Fallback for docs builds where the package metadata is unavailable.
+    release = "0.0.0"
 version = ".".join(release.split(".")[:2])
 
 extensions = [
