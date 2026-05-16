@@ -20,13 +20,13 @@ import os
 
 from antupy.tsg.wea import TMY, WeatherMC, WeatherHist, WeatherConstantDay
 from antupy.tsg.settings import TimeParams
-from antupy.utils.loc.loc_au import LocationAU
+from antupy.utils.loc import LocationAU
 from antupy import Var
 
 # Handle DIR_DATA import gracefully for testing environments
 try:
-    from antupy import ddd_au
-    DIR_DATA = getattr(ddd_au, 'DIR_DATA', {'weather': None})
+    from antupy.core import ddd
+    DIR_DATA = getattr(ddd, 'DIR_DATA', {'weather': None})
 except (ImportError, AttributeError):
     DIR_DATA = {'weather': None}
 

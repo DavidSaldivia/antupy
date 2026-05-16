@@ -14,9 +14,9 @@ import pandas as pd
 
 from antupy.tsg.wea import TMY, WeatherMC, WeatherHist, WeatherConstantDay
 from antupy.tsg.settings import TimeParams
-from antupy.utils.loc.loc_au import LocationAU
+from antupy.utils.loc import LocationAU
 from antupy import Var
-from antupy.ddd_au import DEFINITIONS
+from antupy.core.ddd import DEFINITIONS_AU
 
 
 class TestWeatherClassInstantiation:
@@ -119,7 +119,7 @@ class TestTMYClass:
         """Test TMY with Australian locations."""
         time_params = TimeParams(YEAR=Var(2023, "-"))
         
-        for city in DEFINITIONS.LOCATIONS_METEONORM:
+        for city in DEFINITIONS_AU.LOCATIONS_METEONORM:
             tmy = TMY(location=city, time_params=time_params)
             assert tmy.location == city
 

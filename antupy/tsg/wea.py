@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 
 import pandas as pd
 
-from antupy.ddd_au import DIRECTORY
+from antupy.core.ddd import DIRECTORY_AU, DEFINITIONS_AU, SIMS_IO_AU
 from antupy import Var
 from antupy.tsg.settings import TimeParams
 from antupy.utils.loc import Location
@@ -20,23 +20,15 @@ import xarray as xr
 
 from typing import Optional, Literal, Protocol, runtime_checkable
 
-from antupy.ddd_au import (
-    DIRECTORY,
-    DEFINITIONS,
-    SIMULATIONS_IO
-)
-from antupy.utils.loc.loc_au import (
-    LocationAU,
-    _from_postcode
-)
-from antupy.utils.loc.loc_cl import LocationCL
+from antupy.utils.loc import ( LocationAU, _from_postcode )
+from antupy.utils.loc import LocationCL
 
-DIR_DATA = DIRECTORY.DIR_DATA
-DEFINITION_SEASON = DEFINITIONS.SEASON
-LOCATIONS_METEONORM = DEFINITIONS.LOCATIONS_METEONORM
-LOCATIONS_STATE = DEFINITIONS.LOCATIONS_STATE
-LOCATIONS_COORDINATES = DEFINITIONS.LOCATIONS_COORDINATES
-TS_WEATHER = SIMULATIONS_IO.TS_TYPES["weather"]
+DIR_DATA = DIRECTORY_AU.DIR_DATA
+DEFINITION_SEASON = DEFINITIONS_AU.SEASON_SH
+LOCATIONS_METEONORM = DEFINITIONS_AU.LOCATIONS_METEONORM
+LOCATIONS_STATE = DEFINITIONS_AU.LOCATIONS_STATE
+LOCATIONS_COORDINATES = DEFINITIONS_AU.LOCATIONS_COORDINATES
+TS_WEATHER = SIMS_IO_AU.TS_TYPES["weather"]
 
 #--------------
 DIR_METEONORM = os.path.join(DIR_DATA["weather"], "meteonorm_processed")
@@ -327,7 +319,7 @@ def _load_dataset_meteonorm(
         STEP: int = 3,
 ) -> pd.DataFrame:
 
-    if location not in DEFINITIONS.LOCATIONS_METEONORM:
+    if location not in DEFINITIONS_AU.LOCATIONS_METEONORM:
         raise ValueError(f"location {location} not in available METEONORM files")
     
     df_dataset = pd.read_csv(
@@ -443,7 +435,7 @@ def _load_montecarlo(
     df_dataset.index = pd.to_datetime(df_dataset.index)
     if subset == 'annual':
         df_sample = df_dataset[
-            df_dataset.index.year==value
+            pd.to_datetime(df_dataset.index).year==value
             ]
     elif subset == 'season':
         # value should be a string for season
@@ -457,14 +449,14 @@ def _load_montecarlo(
         if not isinstance(value, int):
             raise ValueError(f"For month subset, value must be an int, got {type(value)}")
         df_sample = df_dataset[
-            df_dataset.index.month==value
+            pd.to_datetime(df_dataset.index).month==value
             ]  
     elif subset == 'date':
         # value should have a date() method (datetime/Timestamp)
         if not hasattr(value, 'date'):
             raise ValueError(f"For date subset, value must be a datetime object, got {type(value)}")
         df_sample = df_dataset[
-            df_dataset.index.date==value.date()  # type: ignore
+            pd.to_datetime(df_dataset.index).date==value.date()  # type: ignore
             ]
     else:
         raise ValueError(f"subset: {subset} not in available options.")

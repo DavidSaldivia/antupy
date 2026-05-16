@@ -12,8 +12,7 @@ import pytest
 
 from antupy.tsg.wea import Weather, TMY, WeatherMC, WeatherHist, WeatherConstantDay
 from antupy.tsg.settings import TimeParams
-from antupy.utils.loc import Location
-from antupy.utils.loc.loc_au import LocationAU
+from antupy.utils.loc import Location, LocationAU
 from antupy import Var
 
 
@@ -60,7 +59,7 @@ class TestWeatherProtocolCompliance:
         
         # Check attribute types
         assert isinstance(instance.dataset, str), f"{weather_class.__name__}.dataset should be str"
-        assert isinstance(instance.location, (str, LocationAU)), f"{weather_class.__name__}.location should be str or Location"
+        assert isinstance(instance.location, (str, Location)), f"{weather_class.__name__}.location should be str or Location"
         assert isinstance(instance.time_params, TimeParams), f"{weather_class.__name__}.time_params should be TimeParams"
         assert callable(instance.load_data), f"{weather_class.__name__}.load_data should be callable"
     

@@ -1,19 +1,33 @@
 import warnings
+
+from typing import Protocol, runtime_checkable
 from typing import Any, overload, Literal
 
 import pandas as pd
 
-from antupy.ddd_au import ( DIRECTORY, DEFINITIONS, SIMULATIONS_IO)
-DIR_DATA = DIRECTORY.DIR_DATA
-FILE_POSTCODES = DIRECTORY.FILE_POSTCODES
+from antupy.core.ddd import ( DIRECTORY_AU, DEFINITIONS_AU, SIMS_IO_AU)
 
-TS_WEATHER = SIMULATIONS_IO.TS_TYPES["weather"]
-DEFINITION_SEASON = DEFINITIONS.SEASON
-LOCATIONS_METEONORM = DEFINITIONS.LOCATIONS_METEONORM
-LOCATIONS_STATE = DEFINITIONS.LOCATIONS_STATE
-LOCATIONS_COORDINATES = DEFINITIONS.LOCATIONS_COORDINATES
+DIR_DATA = DIRECTORY_AU.DIR_DATA
+FILE_POSTCODES = DIRECTORY_AU.FILE_POSTCODES
+DEFINITION_SEASON = DEFINITIONS_AU.SEASON_SH
+LOCATIONS_METEONORM = DEFINITIONS_AU.LOCATIONS_METEONORM
+LOCATIONS_STATE = DEFINITIONS_AU.LOCATIONS_STATE
+LOCATIONS_COORDINATES = DEFINITIONS_AU.LOCATIONS_COORDINATES
+TS_WEATHER = SIMS_IO_AU.TS_TYPES["weather"]
 
-#------------------
+# Protocols for the module
+
+@runtime_checkable
+class Location(Protocol):
+    """Protocol for location classes."""
+    value: str | int | tuple[float, float]
+
+    def __str__(self) -> str:
+        ...
+
+
+# Implementations of the protocol
+
 class LocationAU():
     def __init__(self, value: str|int|tuple[float,float] = "Sydney",):
         self.value = value
@@ -149,8 +163,16 @@ def _from_coords(
     else:
         raise ValueError(f"{get} is not a valid value for get.")
 
+
+class LocationCL():
+    def __init__(self, value: str) -> None:
+        self.value = value
+
+    def __str__(self) -> str:
+        return f"LocationCL: {self.value}"
+
 #------------------
-def main():
+def main_au():
     
     location = LocationAU("Sydney")
     print(location.value)
@@ -166,7 +188,7 @@ def main():
     print(location.postcode)
     print()
 
-    location = LocationAU(DEFINITIONS.LOCATIONS_COORDINATES["Sydney"])
+    location = LocationAU(DEFINITIONS_AU.LOCATIONS_COORDINATES["Sydney"])
     print(location.value)
     print(location.coords)
     print(location.state)
@@ -174,6 +196,12 @@ def main():
 
     return
 
+
+def main_cl():
+    pass
+
 if __name__ == "__main__":
-    main()
+    main_au()
+
+    main_cl()
     pass

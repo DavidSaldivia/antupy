@@ -1,15 +1,100 @@
 import os
-
 import json
 
 from antupy import Var
-from antupy.ddd import DIRECTORY as DIR_BASE
-from antupy.ddd import DEFINITIONS as DEF_BASE
-from antupy.ddd import DEFAULTS as DEFAULT_BASE
-from antupy.ddd import SIMULATIONS_IO as SIM_IO_BASE
+
+class DIRECTORY:
+    DIR_MAIN = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    DIR_FILE = os.path.dirname(os.path.abspath(__file__))
+    try:
+        with open(os.path.join(DIR_MAIN, ".dirs"), "r") as f:
+            private_dirs = json.load(f)
+        DIR_DATA_EXTERNAL = private_dirs["data"]
+    except:
+        DIR_DATA_EXTERNAL = ""
 
 
-class DIRECTORY(DIR_BASE):    
+    DIR_RESULTS = os.path.join(DIR_MAIN, "results")
+    DIR_PROJECTS = os.path.join(DIR_MAIN, "projects")
+
+
+class DEFINITIONS:
+    SEASON_SH = {
+        "summer": [12, 1, 2],
+        "autumn": [3, 4, 5],
+        "winter": [6, 7, 8],
+        "spring": [9, 10, 11],
+    }
+    SEASON_NH = {
+        "summer": [6, 7, 8],
+        "autumn": [9, 10, 11],
+        "winter": [12, 1, 2],
+        "spring": [3, 4, 5],
+    }
+    MONTHS = {
+        1: "January",
+        2: "February",
+        3: "March",
+        4: "April",
+        5: "May",
+        6: "June",
+        7: "July",
+        8: "August",
+        9: "September",
+        10: "October",
+        11: "November",
+        12: "December"
+    }
+    DAYS_PER_MONTHS = {
+        1: 31,
+        2: 28,
+        3: 31,
+        4: 30,
+        5: 31,
+        6: 30,
+        7: 31,
+        8: 31,
+        9: 30,
+        10: 31,
+        11: 30,
+        12: 31
+    }
+    DAYOFWEEK = {
+        "weekday": [0, 1, 2, 3, 4],
+        "weekend": [5, 6]
+    }
+    WEATHER_SIMULATIONS = {
+        "annual" : "tmy",
+        "mc": "mc",
+        "historical": "historical",
+        "hw_only" : "constant_day",
+        "forecast": "mc",
+    }
+
+
+class DEFAULTS():
+    
+    GHI = Var(1000., "W/m2")
+    temp_amb = Var(25., "degC")
+    temp_mains = Var(20., "degC")
+    
+    #pv
+    G_STC = Var(1000., "W/m2")
+    PV_NOMPOW = Var(5000., "W")
+    ADR_PARAMS = {
+        'k_a': 0.99924,
+        'k_d': -5.49097,
+        'tc_d': 0.01918,
+        'k_rs': 0.06999,
+        'k_rsh': 0.26144,
+    }
+
+
+class SIMS_IO():
+    pass
+
+
+class DIRECTORY_AU(DIRECTORY):    
     #DIRS
     DIR_MAIN = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     DIR_FILE = os.path.dirname(os.path.abspath(__file__))
@@ -82,7 +167,7 @@ class DIRECTORY(DIR_BASE):
     FILE_GAS_TARIFF_SAMPLE = os.path.join(DIR_DATA["gas"],"energyaustralia_basic.json")
     
 
-class DEFAULTS(DEFAULT_BASE):
+class DEFAULTS_AU(DEFAULTS):
 
     #location
     LOCATION = "Sydney"
@@ -113,13 +198,21 @@ class DEFAULTS(DEFAULT_BASE):
 
 
 # Definitions and mappings
-class DEFINITIONS(DEF_BASE):
+class DEFINITIONS_AU(DEFINITIONS):
     LOCATIONS_METEONORM = [
         'Adelaide', 'Brisbane', 'Canberra',
         'Darwin', 'Melbourne', 'Perth',
         'Sydney', 'Townsville',
     ]
     LOCATIONS_FEW = ['Sydney', 'Adelaide', 'Brisbane', 'Melbourne']
+    CLIMATE_ZONE = {
+        1: "Hot humid summer",
+        2: "Warm humid summer",
+        3: "Hot dry summer, mild winter",
+        4: "Hot dry summer, cold winter",
+        5: "Warm summer, cool winter",
+        6: "Mild warm summer, cold winter",
+    }
     NEM_REGIONS = [ "NSW1", "VIC1", "QLD1", "SA1", "TAS1" ]
     SIMULATION_TYPES = ["annual", "mc", "historical", "hw_only", "forecast"]
     DNSPS = [
@@ -220,7 +313,7 @@ class DEFINITIONS(DEF_BASE):
     }
     
 
-class SIMULATIONS_IO(SIM_IO_BASE):
+class SIMS_IO_AU(SIMS_IO):
 
     TS_TYPES = {
         "weather": ["GHI", "temp_amb", "temp_mains", "DNI", "DHI", "WS"],
@@ -303,3 +396,23 @@ class SIMULATIONS_IO(SIM_IO_BASE):
         "cost_savings_retailer",
     ]
 
+
+
+
+class DIRECTORY_CL:
+
+    DIR_MAIN = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    DIR_FILE = os.path.dirname(os.path.abspath(__file__))
+    try:
+        with open(os.path.join(DIR_MAIN, ".dirs"), "r") as f:
+            private_dirs = json.load(f)
+        DIR_DATA = private_dirs["data"]
+    except:
+        DIR_DATA = ""
+
+
+class DEFINITIONS_CL:
+    pass
+
+class DEFAULTS_CL:
+    pass
