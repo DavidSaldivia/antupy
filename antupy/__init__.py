@@ -2,9 +2,9 @@ from antupy.core.units import Unit
 from antupy.core.var import Var, CF, C
 from antupy.core.array import Array
 from antupy.core.frame import Frame
-from antupy.core import Simulation, SimulationOutput
-from antupy.core.plant import Plant, component, constraint, derived
-from antupy.core.par import Parametric
+from antupy.sim.sim import Simulation, SimulationOutput
+from antupy.sim.plant import Plant, component, constraint, derived
+from antupy.sim.par import Parametric
 
 from antupy.utils import props, htc, solar
 from antupy.utils import loc
