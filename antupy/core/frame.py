@@ -348,7 +348,7 @@ class Framepl():
         if isinstance(other, (Var, Array)):
             return Framepl(self.data * other.v, )
         elif isinstance(other, Framepl):
-            pass
+            return Framepl(self.data * other.gv(self.u), self.u)
         else:
             raise TypeError("Can only multiply Framepl by Var, Array, or Framepl")
 

@@ -125,75 +125,256 @@ class Glass():
         return _return_default_prop(Var(0.935, "-"), temp)
 
 
+class Water():
+    def rho(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        T = temp.gv("K")
+        P = p.gv("Pa")
+        if isinstance(temp, Var) and isinstance(p, Var):
+            return Var(CP.PropsSI('D', 'T', T, 'P', P, 'Water'), "kg/m3")
+        elif isinstance(temp, Array) or isinstance(p, Array):
+            return Array(CP.PropsSI('D', 'T', T, 'P', P, 'Water'), "kg/m3")
+        else:
+            raise ValueError(f"{type(temp)=} and {type(p)=} are not valid types")
+
+    def cp(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        T = temp.gv("K")
+        P = p.gv("Pa")
+        if isinstance(temp, Var) and isinstance(p, Var):
+            return Var(CP.PropsSI('C', 'T', T, 'P', P, 'Water'), "J/kg-K")
+        elif isinstance(temp, Array) or isinstance(p, Array):
+            return Array(CP.PropsSI('C', 'T', T, 'P', P, 'Water'), "J/kg-K")
+        else:
+            raise ValueError(f"{type(temp)=} and {type(p)=} are not valid types")
+
+    def k(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        T = temp.gv("K")
+        P = p.gv("Pa")
+        if isinstance(temp, Var) and isinstance(p, Var):
+            return Var(CP.PropsSI('L', 'T', T, 'P', P, 'Water'), "W/m-K")
+        elif isinstance(temp, Array) or isinstance(p, Array):
+            return Array(CP.PropsSI('L', 'T', T, 'P', P, 'Water'), "W/m-K")
+        else:
+            raise ValueError(f"{type(temp)=} and {type(p)=} are not valid types")
+
+    def mu(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        T = temp.gv("K")
+        P = p.gv("Pa")
+        if isinstance(temp, Var) and isinstance(p, Var):
+            return Var(CP.PropsSI('V', 'T', T, 'P', P, 'Water'), "Pa-s")
+        elif isinstance(temp, Array) or isinstance(p, Array):
+            return Array(CP.PropsSI('V', 'T', T, 'P', P, 'Water'), "Pa-s")
+        else:
+            raise ValueError(f"{type(temp)=} and {type(p)=} are not valid types")
+        
+    def h(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        T = temp.gv("K")
+        P = p.gv("Pa")
+        if isinstance(temp, Var) and isinstance(p, Var):
+            return Var(CP.PropsSI('H', 'T', T, 'P', P, 'Water'), "J/kg")
+        elif isinstance(temp, Array) or isinstance(p, Array):
+            return Array(CP.PropsSI('H', 'T', T, 'P', P, 'Water'), "J/kg")
+        else:
+            raise ValueError(f"{type(temp)=} and {type(p)=} are not valid types")
+        
+    def s(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        T = temp.gv("K")
+        P = p.gv("Pa")
+        if isinstance(temp, Var) and isinstance(p, Var):
+            return Var(CP.PropsSI('S', 'T', T, 'P', P, 'Water'), "J/kg-K")
+        elif isinstance(temp, Array) or isinstance(p, Array):
+            return Array(CP.PropsSI('S', 'T', T, 'P', P, 'Water'), "J/kg-K")
+        else:
+            raise ValueError(f"{type(temp)=} and {type(p)=} are not valid types")
+
+    def alpha(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        return (self.k(temp, p) / (self.rho(temp, p) * self.cp(temp, p)))
+
+
+class Air():
+    def rho(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        T = temp.gv("K")
+        P = p.gv("Pa")
+        if isinstance(temp, Var) and isinstance(p, Var):
+            return Var(CP.PropsSI('D', 'T', T, 'P', P, 'Air'), "kg/m3")
+        elif isinstance(temp, Array) or isinstance(p, Array):
+            return Array(CP.PropsSI('D', 'T', T, 'P', P, 'Air'), "kg/m3")
+        else:
+            raise ValueError(f"{type(temp)=} and {type(p)=} are not valid types")
+        
+    def cp(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        T = temp.gv("K")
+        P = p.gv("Pa")
+        if isinstance(temp, Var) and isinstance(p, Var):
+            return Var(CP.PropsSI('C', 'T', T, 'P', P, 'Air'), "J/kg-K")
+        elif isinstance(temp, Array) or isinstance(p, Array):
+            return Array(CP.PropsSI('C', 'T', T, 'P', P, 'Air'), "J/kg-K")
+        else:
+            raise ValueError(f"{type(temp)=} and {type(p)=} are not valid types")
+    
+    def k(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        T = temp.gv("K")
+        P = p.gv("Pa")
+        if isinstance(temp, Var) and isinstance(p, Var):
+            return Var(CP.PropsSI('L', 'T', T, 'P', P, 'Air'), "W/m-K")
+        elif isinstance(temp, Array) or isinstance(p, Array):
+            return Array(CP.PropsSI('L', 'T', T, 'P', P, 'Air'), "W/m-K")
+        else:
+            raise ValueError(f"{type(temp)=} and {type(p)=} are not valid types")
+
+    def mu(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        T = temp.gv("K")
+        P = p.gv("Pa")
+        if isinstance(temp, Var) and isinstance(p, Var):
+            return Var(CP.PropsSI('V', 'T', T, 'P', P, 'Air'), "Pa-s")
+        elif isinstance(temp, Array) or isinstance(p, Array):
+            return Array(CP.PropsSI('V', 'T', T, 'P', P, 'Air'), "Pa-s")
+        else:
+            raise ValueError(f"{type(temp)=} and {type(p)=} are not valid types")
+    
+    def h(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        T = temp.gv("K")
+        P = p.gv("Pa")
+        if isinstance(temp, Var) and isinstance(p, Var):
+            return Var(CP.PropsSI('H', 'T', T, 'P', P, 'Air'), "J/kg")
+        elif isinstance(temp, Array) or isinstance(p, Array):
+            return Array(CP.PropsSI('H', 'T', T, 'P', P, 'Air'), "J/kg")
+        else:
+            raise ValueError(f"{type(temp)=} and {type(p)=} are not valid types")
+    
+    def s(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        T = temp.gv("K")
+        P = p.gv("Pa")
+        if isinstance(temp, Var) and isinstance(p, Var):
+            return Var(CP.PropsSI('S', 'T', T, 'P', P, 'Air'), "J/kg-K")
+        elif isinstance(temp, Array) or isinstance(p, Array):
+            return Array(CP.PropsSI('S', 'T', T, 'P', P, 'Air'), "J/kg-K")
+        else:
+            raise ValueError(f"{type(temp)=} and {type(p)=} are not valid types")
+        
+    def alpha(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        return (self.k(temp, p) / (self.rho(temp, p) * self.cp(temp, p)))
+
+
+class CO2():
+    def rho(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        T = temp.gv("K")
+        P = p.gv("Pa")
+        if isinstance(temp, Var) and isinstance(p, Var):
+            return Var(CP.PropsSI('D', 'T', T, 'P', P, 'CO2'), "kg/m3")
+        elif isinstance(temp, Array) or isinstance(p, Array):
+            return Array(CP.PropsSI('D', 'T', T, 'P', P, 'CO2'), "kg/m3")
+        else:
+            raise ValueError(f"{type(temp)=} and {type(p)=} are not valid types")
+    
+    def cp(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        T = temp.gv("K")
+        P = p.gv("Pa")
+        if isinstance(temp, Var) and isinstance(p, Var):
+            return Var(CP.PropsSI('C', 'T', T, 'P', P, 'CO2'), "J/kg-K")
+        elif isinstance(temp, Array) or isinstance(p, Array):
+            return Array(CP.PropsSI('C', 'T', T, 'P', P, 'CO2'), "J/kg-K")
+        else:
+            raise ValueError(f"{type(temp)=} and {type(p)=} are not valid types")
+
+    def k(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        T = temp.gv("K")
+        P = p.gv("Pa")
+        if isinstance(temp, Var) and isinstance(p, Var):
+            return Var(CP.PropsSI('L', 'T', T, 'P', P, 'CO2'), "W/m-K")
+        elif isinstance(temp, Array) or isinstance(p, Array):
+            return Array(CP.PropsSI('L', 'T', T, 'P', P, 'CO2'), "W/m-K")
+        else:
+            raise ValueError(f"{type(temp)=} and {type(p)=} are not valid types")
+
+    def mu(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        T = temp.gv("K")
+        P = p.gv("Pa")
+        if isinstance(temp, Var) and isinstance(p, Var):
+            return Var(CP.PropsSI('V', 'T', T, 'P', P, 'CO2'), "Pa-s")
+        elif isinstance(temp, Array) or isinstance(p, Array):
+            return Array(CP.PropsSI('V', 'T', T, 'P', P, 'CO2'), "Pa-s")
+        else:
+            raise ValueError(f"{type(temp)=} and {type(p)=} are not valid types")
+
+    def h(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        T = temp.gv("K")
+        P = p.gv("Pa")
+        if isinstance(temp, Var) and isinstance(p, Var):
+            return Var(CP.PropsSI('H', 'T', T, 'P', P, 'CO2'), "J/kg")
+        elif isinstance(temp, Array) or isinstance(p, Array):
+            return Array(CP.PropsSI('H', 'T', T, 'P', P, 'CO2'), "J/kg")
+        else:
+            raise ValueError(f"{type(temp)=} and {type(p)=} are not valid types")
+
+    def s(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        T = temp.gv("K")
+        P = p.gv("Pa")
+        if isinstance(temp, Var) and isinstance(p, Var):
+            return Var(CP.PropsSI('S', 'T', T, 'P', P, 'CO2'), "J/kg-K")
+        elif isinstance(temp, Array) or isinstance(p, Array):
+            return Array(CP.PropsSI('S', 'T', T, 'P', P, 'CO2'), "J/kg-K")
+        else:
+            raise ValueError(f"{type(temp)=} and {type(p)=} are not valid types")
+
+    def alpha(self, temp: Var|Array = Var(273.15, "K"), p: Var|Array = Var(101325, "Pa")) -> Var|Array:
+        return (self.k(temp, p) / (self.rho(temp, p) * self.cp(temp, p)))
+
+
 class SaturatedWater():
-    def rho( self, T: float|Var = Var(273.15, "K") ) -> Var:
-        if isinstance(T, Var):
-            temp = T.gv("degC")
-        elif isinstance(T, (int, float)):
-            temp = T
-        A = (9.999e2, 2.034e-2, -6.162e-3, 2.261e-5, -4.657e-8)
-        aux = sum([A[i]*temp**i for i in range(len(A))])
-        return Var(aux, "kg/m3")
+
+    def rho(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        
+        A = np.array([9.999e2, 2.034e-2, -6.162e-3, 2.261e-5, -4.657e-8])
+        if isinstance(temp, Var):
+            T = temp.gv("degC")
+            return Var(sum(Ai*T**i for (i, Ai) in enumerate(A)), "kg/m3")
+        elif isinstance(temp, Array):
+            T = temp.gv("degC")
+            return Array([sum(Ai*Ti**i for (i, Ai) in enumerate(A)) for Ti in T], "kg/m3")
+        
+    def cp(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        T = temp.gv("K")
+        value = 8.15599e3 - 2.80627e1*T + 5.11283e-2*T**2 - 2.17582e-13*T**6
+        if isinstance(temp, Var):
+            return Var(float(value), "J/kg-K")
+        elif isinstance(temp, Array):
+            return Array(np.array(value, dtype=float), "J/kg-K")
     
-    def cp( self, T: float|Var = Var(273.15, "K")) -> Var:
-        if isinstance(T, Var):
-            temp = T.gv("K")
-        elif isinstance(T, (int, float)):
-            temp = T
-        aux = 8.15599e3 - 2.80627e1*temp + 5.11283e-2*temp**2 - 2.17582e-13*temp**6
-        return Var(aux, "J/kg-K")
+    def k(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        A = np.array([0.80201, -0.25992, 0.10024, -0.032005])
+        B = np.array([-0.32, -5.7, -12.0, -15.0])
+
+        if isinstance(temp, Var):
+            T = temp.gv("K")
+            return Var(sum(Ai*(T/300.)**Bi for (Ai, Bi) in zip(A, B)), "W/m-K")
+        elif isinstance(temp, Array):
+            T = temp.gv("K")
+            return Array([sum(Ai*(Ti/300.)**Bi for (Ai, Bi) in zip(A, B)) for Ti in T], "W/m-K")
+        
+    def mu(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        T = temp.gv("K")
+        value = 4.2844e-5 + 1 / ( 0.157*(T+64.994)**2 - 91.296 )
+        if isinstance(temp, Var):
+            return Var(float(value), "Pa-s")
+        elif isinstance(temp, Array):
+            return Array(np.array(value, dtype=float), "Pa-s")
     
-    def k(
-            self,
-            T: float|Var = Var(273.15, "K")
-        ) -> Var:
-        if isinstance(T, Var):
-            temp = T.gv("K")
-        elif isinstance(T, (int, float)):
-            temp = T
-        A = (0.80201, -0.25992, 0.10024, -0.032005)
-        B = (-0.32, -5.7, -12.0, -15.0)
-        aux = sum([
-            A[i]*(temp/300.)**B[i] for i in range(len(A))
-        ])
-        return Var(aux, "W/m-K")
+    def surface_tension(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        T = temp.gv("K")
+        value = 0.2358 * (1 - T/647.096)**1.256 * (1 - 0.625*(T/647.096))
+        if isinstance(temp, Var):
+            return Var(float(value), "N/m")
+        elif isinstance(temp, Array):
+            return Array(np.array(value, dtype=float), "N/m")
     
-    def viscosity(
-            self,
-            T: float|Var = Var(273.15, "K")
-        ) -> Var:
-        if isinstance(T, Var):
-            temp = T.gv("K")
-        elif isinstance(T, (int, float)):
-            temp = T
-        aux = 4.2844e-5 + 1 / ( 0.157*(temp+64.994)**2 - 91.296 )
-        return Var(aux, "Pa-s")
-    
-    def surface_tension(
-            self,
-            T: float|Var = Var(273.15, "K")
-        ) -> Var:
-        if isinstance(T, Var):
-            temp = T.gv("K")
-        elif isinstance(T, (int, float)):
-            temp = T
-        aux = temp / 647.096
-        return Var(
-            0.2358 * (1 - aux)**1.256 * (1 - 0.625*aux),
-            "N/m"
-        )
-    
-    def latent_heat(
-            self,
-            T: float|Var = Var(273.15, "K")
-        ) -> Var:
-        if isinstance(T, Var):
-            temp = T.gv("K")
-        elif isinstance(T, (int, float)):
-            temp = T
-        A = (2.501e6, -2.369e3, 2.678e-1, -8.103e-3, -2.079e-5)
-        aux = sum([ A[i] * temp**i for i in range(len(A)) ])
-        return Var(aux / 1000.,"kJ/kg")
+    def latent_heat(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        A = np.array([2.501e6, -2.369e3, 2.678e-1, -8.103e-3, -2.079e-5])
+        if isinstance(temp, Var):
+            T = temp.gv("K")
+            return Var(sum(Ai*T**i for (i, Ai) in enumerate(A)), "J/kg")
+        elif isinstance(temp, Array):
+            T = temp.gv("K")
+            return Array([sum(Ai*Ti**i for (i, Ai) in enumerate(A)) for Ti in T], "J/kg")
     
     def saturation_pressure(
             self,
@@ -293,82 +474,7 @@ class SaturatedSteam():
         return Var(CP.PropsSI('V', 'T', temp, 'Q', 1.0, 'Water'), "Pa-s")
         
 
-class Water():
-    def rho(
-            self,
-            T: float|Var = Var(273.15, "K"),
-            P: float|Var = Var(101325, "Pa")
-    ) -> Var:
-        if isinstance(T, Var):
-            temp = T.gv("K")
-        elif isinstance(T, (int, float)):
-            temp = T
-        else:
-            raise ValueError(f"{type(T)=} is not a valid type")
-        if isinstance(P, Var):
-            pressure = P.gv("Pa")
-        elif isinstance(P, (int, float)):
-            pressure = P
-        else:
-            raise ValueError(f"{type(P)=} is not a valid type")
-        return Var(CP.PropsSI('D', 'T', temp, 'P', pressure, 'Water'), "kg/m3")
-    
-    def cp(
-            self,
-            T: float|Var = Var(273.15, "K"),
-            P: float|Var = Var(101325, "Pa")
-    ) -> Var:
-        if isinstance(T, Var):
-            temp = T.gv("K")
-        elif isinstance(T, (int, float)):
-            temp = T
-        else:
-            raise ValueError(f"{type(T)=} is not a valid type")
-        if isinstance(P, Var):
-            pressure = P.gv("Pa")
-        elif isinstance(P, float):
-            pressure = P
-        else:
-            raise ValueError(f"{type(P)=} is not a valid type")
-        return Var(CP.PropsSI('C', 'T', temp, 'P', pressure, 'Water'), "J/kg-K")
 
-    def k(
-            self,
-            T: float|Var = Var(273.15, "K"),
-            P: float|Var = Var(101325, "Pa")
-    ) -> Var:
-        if isinstance(T, Var):
-            temp = T.gv("K")
-        elif isinstance(T, (int, float)):
-            temp = T
-        else:
-            raise ValueError(f"{type(T)=} is not a valid type")
-        if isinstance(P, Var):
-            pressure = P.gv("Pa")
-        elif isinstance(P, (int, float)):
-            pressure = P
-        else:
-            raise ValueError(f"{type(P)=} is not a valid type")
-        return Var(CP.PropsSI('L', 'T', temp, 'P', pressure, 'Water'), "W/m-K")
-
-    def viscosity(
-            self,
-            T: float|Var = Var(273.15, "K"),
-            P: float|Var = Var(101325, "Pa")
-    ) -> Var:
-        if isinstance(T, Var):
-            temp = T.gv("K")
-        elif isinstance(T, (int, float)):
-            temp = T
-        else:
-            raise ValueError(f"{type(T)=} is not a valid type")
-        if isinstance(P, Var):
-            pressure = P.gv("Pa")
-        elif isinstance(P, float):
-            pressure = P
-        else:
-            raise ValueError(f"{type(P)=} is not a valid type")
-        return Var(CP.PropsSI('V', 'T', temp, 'P', pressure, 'Water'), "Pa-s")
 
 class SeaWater():
     def rho(
@@ -386,16 +492,16 @@ class SeaWater():
             salinity = X
         A1 = (2*temp - 200) / 160.
         B1 = (2*salinity/1000 - 150) / 150.
-        G = (0.5, B1, 2*B1**2-1)
-        F = (0.5, A1, 2*A1**2-1, 4*A1**3-3*A1)
-        A = (
-            4.032219*G[0] + 0.115313*G[1] + 3.26e-4*G[2],
-            -0.108199*G[0] + 1.571e-3*G[1] + 4.23e-4*G[2],
-            -0.012247*G[0] + 1.74e-3*G[1] + 9e-6*G[2],
-            6.92e-4*G[0] - 8.7e-5*G[1] - 5.3e-5*G[2]
-        )
-        aux = sum([ A[i] * F[i] for i in range(len(A)) ])
-        return Var(aux * 1e3, "kg/m3")
+        G = np.array([0.5, B1, 2*B1**2-1])
+        F = np.array([0.5, A1, 2*A1**2-1, 4*A1**3-3*A1])
+        coefs = np.array([
+            [4.032219, 0.115313, 3.26e-4],
+            [-0.108199, 1.571e-3, 4.23e-4],
+            [-0.012247, 1.74e-3, 9e-6],
+            [6.92e-4, -8.7e-5, -5.3e-5]
+        ])
+        A = coefs @ G
+        return Var(float((A*F).sum()) * 1e3, "kg/m3")
     
     def cp(
             self,
@@ -572,84 +678,6 @@ class DryAir():
                            114., 152., 204., 276.,
                            382., 545., 828., 1400., 3120.])
         return Var(float(np.interp(temp, temps, values))*1.e-3, "-")
-
-
-class Air():
-    def rho(
-            self,
-            T: float|Var = Var(273.15, "K"),
-            P: float|Var = Var(101.325, "kPa"),
-    )-> Var:
-        if isinstance(T, Var):
-            temp = T.gv("K")
-        elif isinstance(T, (int, float)):
-            temp = T
-        else:
-            raise ValueError(f"{type(T)=} is not a valid type")
-        if isinstance(P, Var):
-            pressure = P.gv("Pa")
-        elif isinstance(P, (int, float)):
-            pressure = P
-        else:
-            raise ValueError(f"{type(P)=} is not a valid type")
-        return Var(CP.PropsSI('D', 'T', temp, 'P', pressure, 'Air'), "kg/m3")
-    
-    def cp(
-            self,
-            T: float|Var = Var(273.15, "K"),
-            P: float|Var = Var(101.325, "kPa"),
-    )-> Var:
-        if isinstance(T, Var):
-            temp = T.gv("K")
-        elif isinstance(T, (int, float)):
-            temp = T
-        else:
-            raise ValueError(f"{type(T)=} is not a valid type")
-        if isinstance(P, Var):
-            pressure = P.gv("Pa")
-        elif isinstance(P, (int, float)):
-            pressure = P
-        else:
-            raise ValueError(f"{type(P)=} is not a valid type")
-        return Var(CP.PropsSI('C', 'T', temp, 'P', pressure, 'Air'), "J/kg-K")
-
-    def k(
-            self,
-            T: float|Var = Var(273.15, "K"),
-            P: float|Var = Var(101.325, "kPa"),
-    )-> Var:
-        if isinstance(T, Var):
-            temp = T.gv("K")
-        elif isinstance(T, (int, float)):
-            temp = T
-        else:
-            raise ValueError(f"{type(T)=} is not a valid type")
-        if isinstance(P, Var):
-            pressure = P.gv("Pa")
-        elif isinstance(P, (int, float)):
-            pressure = P
-        else:
-            raise ValueError(f"{type(P)=} is not a valid type")
-        return Var(CP.PropsSI('L', 'T', temp, 'P', pressure, 'Air'), "W/m-K")
-    
-    def viscosity(
-            self,
-            T: float|Var = Var(273.15, "K"),
-            P: float|Var = Var(101.325, "kPa"),
-    )-> Var:
-        if isinstance(T, Var):
-            temp = T.gv("K")
-        elif isinstance(T, (int, float)):
-            temp = T
-        else:
-            raise ValueError(f"{type(T)=} is not a valid type")
-        if isinstance(P, Var):
-            pressure = P.gv("Pa")
-        elif isinstance(P, (int, float)):
-            pressure = P
-        else:
-            raise ValueError(f"{type(P)=} is not a valid type")
-        return Var(CP.PropsSI('V', 'T', temp, 'P', pressure, 'Air'), "Pa-s")
     
 
 
@@ -748,83 +776,6 @@ class HumidAir():
 
         return Var(aux*1000., "kJ/kg")
 
-
-class CO2():
-    def rho(
-            self,
-            T: float|Var = Var(273.15, "K"),
-            P: float|Var = Var(101.325, "kPa"),
-    )-> Var:
-        if isinstance(T, Var):
-            temp = T.gv("K")
-        elif isinstance(T, (int, float)):
-            temp = T
-        else:
-            raise ValueError(f"{type(T)=} is not a valid type")
-        if isinstance(P, Var):
-            pressure = P.gv("Pa")
-        elif isinstance(P, (int, float)):
-            pressure = P
-        else:
-            raise ValueError(f"{type(P)=} is not a valid type")
-        return Var(CP.PropsSI('D', 'T', temp, 'P', pressure, 'CO2'), "kg/m3")
-    
-    def cp(
-            self,
-            T: float|Var = Var(273.15, "K"),
-            P: float|Var = Var(101.325, "kPa"),
-    )-> Var:
-        if isinstance(T, Var):
-            temp = T.gv("K")
-        elif isinstance(T, (int, float)):
-            temp = T
-        else:
-            raise ValueError(f"{type(T)=} is not a valid type")
-        if isinstance(P, Var):
-            pressure = P.gv("Pa")
-        elif isinstance(P, (int, float)):
-            pressure = P
-        else:
-            raise ValueError(f"{type(P)=} is not a valid type")
-        return Var(CP.PropsSI('C', 'T', temp, 'P', pressure, 'CO2'), "J/kg-K")
-
-    def k(
-            self,
-            T: float|Var = Var(273.15, "K"),
-            P: float|Var = Var(101.325, "kPa"),
-    )-> Var:
-        if isinstance(T, Var):
-            temp = T.gv("K")
-        elif isinstance(T, (int, float)):
-            temp = T
-        else:
-            raise ValueError(f"{type(T)=} is not a valid type")
-        if isinstance(P, Var):
-            pressure = P.gv("Pa")
-        elif isinstance(P, (int, float)):
-            pressure = P
-        else:
-            raise ValueError(f"{type(P)=} is not a valid type")
-        return Var(CP.PropsSI('L', 'T', temp, 'P', pressure, 'CO2'), "W/m-K")
-    
-    def viscosity(
-            self,
-            T: float|Var = Var(273.15, "K"),
-            P: float|Var = Var(101.325, "kPa"),
-    )-> Var:
-        if isinstance(T, Var):
-            temp = T.gv("K")
-        elif isinstance(T, (int, float)):
-            temp = T
-        else:
-            raise ValueError(f"{type(T)=} is not a valid type")
-        if isinstance(P, Var):
-            pressure = P.gv("Pa")
-        elif isinstance(P, (int, float)):
-            pressure = P
-        else:
-            raise ValueError(f"{type(P)=} is not a valid type")
-        return Var(CP.PropsSI('V', 'T', temp, 'P', pressure, 'CO2'), "Pa-s")
 
 class TherminolVP1():
     def rho(

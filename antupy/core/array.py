@@ -103,7 +103,7 @@ class Array():
             return NotImplemented
         if self.unit == other.unit:
             return Array(self.value + other.value, self.unit)
-        elif self.unit.base_units == other.unit.base_units:
+        elif self.unit.base_exps == other.unit.base_exps:
             return Array(self.value + other.gv(self.unit.label_unit), self.unit)
         else:
             raise TypeError(f"Cannot add {self.unit} with {other.unit}. Units are not compatible.")
@@ -114,7 +114,7 @@ class Array():
             return NotImplemented
         if self.unit == other.unit:
             return Array(self.value + other.value, other.unit)
-        elif self.unit.base_units == other.unit.base_units:
+        elif self.unit.base_exps == other.unit.base_exps:
             return Array(other.value + self.gv(other.unit.u), other.unit)
         else:
             raise TypeError(f"Cannot add {self.unit} with {other.unit}. Units are not compatible.")    
@@ -125,7 +125,7 @@ class Array():
             return NotImplemented
         if self.unit == other.unit:
             return Array(self.value - other.value, self.unit)
-        elif self.unit.base_units == other.unit.base_units:
+        elif self.unit.base_exps == other.unit.base_exps:
             return Array(self.value - other.gv(self.unit.u), self.unit)
         else:
             raise TypeError(f"Cannot subtract {self.unit} with {other.unit}. Units are not compatible.")
@@ -136,7 +136,7 @@ class Array():
             return NotImplemented
         if self.unit == other.unit:
             return Array(other.value - self.value, self.unit)
-        elif self.unit.base_units == other.unit.base_units:
+        elif self.unit.base_exps == other.unit.base_exps:
             return Array(other.gv(self.unit.u) - self.value, self.unit)
         else:
             raise TypeError(f"Cannot subtract {self.unit} with {other.unit}. Units are not compatible.")
@@ -197,7 +197,7 @@ class Array():
             return False
         return (
             np.allclose(self.value, other.value * CF(other.unit.u, self.unit.u).v)
-            and self.unit.base_units == other.unit.base_units
+            and self.unit.base_exps == other.unit.base_exps
         )
     
     def __len__(self) -> int:
@@ -221,7 +221,7 @@ class Array():
             unit = self.unit.u
         if self.unit == unit:
             return self.value
-        if self.unit.base_units == Unit(unit).base_units:
+        if self.unit.base_exps == Unit(unit).base_exps:
             if unit in ["°C", "degC","K"]:
                 return np.array(_conv_temp(self, unit))
             return self.value * CF(self.unit.u, unit).v
@@ -231,7 +231,7 @@ class Array():
     def set_unit(self, unit: str | None = None) -> Array:
         """ Set the primary unit of the variable. """
         unit = str(unit)
-        if (self.unit.base_units == Unit(unit).base_units) and (self.value is not None):
+        if (self.unit.base_exps == Unit(unit).base_exps) and (self.value is not None):
             return Array(self.value * CF(self.unit, unit).v, Unit(unit))
         else:
             raise ValueError(
