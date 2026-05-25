@@ -4,137 +4,125 @@ from typing import Protocol
 import CoolProp.CoolProp as CP
 import numpy as np
 
-from antupy import Var
+from antupy.core.var import Var
+from antupy.core.array import Array
+
+def _return_default_prop(default_value: Var, temp: Var|Array) -> Var|Array:
+    if isinstance(temp, Var):
+        return default_value
+    elif isinstance(temp, Array):
+        return default_value * Array(np.ones(len(temp)),"-")
 
 class Fluid(Protocol):
-    def rho(self, T: float|Var) -> Var: ...
-    def cp(self, T: float|Var) -> Var: ...
-    def k(self, T: float|Var) -> Var: ...
-    def viscosity(self, T: float|Var) -> Var: ...
+    def rho(self, temp: Var|Array) -> Var|Array: ...
+    def cp(self, temp: Var|Array) -> Var|Array: ...
+    def k(self, temp: Var|Array) -> Var|Array: ...
+    def mu(self, temp: Var|Array) -> Var|Array: ...
+    def h(self, temp: Var|Array) -> Var|Array: ...
+    def s(self, temp: Var|Array) -> Var|Array: ...
+    def alpha(self, temp: Var|Array) -> Var|Array: ...
 
 
 class Material(Protocol):
-    def rho(self, T: float|Var) -> Var:
-        ...
-    def cp(self, T: float|Var) -> Var:
-        ...
-    def k(self, T: float|Var) -> Var:
-        ...
-
+    def rho(self, temp: Var|Array) -> Var|Array: ...
+    def cp(self, temp: Var|Array) -> Var|Array: ...
+    def k(self, temp: Var|Array) -> Var|Array: ...
 
 @dataclass
 class SolarSalt(Fluid):
-    def rho(self, T: float|Var) -> Var:
-        return Var(1900., "kg/m3")
+    def rho(self, temp: Var|Array) -> Var|Array:
+        return _return_default_prop(Var(1900., "kg/m3"), temp)
     
-    def cp(self, T: float|Var) -> Var:
-        return Var(1100., "J/kg-K")
+    def cp(self, temp: Var|Array) -> Var|Array:
+        return _return_default_prop(Var(1100., "J/kg-K"), temp)
     
-    def k(self, T: float | Var) -> Var:
-        return Var(0.55, "W/m-K")
+    def k(self, temp: Var|Array) -> Var|Array:
+        return _return_default_prop(Var(0.55, "W/m-K"), temp)
 
     def __repr__(self) -> str:
         return "Solar salt (NaNO3-KNO3 mixture)"
 
 
 class Carbo(Material):
-    def rho(
-            self,
-            T: float|Var = Var(273.15, "K")
-        ) -> Var:
-        return Var(1810, "kg/m3")
+    def rho(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(1810, "kg/m3"), temp)
     
-    def cp(
-            self,
-            T: float|Var = Var(273.15, "K")
-        ) -> Var:
-        if isinstance(T, Var):
-            temp = T.gv("K")
-        elif isinstance(T, (int, float)):
-            temp = T
-        return Var(148 * temp**0.3093, "J/kg-K")
+    def cp(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(710., "J/kg-K"), temp)
+    
+    def k(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(0.7, "W/m-K"), temp)
 
-    def k(
-            self,
-            T: float|Var = Var(273.15, "K")
-        ) -> Var:
-        return Var(0.7, "W/m-K")
+    def absortivity( self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(0.91, "-"), temp)
 
-    def absortivity(
-            self,
-            T: float|Var = Var(273.15, "K")
-        ) -> Var:
-        return Var(0.91, "-")
-
-    def emissivity(
-            self,
-            T: float|Var = Var(273.15, "K")
-        ) -> Var:
-        return Var(0.85, "-")    
+    def emissivity(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(0.85, "-"), temp)
     
 
 class Aluminium():
-    def rho(self, T: float|Var) -> Var:
-        return Var(2698.4, "kg/m3")
+    def rho(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(2698.4, "kg/m3"), temp)
     
-    def cp(self, T: float|Var) -> Var:
-        return Var(900., "J/kg-K")
+    def cp(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(900., "J/kg-K"), temp)
     
-    def k(self, T: float|Var) -> Var:
-        return Var(237., "W/m-K")
+    def k(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(237., "W/m-K"), temp)
 
 
 class Copper():
-    def rho(self, T: float|Var) -> Var:
-        return Var(8960., "kg/m3")
+    def rho(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(8960., "kg/m3"), temp)
     
-    def cp(self, T: float|Var) -> Var:
-        return Var(385., "J/kg-K")
+    def cp(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(385., "J/kg-K"), temp)
     
-    def k(self, T: float|Var) -> Var:
-        return Var(401., "W/m-K")
+    def k(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(401., "W/m-K"), temp)
 
 
 class CopperNickel():
-    def rho(self, T: float|Var) -> Var:
-        return Var(8900., "kg/m3")
+    def rho(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(8900., "kg/m3"), temp)
     
-    def cp(self, T: float|Var) -> Var:
-        return Var(376.6, "J/kg-K")
+    def cp(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(376.6, "J/kg-K"), temp)
     
-    def k(self, T: float|Var) -> Var:
-        return Var(50.2, "W/m-K")
+    def k(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(50.2, "W/m-K"), temp)
+
 
 
 class StainlessSteel():
-    def rho(self, T: float|Var) -> Var:
-        return Var(7850., "kg/m3")
+    def rho(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(7850., "kg/m3"), temp)
     
-    def cp(self, T: float|Var) -> Var:
-        return Var(510., "J/kg-K")
+    def cp(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(510., "J/kg-K"), temp)
     
-    def k(self, T: float|Var) -> Var:
-        return Var(15., "W/m-K")
+    def k(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(15., "W/m-K"), temp)
 
 
 class Glass():
-    def rho(self, T: float|Var) -> Var:
-        return Var(2490., "kg/m3")
+    def rho(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(2490., "kg/m3"), temp)
     
-    def cp(self, T: float|Var) -> Var:
-        return Var(837.4, "J/kg-K")
+    def cp(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(837.4, "J/kg-K"), temp)
     
-    def k(self, T: float|Var) -> Var:
-        return Var(0.8374, "W/m-K")
+    def k(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(0.8374, "W/m-K"), temp)
     
-    def absortivity(self, T: float|Var) -> Var:
-        return Var(0.02, "-")
+    def absortivity(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(0.02, "-"), temp)
     
-    def emissivity(self, T: float|Var) -> Var:
-        return Var(0.86, "-")
+    def emissivity(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(0.86, "-"), temp)
     
-    def transmisivity(self, T: float|Var) -> Var:
-        return Var(0.935, "-")
+    def transmisivity(self, temp: Var|Array = Var(273.15, "K")) -> Var|Array:
+        return _return_default_prop(Var(0.935, "-"), temp)
 
 
 class SaturatedWater():

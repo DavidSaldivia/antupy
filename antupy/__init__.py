@@ -6,8 +6,7 @@ from antupy.sim.sim import Simulation, SimulationOutput
 from antupy.sim.plant import Plant, component, constraint, derived
 from antupy.sim.par import Parametric
 
-from antupy.utils import props, htc, solar
-from antupy.utils import loc
+from antupy.utils import props, htc, solar, loc
 
 __all__ = [
     "Unit",

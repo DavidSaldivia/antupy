@@ -78,6 +78,21 @@ RELATED_UNITS: dict[str, tuple[float,str,str,str]] = {
     "CLP": (1e-3, "USD", "CL_pesos", "money"),
 }
 
+COMMON_QUANTITIES: dict[str, str] = {
+    "density": "kg/m3",
+    "specific_heat": "J/kg-K",
+    "thermal_capacity": "J/K",
+    "thermal_conductivity": "W/m-K",
+    "htc": "W/m2-K",
+    "viscosity": "Pa-s",
+    "entropy": "J/K",
+    "specific_entropy": "J/kg-K",
+    "enthalpy": "J",
+    "specific_enthalpy": "J/kg",
+    "volume": "m3",
+    "specific_volume": "m3/kg",
+}
+
 PREFIXES: dict[str, float] = {
     "q": 1e-30, # "quecto"
     "r": 1e-27, # "ronto"
@@ -189,7 +204,7 @@ class Unit():
     """
 
     def __init__(self, unit: str = "-", base_factor: float = 1e0):
-        self.base_units: UnitDict = BASE_ADIM.copy()
+        self.base_exps: UnitDict = BASE_ADIM.copy()
         self.base_factor: float = base_factor
         self.label_unit: str = unit
         self._translate_to_base()
@@ -201,9 +216,20 @@ class Unit():
         if isinstance(other, Unit):
             return (
                 (self.base_factor==other.base_factor)
-                and (self.base_units == other.base_units)
+                and (self.base_exps == other.base_exps)
             )
         return False
+
+    def __mul__(self, other: Unit) -> Unit:
+        if not isinstance(other, Unit):
+            raise TypeError("Can only multiply Unit by Unit")
+        base_factor = self.base_factor * other.base_factor
+        base_exps = {k: self.base_exps[k] + other.base_exps[k] for k in self.base_exps}
+        base_exps = UnitDict(**base_exps)
+        unit_result = Unit("-", base_factor)
+        unit_result.base_exps = base_exps
+        unit_result.label_unit = _mul_units(self.label_unit, other.label_unit)
+        return unit_result
     
     @property
     def si(self) -> str:
@@ -239,17 +265,22 @@ class Unit():
         """
         Returns the unit label.
         This is just a shorter alias for label_unit."""
-        return self.label_unit 
+        return self.label_unit
 
     def compatible(self) -> list[str]:
-        return [
-            label for label in (BASE_UNITS | DERIVED_UNITS | RELATED_UNITS)
-            if self.base_units == Unit(label).base_units
-        ]
+        return (
+            [
+                label for label in (BASE_UNITS | DERIVED_UNITS | RELATED_UNITS)
+                if self.base_exps == Unit(label).base_exps
+            ] + [
+                u for u in COMMON_QUANTITIES.values()
+                if self.base_exps == Unit(u).base_exps
+            ]
+        )
     
     def _update_base_repr(self, name: str, exponent: int):
-        exponent_prev = self.base_units.get(name,0)
-        self.base_units[name] = exponent+exponent_prev
+        exponent_prev = self.base_exps.get(name,0)
+        self.base_exps[name] = exponent+exponent_prev
         return
 
     @staticmethod
@@ -432,28 +463,6 @@ CONSTANTS: dict[str, tuple[float, str]] = {
     "R": (8.314462618, "J/mol-K"),  # Gas constant
     "N_A": (6.02214076e23, "1/mol"),  # Avogadro constant
     "K_cd": (683, "lm/W"),  # Luminous efficacy of 540 THz radiation
-}
-
-USEFUL_QUANTITIES = {
-
-    "density": {
-        "kg/m3": 1e0,
-        "g/cm3": 1e-3,
-    },
-    "specific_heat": {
-        "J/kgK": 1e0, "J/kg-K": 1e0,
-        "kJ/kgK": 1e-3, "kJ/kg-K": 1e-3,
-    },
-    "thermal_conductivity": {
-        "W/mK": 1e0, "W/m-K": 1e0,
-        "kW/mK": 1e-3, "kW/m-K": 1e-3,
-        "J/s-m-K": 1e0, "J/s-mK": 1e0,
-    },
-    "viscosity": {
-        "Pa-s": 1e0,
-        "mPa-s": 1e3,
-        "kg/m-s": 1e0
-    }
 }
 
 
