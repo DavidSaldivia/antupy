@@ -55,3 +55,12 @@ class Turbine():
         f1 = eta_s - (state_out.h - state_in.h)/(h_out_s - state_in.h)
         f2 = nom_power - massflowrate * (state_in.h - state_out.h)
         return f1, f2
+    
+    def solve(self, hint: tuple[str, ap.Var] | None = None) -> None:
+        if hint is None:
+            raise ValueError("Hint is required to solve the turbine equations.")
+        if "." in hint[0]:
+            state_label, prop_label = hint[0].split(".")
+        else:
+            pass
+            
