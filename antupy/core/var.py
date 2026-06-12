@@ -175,7 +175,7 @@ class Var():
     def __post_init__(self):
         if isinstance(self._value, Var) and self._unit is None:
             object.__setattr__(self, "value", self._value.v)
-            object.__setattr__(self, "unit", self._value.u)
+            object.__setattr__(self, "unit", self._value.unit)
         elif isinstance(self._value, Var) and self._unit is not None:
             unit_ = _assign_unit(self._unit)
             object.__setattr__(self, "value", self._value.gv(unit_.label_unit))
