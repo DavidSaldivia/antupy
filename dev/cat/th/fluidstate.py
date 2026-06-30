@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Self
 
 import numpy as np
 from antupy.core.units import Unit
@@ -227,6 +227,23 @@ class FluidState():
         self._check_retrievable("s")
         return self._s
     
+    def __repr__(self) -> str:
+        return f"FluidState(fluid={self.fluid_label}, temp={self._temp}, rho={self._rho}, p={self._p}, v={self._v}, u={self._u}, h={self._h}, s={self._s}, q={self._q})"
+    
+    def update(self, **kwargs) -> Self:
+        for key, value in kwargs.items():
+            if key not in _PROPS_COOLPROP.keys():
+                raise ValueError(f"Property {key} is not a valid property. Valid properties are: {_PROPS_COOLPROP.keys()}.")
+            if key not in self.props_provided:
+                ...
+            elif key == self.props_provided[0]:
+                ...
+            elif key == self.props_provided[1]:
+                ...
+            else:
+                raise ValueError("Something went wrong. This should not happen.")
+        return self
+
 
 def main():
     states = [
