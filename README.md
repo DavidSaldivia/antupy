@@ -87,7 +87,7 @@ temp_mains = ap.Var(20, "degC")
 vol_tank = ap.Var(300, "L")
 
 # Get temperature-dependent properties
-fluid = ap.Water()
+fluid = ap.props.Water()
 temp_avg = (temp_max + temp_mains) / 2
 cp = fluid.cp(temp_avg)   # Specific heat [J/kg-K]
 rho = fluid.rho(temp_avg)  # Density [kg/m3]
